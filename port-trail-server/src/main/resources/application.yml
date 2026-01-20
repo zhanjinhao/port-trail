@@ -1,0 +1,19 @@
+server:
+  port: 29892
+  servlet:
+    context-path: /pts
+
+spring:
+  application:
+    name: port-trail-server
+  servlet:
+    multipart:
+      max-file-size: 1000MB
+      max-request-size: 1000MB
+      enabled: true
+
+  jackson:
+    serialization:
+      write-dates-as-timestamps: true
+    deserialization:
+      fail-on-unknown-properties: false

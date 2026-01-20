@@ -1,0 +1,55 @@
+package cn.addenda.porttrail.infrastructure.context;
+
+import cn.addenda.porttrail.common.pojo.ServiceRuntimeInfo;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+public class AgentContext {
+
+  /**
+   * 服务名
+   */
+  @Getter
+  private static String serviceName;
+
+  /**
+   * 镜像名
+   */
+  @Getter
+  private static String imageName;
+
+  /**
+   * 实例ID
+   */
+  @Getter
+  private static String instanceId;
+
+  public static void setServiceName(String serviceName) {
+    AgentContext.serviceName = serviceName;
+  }
+
+  public static void setImageName(String imageName) {
+    AgentContext.imageName = imageName;
+  }
+
+  public static void setInstanceId(String instanceId) {
+    AgentContext.instanceId = instanceId;
+  }
+
+
+  private static ServiceRuntimeInfo serviceRuntimeInfoInstance;
+
+  public static void postInit() {
+    serviceRuntimeInfoInstance = new ServiceRuntimeInfo();
+    serviceRuntimeInfoInstance.setServiceName(serviceName);
+    serviceRuntimeInfoInstance.setImageName(imageName);
+    serviceRuntimeInfoInstance.setInstanceId(instanceId);
+  }
+
+  public static ServiceRuntimeInfo getServiceRuntimeInfo() {
+    return serviceRuntimeInfoInstance;
+  }
+
+}
