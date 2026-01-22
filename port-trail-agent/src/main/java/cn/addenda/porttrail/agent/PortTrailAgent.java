@@ -117,12 +117,13 @@ public class PortTrailAgent {
     with.installOn(instrumentation);
   }
 
+  // 参数的使用：porttrail-agent.jar=SERVICE_NAME=AUTH-CORE,IMAGE_NAME=LOCAL
   private static void initAgentContext(String args) {
     AgentContext.setInstanceId(UuidUtils.generateUuid());
     if (args != null) {
       args = args.trim();
       // 解析参数
-      String[] properties = args.split("\\s+");
+      String[] properties = args.split(",");
       for (String property : properties) {
         String[] propertyPair = property.split("=");
         if (propertyPair.length != 2) {
