@@ -261,7 +261,7 @@
     <!-- name: 打印日志的类的包路径 -->
     <!-- level日志级别: ALL < TRACE < DEBUG < INFO < WARN < ERROR < FATAL < OFF -->
     <!-- additivity: true当前的Logger打印的日志附加到Root,false仅仅在当前Logger打印 -->
-    <Logger name="cn.addenda.porttrail.agent.writer.sqlWrapper.AgentLogSqlWriter" level="ALL" additivity="false">
+    <Logger name="cn.addenda.porttrail.agent.writer.sql.AgentLogSqlWriter" level="ALL" additivity="false">
       <AppenderRef ref="RollingFile_DB_EXECUTION"/>
     </Logger>
 
