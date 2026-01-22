@@ -38,7 +38,7 @@ public class DruidDruidDataSourceGetConnectionDirectInterceptor implements Inter
           @SuperCall Callable<?> zuper
   ) throws Exception {
 
-    log.info("TargetObj is [{}] and it's classloader is [{}].", targetObj, targetObj.getClass().getClassLoader());
+    log.info("TargetObj's class is [{}] and it's classloader is [{}].", targetObj.getClass(), targetObj.getClass().getClassLoader());
 
     Object call = zuper.call();
 
