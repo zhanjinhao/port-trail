@@ -1,7 +1,7 @@
 package cn.addenda.porttrail.agent.transform.interceptor.jdbc;
 
 import cn.addenda.porttrail.agent.log.AgentPortTrailLoggerFactory;
-import cn.addenda.porttrail.agent.transform.interceptor.AbstractEntryPointInterceptor;
+import cn.addenda.porttrail.agent.transform.interceptor.AbstractDeduplicationEntryPointInterceptor;
 import cn.addenda.porttrail.agent.transform.interceptor.Interceptor;
 import cn.addenda.porttrail.common.entrypoint.EntryPoint;
 import cn.addenda.porttrail.common.entrypoint.EntryPointType;
@@ -9,9 +9,10 @@ import cn.addenda.porttrail.infrastructure.log.PortTrailLogger;
 import net.bytebuddy.implementation.bind.annotation.*;
 
 import java.lang.reflect.Method;
+import java.util.Deque;
 import java.util.concurrent.Callable;
 
-public class PortTrailStatementExecuteInterceptor extends AbstractEntryPointInterceptor implements Interceptor {
+public class PortTrailStatementExecuteInterceptor extends AbstractDeduplicationEntryPointInterceptor implements Interceptor {
 
   private static final PortTrailLogger log =
           AgentPortTrailLoggerFactory.getInstance().getPortTrailLogger(PortTrailStatementExecuteInterceptor.class);
@@ -47,6 +48,18 @@ public class PortTrailStatementExecuteInterceptor extends AbstractEntryPointInte
   @Override
   protected EntryPoint entryPoint(String detail) {
     return EntryPoint.of(EntryPointType.REMOTE_JDBC, detail);
+  }
+
+  private static final ThreadLocal<Deque<String>> deduplicationStack = new ThreadLocal<Deque<String>>() {
+    @Override
+    public String toString() {
+      return getClass().getName() + "@" + PortTrailStatementExecuteInterceptor.class.getName() + "@" + Integer.toHexString(hashCode());
+    }
+  };
+
+  @Override
+  protected ThreadLocal<Deque<String>> getDeduplicationStack() {
+    return deduplicationStack;
   }
 
 }

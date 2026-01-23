@@ -2,7 +2,6 @@ package cn.addenda.porttrail.agent.transform.interceptor.tx;
 
 import cn.addenda.porttrail.agent.transform.interceptor.AbstractEntryPointInterceptor;
 import cn.addenda.porttrail.infrastructure.exception.PortTrailException;
-import cn.addenda.porttrail.infrastructure.entrypoint.EntryPointStackContext;
 import cn.addenda.porttrail.infrastructure.tx.TxContext;
 
 import java.util.ArrayDeque;
@@ -14,7 +13,11 @@ public abstract class AbstractTxEntryPointInterceptor extends AbstractEntryPoint
 
   private static final ThreadLocal<Deque<String>> txStack = ThreadLocal.withInitial(() -> null);
 
-  protected void push() {
+  /**
+   * 事务去重，不使用detail，使用上下文里的事务ID
+   */
+  @Override
+  protected void beforePush(String detail) {
     Deque<String> deque = txStack.get();
     if (deque == null) {
       deque = new ArrayDeque<>();
@@ -23,7 +26,8 @@ public abstract class AbstractTxEntryPointInterceptor extends AbstractEntryPoint
     deque.push(TxContext.getTxId());
   }
 
-  protected void pop() {
+  @Override
+  protected void beforePop(String detail) {
     Deque<String> deque = txStack.get();
     if (deque == null) {
       throw new PortTrailException("Unexpected pop operation, current txStack is null.");
@@ -39,29 +43,10 @@ public abstract class AbstractTxEntryPointInterceptor extends AbstractEntryPoint
   }
 
   /**
-   * zuper可能是一个方法，也可能是一个函数表达式。
-   * 再zuper被调用之前，事务已经设置在当前线程的上下文中了。
-   * 所以，Spring的编程式事务不支持。
+   * 事务去重，不使用detail，使用上下文里的事务ID
    */
   @Override
-  protected Object callWithEntryPoint(String detail, Callable<?> zuper)
-          throws Exception {
-    boolean ifPushTxEntryPoint = ifPushTxEntryPoint();
-    if (ifPushTxEntryPoint) {
-      push();
-      EntryPointStackContext.pushEntryPoint(entryPoint(detail));
-    }
-    try {
-      return zuper.call();
-    } finally {
-      if (ifPushTxEntryPoint) {
-        pop();
-        EntryPointStackContext.popEntryPoint();
-      }
-    }
-  }
-
-  private boolean ifPushTxEntryPoint() {
+  protected boolean ifPushEntryPoint(String detail) {
     String txId = TxContext.getTxId();
     if (TxContext.WITHOUT_TX.equals(txId)) {
       // 如果没有事务ID，但是遇到了事务EntryPoint，压一个EntryPoint。
@@ -72,16 +57,24 @@ public abstract class AbstractTxEntryPointInterceptor extends AbstractEntryPoint
     if (entryPointList == null || entryPointList.isEmpty()) {
       return true;
     }
-    // todo 这里是只需要判断栈顶的那个，还是栈里全部的数据
+    // 只需要判断栈顶的那个
     Iterator<String> descendingIterator = entryPointList.descendingIterator();
-    while (descendingIterator.hasNext()) {
+    if (descendingIterator.hasNext()) {
       String entryPoint = descendingIterator.next();
-      if (txId.equals(entryPoint)) {
-        return false;
-      }
+      return !txId.equals(entryPoint);
     }
-
     return true;
+  }
+
+  /**
+   * zuper可能是一个方法，也可能是一个函数表达式。
+   * 再zuper被调用之前，事务已经设置在当前线程的上下文中了。
+   * 所以，Spring的编程式事务不支持。
+   */
+  @Override
+  protected Object callWithEntryPoint(String detail, Callable<?> zuper)
+          throws Exception {
+    return super.callWithEntryPoint(detail, zuper);
   }
 
 }

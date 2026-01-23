@@ -1,7 +1,7 @@
 package cn.addenda.porttrail.agent.transform.interceptor.job.xxl;
 
 import cn.addenda.porttrail.agent.log.AgentPortTrailLoggerFactory;
-import cn.addenda.porttrail.agent.transform.interceptor.AbstractEntryPointInterceptor;
+import cn.addenda.porttrail.agent.transform.interceptor.AbstractDeduplicationEntryPointInterceptor;
 import cn.addenda.porttrail.agent.transform.interceptor.Interceptor;
 import cn.addenda.porttrail.agent.util.ReflectionUtils;
 import cn.addenda.porttrail.common.entrypoint.EntryPoint;
@@ -11,11 +11,12 @@ import net.bytebuddy.implementation.bind.annotation.*;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.Deque;
 import java.util.concurrent.Callable;
 
 import static cn.addenda.porttrail.agent.transform.interceptor.job.xxl.XxlJobHandlerInterceptorPointDefine.*;
 
-public class XxlJobHandlerInterceptor extends AbstractEntryPointInterceptor implements Interceptor {
+public class XxlJobHandlerInterceptor extends AbstractDeduplicationEntryPointInterceptor implements Interceptor {
 
   private static final PortTrailLogger log =
           AgentPortTrailLoggerFactory.getInstance().getPortTrailLogger(XxlJobHandlerInterceptor.class);
@@ -99,7 +100,19 @@ public class XxlJobHandlerInterceptor extends AbstractEntryPointInterceptor impl
 
   @Override
   protected EntryPoint entryPoint(String detail) {
-    return EntryPoint.of(EntryPointType.TASK, detail);
+    return EntryPoint.of(EntryPointType.JOB_XXL, detail);
+  }
+
+  private static final ThreadLocal<Deque<String>> deduplicationStack = new ThreadLocal<Deque<String>>() {
+    @Override
+    public String toString() {
+      return getClass().getName() + "@" + XxlJobHandlerInterceptor.class.getName() + "@" + Integer.toHexString(hashCode());
+    }
+  };
+
+  @Override
+  protected ThreadLocal<Deque<String>> getDeduplicationStack() {
+    return deduplicationStack;
   }
 
 }

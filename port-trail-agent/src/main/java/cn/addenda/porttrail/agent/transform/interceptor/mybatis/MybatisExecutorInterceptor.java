@@ -1,7 +1,7 @@
 package cn.addenda.porttrail.agent.transform.interceptor.mybatis;
 
 import cn.addenda.porttrail.agent.log.AgentPortTrailLoggerFactory;
-import cn.addenda.porttrail.agent.transform.interceptor.AbstractEntryPointInterceptor;
+import cn.addenda.porttrail.agent.transform.interceptor.AbstractDeduplicationEntryPointInterceptor;
 import cn.addenda.porttrail.agent.transform.interceptor.Interceptor;
 import cn.addenda.porttrail.agent.util.ReflectionUtils;
 import cn.addenda.porttrail.common.entrypoint.EntryPoint;
@@ -11,9 +11,10 @@ import net.bytebuddy.implementation.bind.annotation.*;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.Deque;
 import java.util.concurrent.Callable;
 
-public class MybatisExecutorInterceptor extends AbstractEntryPointInterceptor implements Interceptor {
+public class MybatisExecutorInterceptor extends AbstractDeduplicationEntryPointInterceptor implements Interceptor {
 
   private static Field _idField;
 
@@ -63,6 +64,18 @@ public class MybatisExecutorInterceptor extends AbstractEntryPointInterceptor im
   @Override
   protected EntryPoint entryPoint(String detail) {
     return EntryPoint.of(EntryPointType.ORM_MYBATIS, detail);
+  }
+
+  private static final ThreadLocal<Deque<String>> deduplicationStack = new ThreadLocal<Deque<String>>() {
+    @Override
+    public String toString() {
+      return getClass().getName() + "@" + MybatisExecutorInterceptor.class.getName() + "@" + Integer.toHexString(hashCode());
+    }
+  };
+
+  @Override
+  protected ThreadLocal<Deque<String>> getDeduplicationStack() {
+    return deduplicationStack;
   }
 
 }

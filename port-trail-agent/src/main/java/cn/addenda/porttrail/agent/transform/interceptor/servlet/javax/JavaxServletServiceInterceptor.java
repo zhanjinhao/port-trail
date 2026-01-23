@@ -4,7 +4,7 @@ import cn.addenda.porttrail.agent.AgentPackage;
 import cn.addenda.porttrail.agent.PortTrailAgentStartException;
 import cn.addenda.porttrail.agent.log.AgentPortTrailLoggerFactory;
 import cn.addenda.porttrail.agent.transform.OverrideCallable;
-import cn.addenda.porttrail.agent.transform.interceptor.AbstractEntryPointInterceptor;
+import cn.addenda.porttrail.agent.transform.interceptor.AbstractDeduplicationEntryPointInterceptor;
 import cn.addenda.porttrail.agent.transform.interceptor.Interceptor;
 import cn.addenda.porttrail.agent.writer.http.AgentHttpWriter;
 import cn.addenda.porttrail.common.constant.MediaType;
@@ -27,7 +27,7 @@ import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Method;
 import java.util.*;
 
-public class JavaxServletServiceInterceptor extends AbstractEntryPointInterceptor implements Interceptor {
+public class JavaxServletServiceInterceptor extends AbstractDeduplicationEntryPointInterceptor implements Interceptor {
 
   private final HttpWriter httpWriter;
 
@@ -283,6 +283,18 @@ public class JavaxServletServiceInterceptor extends AbstractEntryPointIntercepto
   @Override
   protected EntryPoint entryPoint(String detail) {
     return EntryPoint.of(EntryPointType.SERVLET_JAVAX, detail);
+  }
+
+  private static final ThreadLocal<Deque<String>> deduplicationStack = new ThreadLocal<Deque<String>>() {
+    @Override
+    public String toString() {
+      return getClass().getName() + "@" + JavaxServletServiceInterceptor.class.getName() + "@" + Integer.toHexString(hashCode());
+    }
+  };
+
+  @Override
+  protected ThreadLocal<Deque<String>> getDeduplicationStack() {
+    return deduplicationStack;
   }
 
 }

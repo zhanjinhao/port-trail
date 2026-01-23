@@ -36,17 +36,8 @@ public class EntryPointStack {
 
   public EntryPointSnapshot snapshot() {
     List<EntryPoint> entryPointList = new ArrayList<>();
-    // todo 有没有更优雅的实现？
-    boolean ifHasTx = false;
     for (EntryPoint entryPoint : deque) {
-      if (entryPoint.getEntryPointType().ifTx()) {
-        if (!ifHasTx) {
-          ifHasTx = true;
-          entryPointList.add(EntryPoint.of(entryPoint));
-        }
-      } else {
-        entryPointList.add(EntryPoint.of(entryPoint));
-      }
+      entryPointList.add(EntryPoint.of(entryPoint));
     }
 
     return EntryPointSnapshot.of(entryPointList.isEmpty() ? null : reverse(entryPointList), Thread.currentThread().getName());
