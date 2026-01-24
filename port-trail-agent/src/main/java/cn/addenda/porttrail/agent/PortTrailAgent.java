@@ -8,7 +8,10 @@ import cn.addenda.porttrail.agent.transform.interceptor.datasource.hikari.Hikari
 import cn.addenda.porttrail.agent.transform.interceptor.driver.mysql.MySQLDriverInterceptorPointDefine;
 import cn.addenda.porttrail.agent.transform.interceptor.driver.oracle.OracleDriverInterceptorPointDefine;
 import cn.addenda.porttrail.agent.transform.interceptor.jdbc.PortTrailStatementInterceptorPointDefine;
-import cn.addenda.porttrail.agent.transform.interceptor.job.xxl.XxlJobHandlerInterceptorPointDefine;
+import cn.addenda.porttrail.agent.transform.interceptor.job.xxl.glue.XxlGlueInterceptorPointDefine;
+import cn.addenda.porttrail.agent.transform.interceptor.job.xxl.jobhandler.XxlJobHandlerInterceptorPointDefine;
+import cn.addenda.porttrail.agent.transform.interceptor.job.xxl.script.XxlScriptInterceptorPointDefine;
+import cn.addenda.porttrail.agent.transform.interceptor.job.xxl.method.XxlMethodInterceptorPointDefine;
 import cn.addenda.porttrail.agent.transform.interceptor.mybatis.MybatisExecutorInterceptorPointDefine;
 import cn.addenda.porttrail.agent.transform.interceptor.server.jetty.JettyServerInterceptorPointDefine;
 import cn.addenda.porttrail.agent.transform.interceptor.server.tomcat.TomcatAbstractProtocolInterceptorPointDefine;
@@ -156,6 +159,9 @@ public class PortTrailAgent {
 //    interceptorPointDefineGather.addInterceptorPointDefine(new JakartaServletInterceptorPointDefine());
     interceptorPointDefineGather.addInterceptorPointDefine(new TaskInterceptorPointDefine());
     interceptorPointDefineGather.addInterceptorPointDefine(new XxlJobHandlerInterceptorPointDefine());
+    interceptorPointDefineGather.addInterceptorPointDefine(new XxlMethodInterceptorPointDefine());
+    interceptorPointDefineGather.addInterceptorPointDefine(new XxlGlueInterceptorPointDefine());
+    interceptorPointDefineGather.addInterceptorPointDefine(new XxlScriptInterceptorPointDefine());
     // Tx层拦截
     interceptorPointDefineGather.addInterceptorPointDefine(new SpringTransactionalInterceptorPointDefine());
     interceptorPointDefineGather.addInterceptorPointDefine(new SpringTransactionHelperInterceptorPointDefine());

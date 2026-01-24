@@ -1,7 +1,9 @@
 package cn.addenda.porttrail.agent.transform.interceptor;
 
+import cn.addenda.porttrail.agent.util.AnnotationUtils;
 import cn.addenda.porttrail.agent.util.ReflectionUtils;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 
 /**
@@ -24,6 +26,21 @@ public interface Interceptor {
 
   default Object getFieldValueFromObject(Object o, Field field) {
     return getFieldValueFromObject(o, field, null);
+  }
+
+  default Object getAttributeValue(Annotation annotation, String attributeName, Object defaultValue) {
+    if (annotation == null) {
+      return defaultValue;
+    }
+    if (attributeName == null) {
+      return defaultValue;
+    }
+    Object attributeValueFromObject = AnnotationUtils.getAttributeValue(annotation, attributeName);
+    return attributeValueFromObject == null ? defaultValue : attributeValueFromObject;
+  }
+
+  default Object getAttributeValue(Annotation annotation, String attributeName) {
+    return getAttributeValue(annotation, attributeName, null);
   }
 
 }
