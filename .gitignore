@@ -35,6 +35,7 @@ dependency-reduced-pom.xml
 */*.iml
 
 *.log
+*.log.gz
 
 **/db.properties
 src/test/resources/redis.properties
