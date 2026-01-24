@@ -10,7 +10,7 @@ public class SpringTransactionHelperDoTransactionInterceptorPoint implements Int
 
   @Override
   public ElementMatcher<MethodDescription> getMethodsMatcher() {
-    return ElementMatchers.nameMatches("doTransaction");
+    return ElementMatchers.named("get");
   }
 
   @Override

@@ -83,6 +83,13 @@
       </exclusions>
     </dependency>
 
+    <!-- port-trail-stacktrace -->
+    <dependency>
+      <groupId>cn.addenda</groupId>
+      <artifactId>port-trail-stacktrace</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
     <!-- byte-buddy -->
     <dependency>
       <groupId>net.bytebuddy</groupId>

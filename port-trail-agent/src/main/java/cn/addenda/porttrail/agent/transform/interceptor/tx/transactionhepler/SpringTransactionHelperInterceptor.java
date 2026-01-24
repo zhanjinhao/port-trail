@@ -6,15 +6,20 @@ import cn.addenda.porttrail.agent.transform.interceptor.tx.AbstractTxEntryPointI
 import cn.addenda.porttrail.common.entrypoint.EntryPoint;
 import cn.addenda.porttrail.common.entrypoint.EntryPointType;
 import cn.addenda.porttrail.infrastructure.log.PortTrailLogger;
+import cn.addenda.porttrail.stacktrace.StackTraceUtils;
 import net.bytebuddy.implementation.bind.annotation.*;
 
 import java.lang.reflect.Method;
 import java.util.concurrent.Callable;
 
+import static cn.addenda.porttrail.agent.transform.interceptor.tx.transactionhepler.SpringTransactionHelperInterceptorPointDefine.TRANSACTION_HELPER_NAME;
+
 public class SpringTransactionHelperInterceptor extends AbstractTxEntryPointInterceptor implements Interceptor {
 
   private static final PortTrailLogger log =
           AgentPortTrailLoggerFactory.getInstance().getPortTrailLogger(SpringTransactionHelperInterceptor.class);
+
+  private static final String TRANSACTION_ASPECT_SUPPORT_NAME = "#org.springframework.transaction.interceptor.TransactionAspectSupport";
 
   /**
    * 被@RuntimeType标注的方法就是被委托的方法
@@ -36,7 +41,9 @@ public class SpringTransactionHelperInterceptor extends AbstractTxEntryPointInte
   ) throws Exception {
     log.info("TargetObj is [{}] and it's classloader is [{}].", targetObj, targetObj.getClass().getClassLoader());
 
-    return callWithEntryPoint(assembleDetail(targetObj, targetMethod), zuper);
+    String callerInfo = StackTraceUtils.getCallerInfo(false, false, false, TRANSACTION_HELPER_NAME, TRANSACTION_ASPECT_SUPPORT_NAME);
+
+    return callWithEntryPoint(callerInfo, zuper);
   }
 
   @Override
