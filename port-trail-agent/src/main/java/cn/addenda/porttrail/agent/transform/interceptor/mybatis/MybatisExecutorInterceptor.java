@@ -44,7 +44,7 @@ public class MybatisExecutorInterceptor extends AbstractDeduplicationEntryPointI
     Object ms = targetMethodArgs[0];
 
     Field idField = getIdField(ms);
-    String msId = (String) getFieldValueFromObject(ms, idField);
+    String msId = (String) getFieldValueFromObject(ms, idField, "UNKNOWN_MAPPED_STATEMENT_ID");
 
     return callWithEntryPoint(msId, zuper);
   }

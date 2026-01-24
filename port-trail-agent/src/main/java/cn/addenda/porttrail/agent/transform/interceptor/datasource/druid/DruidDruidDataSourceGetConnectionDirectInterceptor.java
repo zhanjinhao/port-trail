@@ -53,6 +53,9 @@ public class DruidDruidDataSourceGetConnectionDirectInterceptor implements Inter
 
     Field connectionField = getConnectionField(call);
     Connection connection = (Connection) getFieldValueFromObject(call, connectionField);
+    if (connection == null) {
+      return call;
+    }
 
     if (connection instanceof PortTrailConnection) {
       PortTrailConnection portTrailConnection = ((PortTrailConnection) connection);
