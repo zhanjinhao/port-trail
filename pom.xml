@@ -17,6 +17,7 @@
     <module>port-trail-common</module>
     <module>port-trail-client</module>
     <module>port-trail-server</module>
+    <module>port-trail-stacktrace</module>
   </modules>
 
   <properties>
