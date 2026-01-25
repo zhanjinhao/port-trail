@@ -1,7 +1,7 @@
 package cn.addenda.porttrail.jdbc.bo;
 
-import cn.addenda.porttrail.common.pojo.db.bo.AbstractSqlExecutionBo;
 import cn.addenda.porttrail.common.pojo.db.DbExecution;
+import cn.addenda.porttrail.common.pojo.db.bo.AbstractSqlExecutionBo;
 import cn.addenda.porttrail.infrastructure.entrypoint.EntryPointStackContext;
 import cn.addenda.porttrail.infrastructure.writer.SqlWriter;
 
@@ -71,6 +71,9 @@ public class AbstractSqlBoQueue {
   }
 
   public void output(AbstractSqlExecutionBo abstractSqlExecutionBo) {
+    if (abstractSqlExecutionBo.ifKeepAlive()) {
+      return;
+    }
     abstractSqlExecutionBo.setEntryPointSnapshot(EntryPointStackContext.snapshot());
     synchronized (this) {
       String sqlState = abstractSqlExecutionBo.getSqlState();

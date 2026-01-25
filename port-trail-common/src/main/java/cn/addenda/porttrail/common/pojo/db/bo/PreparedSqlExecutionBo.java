@@ -115,4 +115,11 @@ public class PreparedSqlExecutionBo extends AbstractSqlExecutionBo {
     return SerializationUtils.deserialize(bytes);
   }
 
+  @Override
+  public boolean ifKeepAlive() {
+    String parameterizedSqlWithoutBlank = parameterizedSql.replaceAll("\\s+", "");
+    return "select1".equalsIgnoreCase(parameterizedSqlWithoutBlank) ||
+            "select1fromdual".equalsIgnoreCase(parameterizedSqlWithoutBlank);
+  }
+
 }

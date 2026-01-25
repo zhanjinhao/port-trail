@@ -92,4 +92,6 @@ public abstract class AbstractSqlExecutionBo implements DbExecution {
     return entryPointSnapshot;
   }
 
+  public abstract boolean ifKeepAlive();
+
 }

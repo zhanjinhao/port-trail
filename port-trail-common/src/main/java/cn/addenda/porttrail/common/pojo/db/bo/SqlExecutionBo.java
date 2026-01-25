@@ -66,4 +66,16 @@ public class SqlExecutionBo extends AbstractSqlExecutionBo {
     return sqlExecutionBo;
   }
 
+  @Override
+  public boolean ifKeepAlive() {
+    for (SqlWrapper sqlWrapper : sqlWrapperList) {
+      String sqlWithoutBlank = sqlWrapper.getSql().replaceAll("\\s+", "");
+      if (!"select1".equalsIgnoreCase(sqlWithoutBlank)
+              && !"select1fromdual".equalsIgnoreCase(sqlWithoutBlank)) {
+        return false;
+      }
+    }
+    return true;
+  }
+
 }
