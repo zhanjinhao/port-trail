@@ -83,10 +83,16 @@ public class JavaxServletServiceInterceptor extends AbstractDeduplicationEntryPo
           // 用于调用父类的方法。
           @Morph OverrideCallable zuper
   ) throws Exception {
-    log.info("TargetObj is [{}] and it's classloader is [{}].", targetObj, targetObj.getClass().getClassLoader());
 
     HttpServletRequest request = (HttpServletRequest) targetMethodArgs[0];
     HttpServletResponse response = (HttpServletResponse) targetMethodArgs[1];
+
+    if (!ifPushEntryPoint(request.getRequestURI())) {
+      return zuper.call(targetMethodArgs);
+    }
+
+    log.info("TargetObj is [{}] and it's classloader is [{}].", targetObj, targetObj.getClass().getClassLoader());
+
     String requestId = UuidUtils.generateUuid();
 
     return callWithEntryPoint(request.getRequestURI(), () -> {
@@ -109,12 +115,16 @@ public class JavaxServletServiceInterceptor extends AbstractDeduplicationEntryPo
       HttpRequestBo httpRequestBo = assembleHttpRequestBo(request, requestId);
       if (requestWrapper != null) {
         httpRequestBo.setContentLength(requestWrapper.getCachedContent().size());
-        if (MediaType.ifRequestTextContentType(requestContentType)) {
-          httpRequestBo.setBody(extractTextRequestBody(requestWrapper, requestId));
-        } else if (MediaType.ifRequestMultipartFormContentType(requestContentType)) {
-          httpRequestBo.setBody(extractMultipartFormRequestBody(requestWrapper.getParts()));
-        } else if (MediaType.ifRequestBinaryContentType(requestContentType)) {
-          httpRequestBo.setBody(HttpRequestBo.BODY_BYTE_ARRAY);
+        if (httpRequestBo.getContentType() == null) {
+          httpRequestBo.setBody(null);
+        } else {
+          if (MediaType.ifRequestTextContentType(requestContentType)) {
+            httpRequestBo.setBody(extractTextRequestBody(requestWrapper, requestId));
+          } else if (MediaType.ifRequestMultipartFormContentType(requestContentType)) {
+            httpRequestBo.setBody(extractMultipartFormRequestBody(requestWrapper.getParts()));
+          } else if (MediaType.ifRequestBinaryContentType(requestContentType)) {
+            httpRequestBo.setBody(HttpRequestBo.BODY_BYTE_ARRAY);
+          }
         }
       } else {
         httpRequestBo.setContentLength(HttpRequestBo.UNKNOWN_CONTENT_LENGTH);
