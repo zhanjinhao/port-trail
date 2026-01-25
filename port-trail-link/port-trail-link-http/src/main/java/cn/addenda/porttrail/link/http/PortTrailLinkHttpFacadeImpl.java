@@ -97,6 +97,9 @@ public class PortTrailLinkHttpFacadeImpl implements HttpFacade, JVMShutdownCallb
 
     final Result result = closeableHttpClient.execute(httpPost, response -> {
       // Process response message and convert it into a value object
+      if (response.getEntity() == null) {
+        return new Result(response.getCode(), null);
+      }
       return new Result(response.getCode(), EntityUtils.toString(response.getEntity()));
     });
   }
@@ -113,6 +116,9 @@ public class PortTrailLinkHttpFacadeImpl implements HttpFacade, JVMShutdownCallb
 
     final Result result = closeableHttpClient.execute(httpPost, response -> {
       // Process response message and convert it into a value object
+      if (response.getEntity() == null) {
+        return new Result(response.getCode(), null);
+      }
       return new Result(response.getCode(), EntityUtils.toString(response.getEntity()));
     });
   }
