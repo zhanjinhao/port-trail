@@ -21,6 +21,12 @@ public class AgentContext {
   private static String imageName;
 
   /**
+   * 环境
+   */
+  @Getter
+  private static String env;
+
+  /**
    * 实例ID
    */
   @Getter
@@ -34,6 +40,10 @@ public class AgentContext {
     AgentContext.imageName = imageName;
   }
 
+  public static void setEnv(String env) {
+    AgentContext.env = env;
+  }
+
   public static void setInstanceId(String instanceId) {
     AgentContext.instanceId = instanceId;
   }
@@ -45,6 +55,7 @@ public class AgentContext {
     serviceRuntimeInfoInstance = new ServiceRuntimeInfo();
     serviceRuntimeInfoInstance.setServiceName(serviceName);
     serviceRuntimeInfoInstance.setImageName(imageName);
+    serviceRuntimeInfoInstance.setEnv(env);
     serviceRuntimeInfoInstance.setInstanceId(instanceId);
   }
 

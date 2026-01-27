@@ -10,8 +10,8 @@ import cn.addenda.porttrail.agent.transform.interceptor.driver.oracle.OracleDriv
 import cn.addenda.porttrail.agent.transform.interceptor.jdbc.PortTrailStatementInterceptorPointDefine;
 import cn.addenda.porttrail.agent.transform.interceptor.job.xxl.glue.XxlGlueInterceptorPointDefine;
 import cn.addenda.porttrail.agent.transform.interceptor.job.xxl.jobhandler.XxlJobHandlerInterceptorPointDefine;
-import cn.addenda.porttrail.agent.transform.interceptor.job.xxl.script.XxlScriptInterceptorPointDefine;
 import cn.addenda.porttrail.agent.transform.interceptor.job.xxl.method.XxlMethodInterceptorPointDefine;
+import cn.addenda.porttrail.agent.transform.interceptor.job.xxl.script.XxlScriptInterceptorPointDefine;
 import cn.addenda.porttrail.agent.transform.interceptor.mybatis.MybatisExecutorInterceptorPointDefine;
 import cn.addenda.porttrail.agent.transform.interceptor.server.jetty.JettyServerInterceptorPointDefine;
 import cn.addenda.porttrail.agent.transform.interceptor.server.tomcat.TomcatAbstractProtocolInterceptorPointDefine;
@@ -20,9 +20,9 @@ import cn.addenda.porttrail.agent.transform.interceptor.task.TaskInterceptorPoin
 import cn.addenda.porttrail.agent.transform.interceptor.tx.transactional.SpringTransactionalInterceptorPointDefine;
 import cn.addenda.porttrail.agent.transform.interceptor.tx.transactionhepler.SpringTransactionHelperInterceptorPointDefine;
 import cn.addenda.porttrail.agent.transform.interceptor.tx.transactiontemplate.SpringTransactionTemplateInterceptorPointDefine;
-import cn.addenda.porttrail.infrastructure.context.AgentContext;
 import cn.addenda.porttrail.common.util.StringUtils;
 import cn.addenda.porttrail.common.util.UuidUtils;
+import cn.addenda.porttrail.infrastructure.context.AgentContext;
 import cn.addenda.porttrail.infrastructure.log.PortTrailLogger;
 import net.bytebuddy.ByteBuddy;
 import net.bytebuddy.agent.builder.AgentBuilder;
@@ -138,6 +138,9 @@ public class PortTrailAgent {
         if ("IMAGE_NAME".equals(propertyPair[0])) {
           AgentContext.setImageName(propertyPair[1]);
         }
+        if ("ENV".equalsIgnoreCase(propertyPair[0])) {
+          AgentContext.setEnv(propertyPair[1]);
+        }
       }
     }
     if (!StringUtils.hasText(AgentContext.getServiceName())) {
@@ -145,6 +148,9 @@ public class PortTrailAgent {
     }
     if (!StringUtils.hasText(AgentContext.getImageName())) {
       AgentContext.setImageName("UNKNOWN_SERVICE_NAME");
+    }
+    if (!StringUtils.hasText(AgentContext.getEnv())) {
+      AgentContext.setEnv("UNKNOWN_ENV");
     }
     AgentContext.postInit();
   }

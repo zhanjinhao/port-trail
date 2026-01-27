@@ -27,6 +27,11 @@ public class ServiceRuntimeInfo implements Serializable {
   private String imageName;
 
   /**
+   * 环境
+   */
+  private String env;
+
+  /**
    * 实例ID
    */
   private String instanceId;
