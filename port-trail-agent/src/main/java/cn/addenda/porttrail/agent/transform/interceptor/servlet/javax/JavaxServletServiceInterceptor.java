@@ -31,9 +31,8 @@ public class JavaxServletServiceInterceptor extends AbstractDeduplicationEntryPo
 
   private final HttpWriter httpWriter;
 
-  // in kb
   private final int requestMaxBodyLength;
-  // in kb
+
   private final int responseMaxBodyLength;
 
   private static final PortTrailLogger log =
@@ -47,6 +46,7 @@ public class JavaxServletServiceInterceptor extends AbstractDeduplicationEntryPo
 
   private int initRequestMaxBodyLength() {
     Properties agentProperties = AgentPackage.getAgentProperties();
+    // in kb
     String property = agentProperties.getProperty("httpWriter.request.maxBodyLength");
     try {
       return Integer.parseInt(property) * 1024;
@@ -59,6 +59,7 @@ public class JavaxServletServiceInterceptor extends AbstractDeduplicationEntryPo
     Properties agentProperties = AgentPackage.getAgentProperties();
     String property = agentProperties.getProperty("httpWriter.response.maxBodyLength");
     try {
+      // in kb
       return Integer.parseInt(property) * 1024;
     } catch (Exception e) {
       throw new PortTrailAgentStartException(String.format("加载httpWriter.response.maxBodyLength异常，配置值为：%s", property), e);
