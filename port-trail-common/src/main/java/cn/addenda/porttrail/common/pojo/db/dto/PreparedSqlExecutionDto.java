@@ -8,7 +8,7 @@ import cn.addenda.porttrail.common.tuple.Binary;
 import cn.addenda.porttrail.common.tuple.Ternary;
 import cn.addenda.porttrail.common.tuple.Tuple;
 import cn.addenda.porttrail.common.tuple.Unary;
-import cn.addenda.porttrail.common.util.SerializationUtils;
+import cn.addenda.porttrail.common.util.JdkSerializationUtils;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -94,7 +94,7 @@ public class PreparedSqlExecutionDto extends AbstractDbDto {
       return null;
     } else {
       if (f1 instanceof Serializable) {
-        return SerializationUtils.serialize(f1);
+        return JdkSerializationUtils.serialize(f1);
       } else {
         return PreparedStatementParameterWrapper.UN_SUPPORTED_PARAMETER;
       }

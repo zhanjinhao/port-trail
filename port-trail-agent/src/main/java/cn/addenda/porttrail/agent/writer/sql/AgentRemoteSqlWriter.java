@@ -8,7 +8,7 @@ import cn.addenda.porttrail.common.pojo.db.bo.SqlExecutionBo;
 import cn.addenda.porttrail.common.pojo.db.dto.DbConfigDto;
 import cn.addenda.porttrail.common.pojo.db.dto.PreparedSqlExecutionDto;
 import cn.addenda.porttrail.common.pojo.db.dto.SqlExecutionDto;
-import cn.addenda.porttrail.common.util.SerializationUtils;
+import cn.addenda.porttrail.common.util.JdkSerializationUtils;
 import cn.addenda.porttrail.infrastructure.context.AgentContext;
 import cn.addenda.porttrail.infrastructure.writer.SqlWriter;
 
@@ -19,7 +19,7 @@ public class AgentRemoteSqlWriter implements SqlWriter {
     SqlExecutionDto sqlExecutionDto =
             SqlExecutionDto.createBySqlExecutionBo((SqlExecutionBo) dbExecution);
     sqlExecutionDto.setServiceRuntimeInfo(AgentContext.getServiceRuntimeInfo());
-    LinkFacade.sendSqlExecution(SerializationUtils.serialize(sqlExecutionDto));
+    LinkFacade.sendSqlExecution(JdkSerializationUtils.serialize(sqlExecutionDto));
   }
 
   @Override
@@ -27,7 +27,7 @@ public class AgentRemoteSqlWriter implements SqlWriter {
     PreparedSqlExecutionDto preparedSqlExecutionDto =
             PreparedSqlExecutionDto.createByPreparedSqlExecutionBo((PreparedSqlExecutionBo) dbExecution);
     preparedSqlExecutionDto.setServiceRuntimeInfo(AgentContext.getServiceRuntimeInfo());
-    LinkFacade.sendPreparedSqlExecution(SerializationUtils.serialize(preparedSqlExecutionDto));
+    LinkFacade.sendPreparedSqlExecution(JdkSerializationUtils.serialize(preparedSqlExecutionDto));
   }
 
   @Override

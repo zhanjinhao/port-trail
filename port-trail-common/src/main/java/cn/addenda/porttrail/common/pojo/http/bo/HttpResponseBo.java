@@ -3,12 +3,11 @@ package cn.addenda.porttrail.common.pojo.http.bo;
 import cn.addenda.porttrail.common.constant.MediaType;
 import cn.addenda.porttrail.common.pojo.http.LocaleData;
 import cn.addenda.porttrail.common.pojo.http.dto.HttpResponseDto;
-import cn.addenda.porttrail.common.util.SerializationUtils;
+import cn.addenda.porttrail.common.util.JdkSerializationUtils;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
@@ -61,7 +60,7 @@ public class HttpResponseBo extends AbstractHttpExecution {
     httpResponseBo.setLocale(httpResponseDto.getLocale());
     httpResponseBo.setStatus(httpResponseDto.getStatus());
     httpResponseBo.setHeaderMap(httpResponseDto.getHeaderMap());
-    httpResponseBo.setBody(SerializationUtils.deserialize(httpResponseDto.getBody()));
+    httpResponseBo.setBody(JdkSerializationUtils.deserialize(httpResponseDto.getBody()));
     return httpResponseBo;
   }
 

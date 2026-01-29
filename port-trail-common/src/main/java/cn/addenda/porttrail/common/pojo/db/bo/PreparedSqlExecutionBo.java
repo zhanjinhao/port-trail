@@ -8,7 +8,7 @@ import cn.addenda.porttrail.common.tuple.Ternary;
 import cn.addenda.porttrail.common.tuple.Tuple;
 import cn.addenda.porttrail.common.tuple.Unary;
 import cn.addenda.porttrail.common.util.ArrayUtils;
-import cn.addenda.porttrail.common.util.SerializationUtils;
+import cn.addenda.porttrail.common.util.JdkSerializationUtils;
 import lombok.*;
 
 import java.sql.PreparedStatement;
@@ -112,7 +112,7 @@ public class PreparedSqlExecutionBo extends AbstractSqlExecutionBo {
     if (Arrays.equals(bytes, PreparedStatementParameterWrapper.UN_SUPPORTED_PARAMETER)) {
       return null;
     }
-    return SerializationUtils.deserialize(bytes);
+    return JdkSerializationUtils.deserialize(bytes);
   }
 
   @Override

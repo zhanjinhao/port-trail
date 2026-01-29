@@ -1,4 +1,4 @@
-package cn.addenda.porttrail.infrastructure.exception;
+package cn.addenda.porttrail.common.exception;
 
 public class PortTrailException extends RuntimeException {
 

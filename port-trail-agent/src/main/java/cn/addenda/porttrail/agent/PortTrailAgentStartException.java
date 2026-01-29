@@ -1,6 +1,6 @@
 package cn.addenda.porttrail.agent;
 
-import cn.addenda.porttrail.infrastructure.exception.PortTrailException;
+import cn.addenda.porttrail.common.exception.PortTrailException;
 
 /**
  * 这个异常是在处理自定义ClassLoader后，已经进行Class改写，或者加载自定义link包的时候使用。

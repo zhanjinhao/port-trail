@@ -1,6 +1,6 @@
 package cn.addenda.porttrail.agent.transform.interceptor;
 
-import cn.addenda.porttrail.infrastructure.exception.PortTrailException;
+import cn.addenda.porttrail.common.exception.PortTrailException;
 
 import java.util.ArrayDeque;
 import java.util.Deque;

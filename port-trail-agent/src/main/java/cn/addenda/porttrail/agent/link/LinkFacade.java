@@ -3,6 +3,7 @@ package cn.addenda.porttrail.agent.link;
 import cn.addenda.porttrail.agent.AgentPackage;
 import cn.addenda.porttrail.agent.PortTrailAgentStartException;
 import cn.addenda.porttrail.agent.util.FileUtils;
+import cn.addenda.porttrail.common.util.CompressUtils;
 import cn.addenda.porttrail.facade.*;
 import cn.addenda.porttrail.infrastructure.jvm.JVMShutdown;
 import cn.addenda.porttrail.infrastructure.jvm.JVMShutdownCallback;
@@ -68,11 +69,11 @@ public class LinkFacade {
   }
 
   public static void sendSqlExecution(byte[] sqlExecution) {
-    httpFacade.sendRequest(sendSqlExecutionUrl, sqlExecution);
+    httpFacade.sendRequest(sendSqlExecutionUrl, CompressUtils.compress(sqlExecution));
   }
 
   public static void sendPreparedSqlExecution(byte[] preparedSqlExecution) {
-    httpFacade.sendRequest(sendPreparedSqlExecutionUrl, preparedSqlExecution);
+    httpFacade.sendRequest(sendPreparedSqlExecutionUrl, CompressUtils.compress(preparedSqlExecution));
   }
 
   public static void sendDbConfig(String dbConfig) {
@@ -80,11 +81,11 @@ public class LinkFacade {
   }
 
   public static void sendHttpRequest(byte[] httpRequest) {
-    httpFacade.sendRequest(sendHttpRequestUrl, httpRequest);
+    httpFacade.sendRequest(sendHttpRequestUrl, CompressUtils.compress(httpRequest));
   }
 
   public static void sendHttpResponse(byte[] httpResponse) {
-    httpFacade.sendRequest(sendHttpResponseUrl, httpResponse);
+    httpFacade.sendRequest(sendHttpResponseUrl, CompressUtils.compress(httpResponse));
   }
 
   // ------------------------

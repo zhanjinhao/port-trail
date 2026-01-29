@@ -1,6 +1,6 @@
 package cn.addenda.porttrail.link.http;
 
-import cn.addenda.porttrail.infrastructure.exception.PortTrailException;
+import cn.addenda.porttrail.common.exception.PortTrailException;
 
 public class PortTrailLinkHttpException extends PortTrailException {
 

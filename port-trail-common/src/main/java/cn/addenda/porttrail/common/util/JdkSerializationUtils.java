@@ -2,7 +2,7 @@ package cn.addenda.porttrail.common.util;
 
 import java.io.*;
 
-public abstract class SerializationUtils {
+public abstract class JdkSerializationUtils {
 
   /**
    * Serialize the given object to a byte array.

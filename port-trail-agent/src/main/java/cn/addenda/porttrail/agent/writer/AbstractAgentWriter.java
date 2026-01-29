@@ -1,7 +1,7 @@
 package cn.addenda.porttrail.agent.writer;
 
 import cn.addenda.porttrail.agent.link.LinkFacade;
-import cn.addenda.porttrail.infrastructure.exception.PortTrailException;
+import cn.addenda.porttrail.common.exception.PortTrailException;
 import cn.addenda.porttrail.infrastructure.log.PortTrailLogger;
 
 import java.util.function.Consumer;

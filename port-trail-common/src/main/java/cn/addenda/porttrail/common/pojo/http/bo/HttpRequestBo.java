@@ -4,7 +4,7 @@ import cn.addenda.porttrail.common.constant.MediaType;
 import cn.addenda.porttrail.common.pojo.http.HttpRequestFormData;
 import cn.addenda.porttrail.common.pojo.http.LocaleData;
 import cn.addenda.porttrail.common.pojo.http.dto.HttpRequestDto;
-import cn.addenda.porttrail.common.util.SerializationUtils;
+import cn.addenda.porttrail.common.util.JdkSerializationUtils;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -80,7 +80,7 @@ public class HttpRequestBo extends AbstractHttpExecution {
     httpRequestBo.setAllContentLength(httpRequestDto.getAllContentLength());
     httpRequestBo.setContentLength(httpRequestDto.getContentLength());
     httpRequestBo.setLocale(httpRequestDto.getLocale());
-    httpRequestBo.setBody(SerializationUtils.deserialize(httpRequestDto.getBody()));
+    httpRequestBo.setBody(JdkSerializationUtils.deserialize(httpRequestDto.getBody()));
     return httpRequestBo;
   }
 

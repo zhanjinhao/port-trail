@@ -1,7 +1,7 @@
 package cn.addenda.porttrail.agent.transform.interceptor.tx;
 
 import cn.addenda.porttrail.agent.transform.interceptor.AbstractEntryPointInterceptor;
-import cn.addenda.porttrail.infrastructure.exception.PortTrailException;
+import cn.addenda.porttrail.common.exception.PortTrailException;
 import cn.addenda.porttrail.infrastructure.tx.TxContext;
 
 import java.util.ArrayDeque;

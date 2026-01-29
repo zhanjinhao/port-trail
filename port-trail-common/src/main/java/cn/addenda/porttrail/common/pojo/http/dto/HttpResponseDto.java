@@ -3,7 +3,7 @@ package cn.addenda.porttrail.common.pojo.http.dto;
 import cn.addenda.porttrail.common.constant.MediaType;
 import cn.addenda.porttrail.common.pojo.http.LocaleData;
 import cn.addenda.porttrail.common.pojo.http.bo.HttpResponseBo;
-import cn.addenda.porttrail.common.util.SerializationUtils;
+import cn.addenda.porttrail.common.util.JdkSerializationUtils;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -54,7 +54,7 @@ public class HttpResponseDto extends AbstractHttpDto {
     httpResponseDto.setLocale(httpResponseBo.getLocale());
     httpResponseDto.setStatus(httpResponseBo.getStatus());
     httpResponseDto.setHeaderMap(httpResponseBo.getHeaderMap());
-    httpResponseDto.setBody(SerializationUtils.serialize(httpResponseBo.getBody()));
+    httpResponseDto.setBody(JdkSerializationUtils.serialize(httpResponseBo.getBody()));
     return httpResponseDto;
   }
 

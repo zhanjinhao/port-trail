@@ -2,7 +2,7 @@ package cn.addenda.porttrail.infrastructure.entrypoint;
 
 import cn.addenda.porttrail.common.entrypoint.EntryPoint;
 import cn.addenda.porttrail.common.entrypoint.EntryPointSnapshot;
-import cn.addenda.porttrail.infrastructure.exception.PortTrailException;
+import cn.addenda.porttrail.common.exception.PortTrailException;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 

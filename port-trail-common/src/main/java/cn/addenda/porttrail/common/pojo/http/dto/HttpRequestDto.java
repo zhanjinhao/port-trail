@@ -4,7 +4,7 @@ import cn.addenda.porttrail.common.constant.MediaType;
 import cn.addenda.porttrail.common.pojo.http.HttpRequestFormData;
 import cn.addenda.porttrail.common.pojo.http.LocaleData;
 import cn.addenda.porttrail.common.pojo.http.bo.HttpRequestBo;
-import cn.addenda.porttrail.common.util.SerializationUtils;
+import cn.addenda.porttrail.common.util.JdkSerializationUtils;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -77,7 +77,7 @@ public class HttpRequestDto extends AbstractHttpDto {
     httpRequestDto.setAllContentLength(httpRequestBo.getContentLength());
     httpRequestDto.setContentLength(httpRequestBo.getContentLength());
     httpRequestDto.setLocale(httpRequestBo.getLocale());
-    httpRequestDto.setBody(SerializationUtils.serialize(httpRequestBo.getBody()));
+    httpRequestDto.setBody(JdkSerializationUtils.serialize(httpRequestBo.getBody()));
     return httpRequestDto;
   }
 
