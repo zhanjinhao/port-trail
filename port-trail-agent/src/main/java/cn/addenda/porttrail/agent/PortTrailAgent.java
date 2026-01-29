@@ -132,6 +132,9 @@ public class PortTrailAgent {
         if (propertyPair.length != 2) {
           continue;
         }
+        if ("SYSTEM_CODE".equals(propertyPair[0])) {
+          AgentContext.setSystemCode(propertyPair[1]);
+        }
         if ("SERVICE_NAME".equals(propertyPair[0])) {
           AgentContext.setServiceName(propertyPair[1]);
         }
@@ -143,11 +146,14 @@ public class PortTrailAgent {
         }
       }
     }
+    if (!StringUtils.hasText(AgentContext.getSystemCode())) {
+      AgentContext.setSystemCode("UNKNOWN_SYSTEM_CODE");
+    }
     if (!StringUtils.hasText(AgentContext.getServiceName())) {
       AgentContext.setServiceName("UNKNOWN_SERVICE_NAME");
     }
     if (!StringUtils.hasText(AgentContext.getImageName())) {
-      AgentContext.setImageName("UNKNOWN_SERVICE_NAME");
+      AgentContext.setImageName("UNKNOWN_IMAGE_NAME");
     }
     if (!StringUtils.hasText(AgentContext.getEnv())) {
       AgentContext.setEnv("UNKNOWN_ENV");

@@ -9,6 +9,12 @@ import lombok.NoArgsConstructor;
 public class AgentContext {
 
   /**
+   * 系统编码
+   */
+  @Getter
+  private static String systemCode;
+
+  /**
    * 服务名
    */
   @Getter
@@ -32,6 +38,10 @@ public class AgentContext {
   @Getter
   private static String instanceId;
 
+  public static void setSystemCode(String systemCode) {
+    AgentContext.systemCode = systemCode;
+  }
+
   public static void setServiceName(String serviceName) {
     AgentContext.serviceName = serviceName;
   }
@@ -53,6 +63,7 @@ public class AgentContext {
 
   public static void postInit() {
     serviceRuntimeInfoInstance = new ServiceRuntimeInfo();
+    serviceRuntimeInfoInstance.setSystemCode(systemCode);
     serviceRuntimeInfoInstance.setServiceName(serviceName);
     serviceRuntimeInfoInstance.setImageName(imageName);
     serviceRuntimeInfoInstance.setEnv(env);

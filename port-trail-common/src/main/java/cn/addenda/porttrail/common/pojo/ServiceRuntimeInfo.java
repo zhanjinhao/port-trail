@@ -17,6 +17,11 @@ public class ServiceRuntimeInfo implements Serializable {
   private static final long serialVersionUID = 1L;
 
   /**
+   * 系统编码
+   */
+  private String systemCode;
+
+  /**
    * 服务名
    */
   private String serviceName;
