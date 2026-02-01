@@ -309,11 +309,9 @@ public class LinkFacade {
     }
     while (resources.hasMoreElements()) {
       URL url = resources.nextElement();
-      InputStream inputStream = null;
-      BufferedReader bufferedReader = null;
-      try {
-        inputStream = url.openStream();
-        bufferedReader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
+      try (InputStream inputStream = url.openStream();
+           InputStreamReader inputStreamReader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
+           BufferedReader bufferedReader = new BufferedReader(inputStreamReader);) {
         while (true) {
           String s = bufferedReader.readLine();
           if (s != null && !s.trim().isEmpty()) {
@@ -325,14 +323,6 @@ public class LinkFacade {
       } catch (IOException x) {
         throw new PortTrailAgentStartException(
                 String.format("Error reading configuration file, url: %s.", url.getPath()), x);
-      } finally {
-        try {
-          if (bufferedReader != null) bufferedReader.close();
-          if (inputStream != null) inputStream.close();
-        } catch (IOException y) {
-          throw new PortTrailAgentStartException(
-                  String.format("Error closing configuration file, url: %s.", url.getPath()), y);
-        }
       }
     }
     return nameList;
