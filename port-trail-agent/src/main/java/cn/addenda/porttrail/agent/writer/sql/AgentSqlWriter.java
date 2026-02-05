@@ -34,13 +34,26 @@ public class AgentSqlWriter extends AbstractAgentWriter implements SqlWriter {
 
   private final int hashSlotCount;
 
+  private final int dbExecutionQueueSize;
+
   private final List<DbExecutionConsumer> dbExecutionConsumerList;
 
   private AgentSqlWriter() {
     this.hashSlotCount = initHashSlotCount();
+    this.dbExecutionQueueSize = initDbExecutionQueueSize();
     this.sqlWriterList = initSqlWriter();
     this.dbExecutionConsumerList = initExecutionConsumerList();
     initJvmShutdown();
+  }
+
+  private int initDbExecutionQueueSize() {
+    Properties agentProperties = AgentPackage.getAgentProperties();
+    String property = agentProperties.getProperty("sqlWriter.dbExecutionQueue.size");
+    try {
+      return Integer.parseInt(property);
+    } catch (Exception e) {
+      throw new PortTrailAgentStartException(String.format("加载sqlWriter.dbExecutionQueue.size异常，配置值为：%s", property), e);
+    }
   }
 
   public static AgentSqlWriter getInstance() {
@@ -81,7 +94,7 @@ public class AgentSqlWriter extends AbstractAgentWriter implements SqlWriter {
   private List<DbExecutionConsumer> initExecutionConsumerList() {
     List<DbExecutionConsumer> tmpList = new ArrayList<>();
     for (int i = 0; i < hashSlotCount; i++) {
-      tmpList.add(new DbExecutionConsumer(1000, i));
+      tmpList.add(new DbExecutionConsumer(dbExecutionQueueSize, i));
     }
     return tmpList;
   }
@@ -234,14 +247,22 @@ public class AgentSqlWriter extends AbstractAgentWriter implements SqlWriter {
         try {
           if (DbExecution.DB_EXECUTION_TYPE_CONFIG.equals(dbExecution.getDbExecutionType())) {
             if (ifEnableRetry) {
-              retrySend(sqlWriter::writeConfig, dbExecution);
+              retrySend(sqlWriter::writeConfig, dbExecution, 10);
             } else {
               sqlWriter.writeConfig(dbExecution);
             }
           } else if (DbExecution.DB_EXECUTION_TYPE_SQL.equals(dbExecution.getDbExecutionType())) {
-            sqlWriter.writeSql(dbExecution);
+            if (ifEnableRetry) {
+              retrySend(sqlWriter::writeSql, dbExecution, 2);
+            } else {
+              sqlWriter.writeSql(dbExecution);
+            }
           } else if (DbExecution.DB_EXECUTION_TYPE_PREPARED_SQL.equals(dbExecution.getDbExecutionType())) {
-            sqlWriter.writePreparedSql(dbExecution);
+            if (ifEnableRetry) {
+              retrySend(sqlWriter::writePreparedSql, dbExecution, 2);
+            } else {
+              sqlWriter.writePreparedSql(dbExecution);
+            }
           } else {
             log.error("[{}] dbExecutionType is not support. DbExecution is [{}].", sqlWriter, LinkFacade.toStr(dbExecution));
           }

@@ -34,10 +34,13 @@ public class AgentHttpWriter extends AbstractAgentWriter implements HttpWriter {
 
   private final int hashSlotCount;
 
+  private final int httpExecutionQueueSize;
+
   private final List<HttpExecutionConsumer> httpExecutionConsumerList;
 
   private AgentHttpWriter() {
     this.hashSlotCount = initHashSlotCount();
+    this.httpExecutionQueueSize = initHttpExecutionQueueSize();
     this.httpWriterList = initHttpWriter();
     this.httpExecutionConsumerList = initExecutionConsumerList();
     initJvmShutdown();
@@ -62,6 +65,16 @@ public class AgentHttpWriter extends AbstractAgentWriter implements HttpWriter {
     }
   }
 
+  private int initHttpExecutionQueueSize() {
+    Properties agentProperties = AgentPackage.getAgentProperties();
+    String property = agentProperties.getProperty("httpWriter.httpExecutionQueue.size");
+    try {
+      return Integer.parseInt(property);
+    } catch (Exception e) {
+      throw new PortTrailAgentStartException(String.format("加载httpWriter.httpExecutionQueue.size异常，配置值为：%s", property), e);
+    }
+  }
+
   private List<HttpWriter> initHttpWriter() {
     List<HttpWriter> tmpList = new ArrayList<>();
     Properties agentProperties = AgentPackage.getAgentProperties();
@@ -81,7 +94,7 @@ public class AgentHttpWriter extends AbstractAgentWriter implements HttpWriter {
   private List<HttpExecutionConsumer> initExecutionConsumerList() {
     List<HttpExecutionConsumer> tmpList = new ArrayList<>();
     for (int i = 0; i < hashSlotCount; i++) {
-      tmpList.add(new HttpExecutionConsumer(1000, i));
+      tmpList.add(new HttpExecutionConsumer(httpExecutionQueueSize, i));
     }
     return tmpList;
   }

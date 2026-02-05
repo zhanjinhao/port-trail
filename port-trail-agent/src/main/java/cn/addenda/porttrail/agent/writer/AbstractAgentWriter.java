@@ -9,8 +9,7 @@ import java.util.function.Predicate;
 
 public abstract class AbstractAgentWriter {
 
-  protected <T> void retrySend(Consumer<T> sendAction, T dbExecution) {
-    int maxRetries = 100;
+  protected <T> void retrySend(Consumer<T> sendAction, T dbExecution, int maxRetries) {
     int retryCount = 0;
 
     while (true) {
