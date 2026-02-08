@@ -38,6 +38,13 @@
       <artifactId>spring-boot-starter-log4j2</artifactId>
     </dependency>
 
+    <!--spring-boot-test-->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-test</artifactId>
+      <scope>test</scope>
+    </dependency>
+
     <dependency>
       <groupId>cn.addenda</groupId>
       <artifactId>port-trail-common</artifactId>
@@ -47,6 +54,11 @@
     <dependency>
       <groupId>cn.addenda</groupId>
       <artifactId>base-component</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>com.github.jsqlparser</groupId>
+      <artifactId>jsqlparser</artifactId>
     </dependency>
   </dependencies>
 

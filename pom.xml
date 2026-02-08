@@ -42,6 +42,7 @@
     <maven-source-plugin.version>3.0.1</maven-source-plugin.version>
 
     <component.version>2.0-SNAPSHOT</component.version>
+    <jsqlparser.version>4.9</jsqlparser.version>
   </properties>
 
   <dependencyManagement>
@@ -171,11 +172,22 @@
         <artifactId>spring-boot-starter-log4j2</artifactId>
         <version>${spring-boot.version}</version>
       </dependency>
+      <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-test</artifactId>
+        <version>${spring-boot.version}</version>
+      </dependency>
 
       <dependency>
         <groupId>cn.addenda</groupId>
         <artifactId>base-component</artifactId>
         <version>${component.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>com.github.jsqlparser</groupId>
+        <artifactId>jsqlparser</artifactId>
+        <version>${jsqlparser.version}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
