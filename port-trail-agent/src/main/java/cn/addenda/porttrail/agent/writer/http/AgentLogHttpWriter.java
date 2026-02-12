@@ -1,7 +1,7 @@
 package cn.addenda.porttrail.agent.writer.http;
 
 import cn.addenda.porttrail.agent.link.LinkFacade;
-import cn.addenda.porttrail.common.pojo.http.HttpExecution;
+import cn.addenda.porttrail.common.pojo.http.bo.HttpExecution;
 import cn.addenda.porttrail.facade.LogFacade;
 import cn.addenda.porttrail.infrastructure.writer.HttpWriter;
 

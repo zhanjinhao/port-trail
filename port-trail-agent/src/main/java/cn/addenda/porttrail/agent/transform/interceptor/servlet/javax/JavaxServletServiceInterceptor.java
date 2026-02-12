@@ -10,8 +10,8 @@ import cn.addenda.porttrail.agent.writer.http.AgentHttpWriter;
 import cn.addenda.porttrail.common.constant.MediaType;
 import cn.addenda.porttrail.common.entrypoint.EntryPoint;
 import cn.addenda.porttrail.common.entrypoint.EntryPointType;
-import cn.addenda.porttrail.common.pojo.http.HttpRequestFormData;
-import cn.addenda.porttrail.common.pojo.http.LocaleData;
+import cn.addenda.porttrail.common.pojo.http.bo.HttpRequestFormData;
+import cn.addenda.porttrail.common.pojo.http.bo.LocaleData;
 import cn.addenda.porttrail.common.pojo.http.bo.AbstractHttpExecution;
 import cn.addenda.porttrail.common.pojo.http.bo.HttpRequestBo;
 import cn.addenda.porttrail.common.pojo.http.bo.HttpResponseBo;
@@ -129,7 +129,7 @@ public class JavaxServletServiceInterceptor extends AbstractDeduplicationEntryPo
         }
       } else {
         httpRequestBo.setContentLength(HttpRequestBo.UNKNOWN_CONTENT_LENGTH);
-        httpRequestBo.setBody(HttpRequestBo.UNSUPPORTED_CONTENT_TYPE);
+        httpRequestBo.setBody(AbstractHttpExecution.UNSUPPORTED_CONTENT_TYPE);
       }
       httpWriter.writeHttpRequest(httpRequestBo);
 
@@ -147,7 +147,7 @@ public class JavaxServletServiceInterceptor extends AbstractDeduplicationEntryPo
         }
       } else {
         httpResponseBo.setContentLength(HttpResponseBo.UNKNOWN_CONTENT_LENGTH);
-        httpResponseBo.setBody(HttpResponseBo.UNSUPPORTED_CONTENT_TYPE);
+        httpResponseBo.setBody(AbstractHttpExecution.UNSUPPORTED_CONTENT_TYPE);
       }
       httpWriter.writeHttpResponse(httpResponseBo);
 

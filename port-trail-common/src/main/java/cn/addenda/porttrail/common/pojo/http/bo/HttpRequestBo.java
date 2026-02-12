@@ -1,16 +1,18 @@
 package cn.addenda.porttrail.common.pojo.http.bo;
 
 import cn.addenda.porttrail.common.constant.MediaType;
-import cn.addenda.porttrail.common.pojo.http.HttpRequestFormData;
-import cn.addenda.porttrail.common.pojo.http.LocaleData;
+import cn.addenda.porttrail.common.pojo.http.dto.AbstractHttpDto;
 import cn.addenda.porttrail.common.pojo.http.dto.HttpRequestDto;
+import cn.addenda.porttrail.common.pojo.http.dto.HttpRequestFormDataDto;
 import cn.addenda.porttrail.common.util.JdkSerializationUtils;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @Setter
 @Getter
@@ -19,7 +21,6 @@ public class HttpRequestBo extends AbstractHttpExecution {
 
   public static final String BODY_EMPTY = "BODY_EMPTY";
   public static final String BODY_EXCEED_LENGTH = "BODY_EXCEED_LENGTH";
-  public static final String UNSUPPORTED_CONTENT_TYPE = "UNSUPPORTED_CONTENT_TYPE";
   public static final int UNKNOWN_CONTENT_LENGTH = -2;
   public static final String BODY_BYTE_ARRAY = "BYTE_ARRAY";
 
@@ -62,26 +63,43 @@ public class HttpRequestBo extends AbstractHttpExecution {
    * {@link MediaType#ifRequestTextContentType(String)} : {@link String}
    * {@link MediaType#ifRequestMultipartFormContentType(String)} : {@link HttpRequestFormData}
    * {@link MediaType#ifRequestBinaryContentType(String)} : {@link HttpRequestBo#BODY_BYTE_ARRAY }
-   * 其他：{@link HttpRequestBo#UNSUPPORTED_CONTENT_TYPE}
+   * 其他：{@link AbstractHttpExecution#UNSUPPORTED_CONTENT_TYPE}
    */
   private Object body;
 
-  public static HttpRequestBo createByHttpRequestDto(HttpRequestDto httpRequestDto) {
-    HttpRequestBo httpRequestBo = new HttpRequestBo(httpRequestDto.getRequestId());
-    httpRequestBo.setVersion(httpRequestDto.getVersion());
-    httpRequestBo.setScheme(httpRequestDto.getScheme());
-    httpRequestBo.setMethod(httpRequestDto.getMethod());
-    httpRequestBo.setUri(httpRequestDto.getUri());
-    httpRequestBo.setQueryString(httpRequestDto.getQueryString());
-    httpRequestBo.setContentType(httpRequestDto.getContentType());
-    httpRequestBo.setCharsetEncoding(httpRequestDto.getCharsetEncoding());
-    httpRequestBo.setHeaderMap(httpRequestDto.getHeaderMap());
-    httpRequestBo.setDatetime(httpRequestDto.getDatetime());
-    httpRequestBo.setAllContentLength(httpRequestDto.getAllContentLength());
-    httpRequestBo.setContentLength(httpRequestDto.getContentLength());
-    httpRequestBo.setLocale(httpRequestDto.getLocale());
-    httpRequestBo.setBody(JdkSerializationUtils.deserialize(httpRequestDto.getBody()));
-    return httpRequestBo;
+  public HttpRequestBo(HttpRequestDto httpRequestDto) {
+    super(httpRequestDto.getRequestId());
+    this.setVersion(httpRequestDto.getVersion());
+    this.setScheme(httpRequestDto.getScheme());
+    this.setMethod(httpRequestDto.getMethod());
+    this.setUri(httpRequestDto.getUri());
+    this.setQueryString(httpRequestDto.getQueryString());
+    this.setContentType(httpRequestDto.getContentType());
+    this.setCharsetEncoding(httpRequestDto.getCharsetEncoding());
+    this.setHeaderMap(httpRequestDto.getHeaderMap());
+    this.setDatetime(httpRequestDto.getDatetime());
+    this.setAllContentLength(httpRequestDto.getAllContentLength());
+    this.setContentLength(httpRequestDto.getContentLength());
+    this.setLocale(
+            Optional.ofNullable(httpRequestDto.getLocale())
+                    .map(LocaleData::new).orElse(null)
+    );
+    byte[] bodyOfDto = httpRequestDto.getBody();
+    if (bodyOfDto == null) {
+      this.setBody(null);
+    } else if (Arrays.equals(AbstractHttpDto.UNSUPPORTED_CONTENT_TYPE, bodyOfDto)) {
+      this.setBody(UNSUPPORTED_CONTENT_TYPE);
+    } else {
+      Object obj = JdkSerializationUtils.deserialize(bodyOfDto);
+      if (obj instanceof HttpRequestFormDataDto) {
+        this.setBody(new HttpRequestFormData((HttpRequestFormDataDto) obj));
+      } else if (obj instanceof String) {
+        this.setBody(obj);
+      } else {
+        // 走不进来
+        this.setBody(obj);
+      }
+    }
   }
 
   public HttpRequestBo(String requestId) {

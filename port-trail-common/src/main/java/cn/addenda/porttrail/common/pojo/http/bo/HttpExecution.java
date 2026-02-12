@@ -1,4 +1,4 @@
-package cn.addenda.porttrail.common.pojo.http;
+package cn.addenda.porttrail.common.pojo.http.bo;
 
 public interface HttpExecution {
 

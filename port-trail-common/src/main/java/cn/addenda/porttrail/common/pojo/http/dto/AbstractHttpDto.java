@@ -10,6 +10,8 @@ import lombok.ToString;
 @ToString
 public class AbstractHttpDto extends AbstractDto {
 
+  public static final byte[] UNSUPPORTED_CONTENT_TYPE = new byte[]{-1};
+
   private final String requestId;
 
   public AbstractHttpDto(String requestId) {

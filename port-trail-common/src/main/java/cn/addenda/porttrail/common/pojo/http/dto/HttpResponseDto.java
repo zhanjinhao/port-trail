@@ -1,15 +1,18 @@
 package cn.addenda.porttrail.common.pojo.http.dto;
 
 import cn.addenda.porttrail.common.constant.MediaType;
-import cn.addenda.porttrail.common.pojo.http.LocaleData;
+import cn.addenda.porttrail.common.pojo.http.bo.AbstractHttpExecution;
 import cn.addenda.porttrail.common.pojo.http.bo.HttpResponseBo;
 import cn.addenda.porttrail.common.util.JdkSerializationUtils;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 
 @Setter
 @Getter
@@ -26,7 +29,7 @@ public class HttpResponseDto extends AbstractHttpDto {
 
   private long datetime;
 
-  private LocaleData locale;
+  private LocaleDataDto locale;
 
   // response.getStatus()
   private int status;
@@ -37,7 +40,7 @@ public class HttpResponseDto extends AbstractHttpDto {
   /**
    * {@link MediaType#ifResponseTextContentType(String)} : {@link String}
    * {@link MediaType#ifResponseBinaryContentType(String)} : {@link String} filename
-   * 其他：{@link HttpResponseBo#UNSUPPORTED_CONTENT_TYPE}
+   * 其他：{@link AbstractHttpDto#UNSUPPORTED_CONTENT_TYPE}
    */
   private byte[] body;
 
@@ -45,17 +48,27 @@ public class HttpResponseDto extends AbstractHttpDto {
     super(requestId);
   }
 
-  public static HttpResponseDto createByHttpResponseBo(HttpResponseBo httpResponseBo) {
-    HttpResponseDto httpResponseDto = new HttpResponseDto(httpResponseBo.getRequestId());
-    httpResponseDto.setContentType(httpResponseBo.getContentType());
-    httpResponseDto.setCharsetEncoding(httpResponseBo.getCharsetEncoding());
-    httpResponseDto.setContentLength(httpResponseBo.getContentLength());
-    httpResponseDto.setDatetime(httpResponseBo.getDatetime());
-    httpResponseDto.setLocale(httpResponseBo.getLocale());
-    httpResponseDto.setStatus(httpResponseBo.getStatus());
-    httpResponseDto.setHeaderMap(httpResponseBo.getHeaderMap());
-    httpResponseDto.setBody(JdkSerializationUtils.serialize(httpResponseBo.getBody()));
-    return httpResponseDto;
+  public HttpResponseDto(HttpResponseBo httpResponseBo) {
+    super(httpResponseBo.getRequestId());
+    this.setContentType(httpResponseBo.getContentType());
+    this.setCharsetEncoding(httpResponseBo.getCharsetEncoding());
+    this.setContentLength(httpResponseBo.getContentLength());
+    this.setDatetime(httpResponseBo.getDatetime());
+    this.setLocale(
+            Optional.ofNullable(httpResponseBo.getLocale())
+                    .map(LocaleDataDto::new).orElse(null)
+    );
+    this.setStatus(httpResponseBo.getStatus());
+    this.setHeaderMap(httpResponseBo.getHeaderMap());
+    Object bodyOfBo = httpResponseBo.getBody();
+    if (Objects.equals(AbstractHttpExecution.UNSUPPORTED_CONTENT_TYPE, bodyOfBo)) {
+      this.setBody(UNSUPPORTED_CONTENT_TYPE);
+    } else if (bodyOfBo instanceof Serializable) {
+      this.setBody(JdkSerializationUtils.serialize(bodyOfBo));
+    } else {
+      // 走不进来
+      this.setBody(null);
+    }
   }
 
 }

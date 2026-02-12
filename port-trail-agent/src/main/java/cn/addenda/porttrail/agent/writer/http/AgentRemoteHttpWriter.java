@@ -1,7 +1,7 @@
 package cn.addenda.porttrail.agent.writer.http;
 
 import cn.addenda.porttrail.agent.link.LinkFacade;
-import cn.addenda.porttrail.common.pojo.http.HttpExecution;
+import cn.addenda.porttrail.common.pojo.http.bo.HttpExecution;
 import cn.addenda.porttrail.common.pojo.http.bo.HttpRequestBo;
 import cn.addenda.porttrail.common.pojo.http.bo.HttpResponseBo;
 import cn.addenda.porttrail.common.pojo.http.dto.HttpRequestDto;
@@ -14,14 +14,16 @@ public class AgentRemoteHttpWriter implements HttpWriter {
 
   @Override
   public void writeHttpRequest(HttpExecution httpExecution) {
-    HttpRequestDto httpRequestDto = HttpRequestDto.createByHttpRequestBo((HttpRequestBo) httpExecution);
+    HttpRequestDto httpRequestDto =
+            new HttpRequestDto((HttpRequestBo) httpExecution);
     httpRequestDto.setServiceRuntimeInfo(AgentContext.getServiceRuntimeInfo());
     LinkFacade.sendHttpRequest(JdkSerializationUtils.serialize(httpRequestDto));
   }
 
   @Override
   public void writeHttpResponse(HttpExecution httpExecution) {
-    HttpResponseDto httpResponseDto = HttpResponseDto.createByHttpResponseBo((HttpResponseBo) httpExecution);
+    HttpResponseDto httpResponseDto =
+            new HttpResponseDto((HttpResponseBo) httpExecution);
     httpResponseDto.setServiceRuntimeInfo(AgentContext.getServiceRuntimeInfo());
     LinkFacade.sendHttpResponse(JdkSerializationUtils.serialize(httpResponseDto));
   }

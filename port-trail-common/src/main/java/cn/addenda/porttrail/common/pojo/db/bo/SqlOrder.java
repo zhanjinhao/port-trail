@@ -1,4 +1,4 @@
-package cn.addenda.porttrail.common.pojo.db;
+package cn.addenda.porttrail.common.pojo.db.bo;
 
 import java.sql.PreparedStatement;
 import java.sql.Statement;

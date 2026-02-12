@@ -27,28 +27,20 @@ public class StatementExecutionDto extends AbstractDbDto {
 
   private List<StatementSqlDto> statementSqlDtoList = new ArrayList<>();
 
-  public static StatementExecutionDto createByStatementExecutionBo(StatementExecutionBo statementExecutionBo) {
-    StatementExecutionDto statementExecutionDto = new StatementExecutionDto();
-    statementExecutionDto.setDataSourcePortTrailId(statementExecutionBo.getDataSourcePortTrailId());
-    statementExecutionDto.setConnectionPortTrailId(statementExecutionBo.getConnectionPortTrailId());
-    statementExecutionDto.setStatementPortTrailId(statementExecutionBo.getStatementPortTrailId());
-    statementExecutionDto.setStatementState(statementExecutionBo.getStatementState());
-    statementExecutionDto.setTxId(statementExecutionBo.getTxId());
-    statementExecutionDto.setStart(statementExecutionBo.getStart());
-    statementExecutionDto.setEnd(statementExecutionBo.getEnd());
-    statementExecutionDto.setEntryPointSnapshot(statementExecutionBo.getEntryPointSnapshot());
+  public StatementExecutionDto(StatementExecutionBo statementExecutionBo) {
+    this.setDataSourcePortTrailId(statementExecutionBo.getDataSourcePortTrailId());
+    this.setConnectionPortTrailId(statementExecutionBo.getConnectionPortTrailId());
+    this.setStatementPortTrailId(statementExecutionBo.getStatementPortTrailId());
+    this.setStatementState(statementExecutionBo.getStatementState());
+    this.setTxId(statementExecutionBo.getTxId());
+    this.setStart(statementExecutionBo.getStart());
+    this.setEnd(statementExecutionBo.getEnd());
+    this.setEntryPointSnapshot(statementExecutionBo.getEntryPointSnapshot());
 
-    List<StatementSqlDto> statementSqlDtoList = statementExecutionBo.getStatementSqlList().stream()
-            .map(statementSql -> {
-              StatementSqlDto statementSqlDto = new StatementSqlDto();
-              statementSqlDto.setSql(statementSql.getSql());
-              statementSqlDto.setOrderInConnection(statementSql.getOrderInConnection());
-              statementSqlDto.setOrderInStatement(statementSql.getOrderInStatement());
-              return statementSqlDto;
-            }).collect(Collectors.toList());
-
-    statementExecutionDto.setStatementSqlDtoList(statementSqlDtoList);
-    return statementExecutionDto;
+    this.setStatementSqlDtoList(
+            statementExecutionBo.getStatementSqlList().stream()
+                    .map(StatementSqlDto::new).collect(Collectors.toList())
+    );
   }
 
 }

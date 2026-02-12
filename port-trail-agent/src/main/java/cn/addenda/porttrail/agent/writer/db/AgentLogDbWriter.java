@@ -1,7 +1,7 @@
 package cn.addenda.porttrail.agent.writer.db;
 
 import cn.addenda.porttrail.agent.link.LinkFacade;
-import cn.addenda.porttrail.common.pojo.db.DbExecution;
+import cn.addenda.porttrail.common.pojo.db.bo.DbExecution;
 import cn.addenda.porttrail.facade.LogFacade;
 import cn.addenda.porttrail.infrastructure.writer.DbWriter;
 

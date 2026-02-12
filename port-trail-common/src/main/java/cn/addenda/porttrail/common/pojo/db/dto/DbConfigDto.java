@@ -21,17 +21,15 @@ public class DbConfigDto extends AbstractDbDto {
 
   private EntryPointSnapshot entryPointSnapshot;
 
-  public static DbConfigDto createByDbConfigBo(DbConfigBo dbConfigBo) {
-    DbConfigDto dbConfigDto = new DbConfigDto();
-    dbConfigDto.setJdbcUrl(dbConfigBo.getJdbcUrl());
-    dbConfigDto.setUser(dbConfigBo.getUser());
-    dbConfigDto.setPassword(dbConfigBo.getPassword());
-    dbConfigDto.setDataSourcePortTrailId(dbConfigBo.getDataSourcePortTrailId());
-    dbConfigDto.setConnectionPortTrailId(dbConfigBo.getConnectionPortTrailId());
-    dbConfigDto.setStatementPortTrailId(dbConfigBo.getStatementPortTrailId());
-    dbConfigDto.setDriverName(dbConfigBo.getDriverName());
-    dbConfigDto.setEntryPointSnapshot(dbConfigBo.getEntryPointSnapshot());
-    return dbConfigDto;
+  public DbConfigDto(DbConfigBo dbConfigBo) {
+    this.setJdbcUrl(dbConfigBo.getJdbcUrl());
+    this.setUser(dbConfigBo.getUser());
+    this.setPassword(dbConfigBo.getPassword());
+    this.setDataSourcePortTrailId(dbConfigBo.getDataSourcePortTrailId());
+    this.setConnectionPortTrailId(dbConfigBo.getConnectionPortTrailId());
+    this.setStatementPortTrailId(dbConfigBo.getStatementPortTrailId());
+    this.setDriverName(dbConfigBo.getDriverName());
+    this.setEntryPointSnapshot(dbConfigBo.getEntryPointSnapshot());
   }
 
 }

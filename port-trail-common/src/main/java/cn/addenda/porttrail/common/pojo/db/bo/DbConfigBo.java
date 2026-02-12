@@ -1,7 +1,6 @@
 package cn.addenda.porttrail.common.pojo.db.bo;
 
 import cn.addenda.porttrail.common.entrypoint.EntryPointSnapshot;
-import cn.addenda.porttrail.common.pojo.db.DbExecution;
 import cn.addenda.porttrail.common.pojo.db.dto.DbConfigDto;
 import lombok.Getter;
 import lombok.Setter;
@@ -35,6 +34,17 @@ public class DbConfigBo implements DbExecution {
   private EntryPointSnapshot entryPointSnapshot;
 
   public DbConfigBo() {
+  }
+
+  public DbConfigBo(DbConfigDto dbConfigDto) {
+    this.setJdbcUrl(dbConfigDto.getJdbcUrl());
+    this.setUser(dbConfigDto.getUser());
+    this.setPassword(dbConfigDto.getPassword());
+    this.setDataSourcePortTrailId(dbConfigDto.getDataSourcePortTrailId());
+    this.setConnectionPortTrailId(dbConfigDto.getConnectionPortTrailId());
+    this.setStatementPortTrailId(dbConfigDto.getStatementPortTrailId());
+    this.setDriverName(dbConfigDto.getDriverName());
+    this.setEntryPointSnapshot(dbConfigDto.getEntryPointSnapshot());
   }
 
   @Override
@@ -80,19 +90,6 @@ public class DbConfigBo implements DbExecution {
   @Override
   public EntryPointSnapshot getEntryPointSnapshot() {
     return entryPointSnapshot;
-  }
-
-  public static DbConfigBo createByDbConfigDto(DbConfigDto dbConfigDto) {
-    DbConfigBo dbConfigBo = new DbConfigBo();
-    dbConfigBo.setJdbcUrl(dbConfigDto.getJdbcUrl());
-    dbConfigBo.setUser(dbConfigDto.getUser());
-    dbConfigBo.setPassword(dbConfigDto.getPassword());
-    dbConfigBo.setDataSourcePortTrailId(dbConfigDto.getDataSourcePortTrailId());
-    dbConfigBo.setConnectionPortTrailId(dbConfigDto.getConnectionPortTrailId());
-    dbConfigBo.setStatementPortTrailId(dbConfigDto.getStatementPortTrailId());
-    dbConfigBo.setDriverName(dbConfigDto.getDriverName());
-    dbConfigBo.setEntryPointSnapshot(dbConfigDto.getEntryPointSnapshot());
-    return dbConfigBo;
   }
 
 }

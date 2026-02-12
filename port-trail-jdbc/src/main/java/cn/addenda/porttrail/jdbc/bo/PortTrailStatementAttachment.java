@@ -1,8 +1,8 @@
 package cn.addenda.porttrail.jdbc.bo;
 
-import cn.addenda.porttrail.jdbc.core.PortTrailStatement;
-import cn.addenda.porttrail.common.pojo.db.StatementSql;
 import cn.addenda.porttrail.common.pojo.db.bo.StatementExecutionBo;
+import cn.addenda.porttrail.common.pojo.db.bo.StatementSql;
+import cn.addenda.porttrail.jdbc.core.PortTrailStatement;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -31,7 +31,7 @@ public class PortTrailStatementAttachment {
                          String sql, String txId, long start, long end) {
     synchronized (abstractStatementExecutionBoQueue) {
       StatementExecutionBo statementExecutionBo = new StatementExecutionBo(dataSourcePortTrailId, connectionPortTrailId, statementPortTrailId,
-              statementState, StatementSql.of(sql, getNextOrder(), abstractStatementExecutionBoQueue.getNextOrder()), txId, start, end);
+              statementState, new StatementSql(sql, getNextOrder(), abstractStatementExecutionBoQueue.getNextOrder()), txId, start, end);
       abstractStatementExecutionBoQueue.output(statementExecutionBo);
     }
   }
@@ -78,7 +78,7 @@ public class PortTrailStatementAttachment {
       if (stashedStatementExecutionBo == null) {
         stashedStatementExecutionBo = new StatementExecutionBo();
       }
-      stashedStatementExecutionBo.getStatementSqlList().add(StatementSql.of(sql, getNextBatchTmpOrder(), abstractStatementExecutionBoQueue.getNextBatchTmpOrder()));
+      stashedStatementExecutionBo.getStatementSqlList().add(new StatementSql(sql, getNextBatchTmpOrder(), abstractStatementExecutionBoQueue.getNextBatchTmpOrder()));
     }
   }
 

@@ -1,6 +1,6 @@
 package cn.addenda.porttrail.infrastructure.writer;
 
-import cn.addenda.porttrail.common.pojo.db.DbExecution;
+import cn.addenda.porttrail.common.pojo.db.bo.DbExecution;
 
 public interface DbWriter {
 

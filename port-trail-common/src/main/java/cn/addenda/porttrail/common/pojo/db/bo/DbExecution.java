@@ -1,4 +1,4 @@
-package cn.addenda.porttrail.common.pojo.db;
+package cn.addenda.porttrail.common.pojo.db.bo;
 
 import cn.addenda.porttrail.common.entrypoint.EntryPointSnapshot;
 

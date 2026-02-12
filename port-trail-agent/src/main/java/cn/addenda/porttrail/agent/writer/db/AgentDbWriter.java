@@ -5,7 +5,7 @@ import cn.addenda.porttrail.agent.PortTrailAgentStartException;
 import cn.addenda.porttrail.agent.link.LinkFacade;
 import cn.addenda.porttrail.agent.log.AgentPortTrailLoggerFactory;
 import cn.addenda.porttrail.agent.writer.AbstractAgentWriter;
-import cn.addenda.porttrail.common.pojo.db.DbExecution;
+import cn.addenda.porttrail.common.pojo.db.bo.DbExecution;
 import cn.addenda.porttrail.common.util.StringUtils;
 import cn.addenda.porttrail.infrastructure.jvm.JVMShutdown;
 import cn.addenda.porttrail.infrastructure.jvm.JVMShutdownCallback;

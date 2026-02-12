@@ -20,7 +20,7 @@ public class DbExecutionController {
 
   @PostMapping("receiveDbConfig")
   public void receiveDbConfig(@RequestBody DbConfigDto dbConfigDto) {
-    DbConfigBo dbConfigBo = DbConfigBo.createByDbConfigDto(dbConfigDto);
+    DbConfigBo dbConfigBo = new DbConfigBo(dbConfigDto);
     System.out.println(JacksonUtils.toStr(dbConfigBo) + " of " + JacksonUtils.toStr(dbConfigDto.getServiceRuntimeInfo()));
   }
 
@@ -30,8 +30,7 @@ public class DbExecutionController {
     bytes = CompressUtils.decompress(bytes);
     // 可以通过 JacksonUtils 或其他方式反序列化
     StatementExecutionDto statementExecutionDto = (StatementExecutionDto) JdkSerializationUtils.deserialize(bytes);
-    StatementExecutionBo statementExecutionBo =
-            StatementExecutionBo.createByStatementExecutionDto(statementExecutionDto);
+    StatementExecutionBo statementExecutionBo = new StatementExecutionBo(statementExecutionDto);
     System.out.println(JacksonUtils.toStr(statementExecutionBo) + " of " + JacksonUtils.toStr(statementExecutionDto.getServiceRuntimeInfo()));
   }
 
@@ -41,8 +40,7 @@ public class DbExecutionController {
     bytes = CompressUtils.decompress(bytes);
     // 可以通过 JacksonUtils 或其他方式反序列化
     PreparedStatementExecutionDto preparedStatementExecutionDto = (PreparedStatementExecutionDto) JdkSerializationUtils.deserialize(bytes);
-    PreparedStatementExecutionBo preparedStatementExecutionBo =
-            PreparedStatementExecutionBo.createByPreparedStatementExecutionDto(preparedStatementExecutionDto);
+    PreparedStatementExecutionBo preparedStatementExecutionBo = new PreparedStatementExecutionBo(preparedStatementExecutionDto);
     System.out.println(JacksonUtils.toStr(preparedStatementExecutionBo) + " of " + JacksonUtils.toStr(preparedStatementExecutionDto.getServiceRuntimeInfo()));
   }
 

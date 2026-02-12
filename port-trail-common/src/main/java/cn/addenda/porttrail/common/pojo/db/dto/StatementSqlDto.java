@@ -1,5 +1,6 @@
 package cn.addenda.porttrail.common.pojo.db.dto;
 
+import cn.addenda.porttrail.common.pojo.db.bo.StatementSql;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -20,5 +21,14 @@ public class StatementSqlDto implements Serializable {
   private int orderInStatement;
 
   private int orderInConnection;
+
+  public StatementSqlDto() {
+  }
+
+  public StatementSqlDto(StatementSql statementSql) {
+    this.setSql(statementSql.getSql());
+    this.setOrderInStatement(statementSql.getOrderInStatement());
+    this.setOrderInConnection(statementSql.getOrderInConnection());
+  }
 
 }

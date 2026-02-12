@@ -1,8 +1,8 @@
 package cn.addenda.porttrail.agent.writer.db;
 
 import cn.addenda.porttrail.agent.link.LinkFacade;
-import cn.addenda.porttrail.common.pojo.db.DbExecution;
 import cn.addenda.porttrail.common.pojo.db.bo.DbConfigBo;
+import cn.addenda.porttrail.common.pojo.db.bo.DbExecution;
 import cn.addenda.porttrail.common.pojo.db.bo.PreparedStatementExecutionBo;
 import cn.addenda.porttrail.common.pojo.db.bo.StatementExecutionBo;
 import cn.addenda.porttrail.common.pojo.db.dto.DbConfigDto;
@@ -17,7 +17,7 @@ public class AgentRemoteDbWriter implements DbWriter {
   @Override
   public void writeStatement(DbExecution dbExecution) {
     StatementExecutionDto statementExecutionDto =
-            StatementExecutionDto.createByStatementExecutionBo((StatementExecutionBo) dbExecution);
+            new StatementExecutionDto((StatementExecutionBo) dbExecution);
     statementExecutionDto.setServiceRuntimeInfo(AgentContext.getServiceRuntimeInfo());
     LinkFacade.sendStatementExecution(JdkSerializationUtils.serialize(statementExecutionDto));
   }
@@ -25,7 +25,7 @@ public class AgentRemoteDbWriter implements DbWriter {
   @Override
   public void writePreparedStatement(DbExecution dbExecution) {
     PreparedStatementExecutionDto preparedStatementExecutionDto =
-            PreparedStatementExecutionDto.createByPreparedStatementExecutionBo((PreparedStatementExecutionBo) dbExecution);
+            new PreparedStatementExecutionDto((PreparedStatementExecutionBo) dbExecution);
     preparedStatementExecutionDto.setServiceRuntimeInfo(AgentContext.getServiceRuntimeInfo());
     LinkFacade.sendPreparedStatementExecution(JdkSerializationUtils.serialize(preparedStatementExecutionDto));
   }
@@ -33,7 +33,7 @@ public class AgentRemoteDbWriter implements DbWriter {
   @Override
   public void writeDbConfig(DbExecution dbExecution) {
     DbConfigDto dbConfigDto =
-            DbConfigDto.createByDbConfigBo((DbConfigBo) dbExecution);
+            new DbConfigDto((DbConfigBo) dbExecution);
     dbConfigDto.setServiceRuntimeInfo(AgentContext.getServiceRuntimeInfo());
     LinkFacade.sendDbConfig(LinkFacade.toStr(dbConfigDto));
   }

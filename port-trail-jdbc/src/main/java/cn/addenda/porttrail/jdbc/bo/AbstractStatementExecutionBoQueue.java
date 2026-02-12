@@ -1,6 +1,6 @@
 package cn.addenda.porttrail.jdbc.bo;
 
-import cn.addenda.porttrail.common.pojo.db.DbExecution;
+import cn.addenda.porttrail.common.pojo.db.bo.DbExecution;
 import cn.addenda.porttrail.common.pojo.db.bo.AbstractStatementExecutionBo;
 import cn.addenda.porttrail.infrastructure.entrypoint.EntryPointStackContext;
 import cn.addenda.porttrail.infrastructure.writer.DbWriter;

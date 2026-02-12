@@ -1,6 +1,6 @@
 package cn.addenda.porttrail.jdbc.test.log;
 
-import cn.addenda.porttrail.common.pojo.db.DbExecution;
+import cn.addenda.porttrail.common.pojo.db.bo.DbExecution;
 import cn.addenda.porttrail.infrastructure.writer.DbWriter;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;

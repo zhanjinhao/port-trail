@@ -22,8 +22,7 @@ public class HttpExecutionController {
     bytes = CompressUtils.decompress(bytes);
     // 可以通过 JacksonUtils 或其他方式反序列化
     HttpRequestDto httpRequestDto = (HttpRequestDto) JdkSerializationUtils.deserialize(bytes);
-    HttpRequestBo httpRequestBo =
-            HttpRequestBo.createByHttpRequestDto(httpRequestDto);
+    HttpRequestBo httpRequestBo = new HttpRequestBo(httpRequestDto);
     System.out.println(JacksonUtils.toStr(httpRequestBo) + " of " + JacksonUtils.toStr(httpRequestDto.getServiceRuntimeInfo()));
   }
 
@@ -33,8 +32,7 @@ public class HttpExecutionController {
     bytes = CompressUtils.decompress(bytes);
     // 可以通过 JacksonUtils 或其他方式反序列化
     HttpResponseDto httpResponseDto = (HttpResponseDto) JdkSerializationUtils.deserialize(bytes);
-    HttpResponseBo httpResponseBo =
-            HttpResponseBo.createByHttpResponseDto(httpResponseDto);
+    HttpResponseBo httpResponseBo = new HttpResponseBo(httpResponseDto);
     System.out.println(JacksonUtils.toStr(httpResponseBo) + " of " + JacksonUtils.toStr(httpResponseDto.getServiceRuntimeInfo()));
   }
 

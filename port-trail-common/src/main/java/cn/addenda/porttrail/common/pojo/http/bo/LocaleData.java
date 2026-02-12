@@ -1,17 +1,14 @@
-package cn.addenda.porttrail.common.pojo.http;
+package cn.addenda.porttrail.common.pojo.http.bo;
 
+import cn.addenda.porttrail.common.pojo.http.dto.LocaleDataDto;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
-import java.io.Serializable;
-
 @Setter
 @Getter
 @ToString
-public class LocaleData implements Serializable {
-
-  private static final long serialVersionUID = 1L;
+public class LocaleData {
 
   private String language;
   private String country;
@@ -24,6 +21,12 @@ public class LocaleData implements Serializable {
     this.language = language;
     this.country = country;
     this.variant = variant;
+  }
+
+  public LocaleData(LocaleDataDto localeDataDto) {
+    this.language = localeDataDto.getCountry();
+    this.country = localeDataDto.getCountry();
+    this.variant = localeDataDto.getVariant();
   }
 
 }

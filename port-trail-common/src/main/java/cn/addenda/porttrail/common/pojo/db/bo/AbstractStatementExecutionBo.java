@@ -1,7 +1,6 @@
 package cn.addenda.porttrail.common.pojo.db.bo;
 
 import cn.addenda.porttrail.common.entrypoint.EntryPointSnapshot;
-import cn.addenda.porttrail.common.pojo.db.DbExecution;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;

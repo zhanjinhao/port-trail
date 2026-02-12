@@ -1,9 +1,9 @@
 package cn.addenda.porttrail.jdbc.bo;
 
-import cn.addenda.porttrail.common.pojo.db.StatementSql;
+import cn.addenda.porttrail.common.pojo.db.bo.StatementSql;
 import cn.addenda.porttrail.common.pojo.db.bo.PreparedStatementExecutionBo;
 import cn.addenda.porttrail.common.pojo.db.bo.PreparedStatementParameter;
-import cn.addenda.porttrail.common.pojo.db.SqlOrder;
+import cn.addenda.porttrail.common.pojo.db.bo.SqlOrder;
 import cn.addenda.porttrail.common.tuple.Binary;
 import cn.addenda.porttrail.common.tuple.Ternary;
 import cn.addenda.porttrail.common.tuple.Unary;
