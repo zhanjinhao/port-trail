@@ -2,13 +2,13 @@ package cn.addenda.porttrail.jdbc.test.porttrail;
 
 import cn.addenda.porttrail.common.pojo.db.DbExecution;
 import cn.addenda.porttrail.common.tuple.Unary;
-import cn.addenda.porttrail.common.pojo.db.bo.AbstractSqlExecutionBo;
-import cn.addenda.porttrail.common.pojo.db.bo.PreparedSqlExecutionBo;
+import cn.addenda.porttrail.common.pojo.db.bo.AbstractStatementExecutionBo;
+import cn.addenda.porttrail.common.pojo.db.bo.PreparedStatementExecutionBo;
 import cn.addenda.porttrail.jdbc.core.PortTrailDataSource;
 import cn.addenda.porttrail.jdbc.log.JdbcPortTrailLoggerFactory;
 import cn.addenda.porttrail.jdbc.test.DbUtils;
 import cn.addenda.porttrail.jdbc.test.jdbc.SingleModeParameterizeJDBCTest;
-import cn.addenda.porttrail.jdbc.test.log.JdbcTestSqlWriter;
+import cn.addenda.porttrail.jdbc.test.log.JdbcTestDbWriter;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -25,13 +25,13 @@ public class SingleModeParameterizePortTrailTest extends SingleModeParameterizeJ
 
   private DataSource dataSource;
 
-  private JdbcTestSqlWriter sqlWriter;
+  private JdbcTestDbWriter dbWriter;
 
   @BeforeEach
   void before() {
     dataSource = DbUtils.getDataSource();
-    sqlWriter = new JdbcTestSqlWriter();
-    dataSource = new PortTrailDataSource(dataSource, JdbcPortTrailLoggerFactory.getInstance(), sqlWriter);
+    dbWriter = new JdbcTestDbWriter();
+    dataSource = new PortTrailDataSource(dataSource, JdbcPortTrailLoggerFactory.getInstance(), dbWriter);
   }
 
   @Test
@@ -40,58 +40,58 @@ public class SingleModeParameterizePortTrailTest extends SingleModeParameterizeJ
     test_preparedStatement_execute_parameterize_update_autoCommit_false_commit(connection);
 
 
-    List<DbExecution> dbExecutionList = sqlWriter.getDbExecutionList();
+    List<DbExecution> dbExecutionList = dbWriter.getDbExecutionList();
     Assertions.assertEquals(3, dbExecutionList.size());
 
-    Assertions.assertInstanceOf(PreparedSqlExecutionBo.class, dbExecutionList.get(0));
-    Assertions.assertInstanceOf(PreparedSqlExecutionBo.class, dbExecutionList.get(1));
-    Assertions.assertInstanceOf(PreparedSqlExecutionBo.class, dbExecutionList.get(2));
+    Assertions.assertInstanceOf(PreparedStatementExecutionBo.class, dbExecutionList.get(0));
+    Assertions.assertInstanceOf(PreparedStatementExecutionBo.class, dbExecutionList.get(1));
+    Assertions.assertInstanceOf(PreparedStatementExecutionBo.class, dbExecutionList.get(2));
 
-    List<PreparedSqlExecutionBo> sqlBoList = dbExecutionList.stream().map(a -> ((PreparedSqlExecutionBo) a)).collect(Collectors.toList());
+    List<PreparedStatementExecutionBo> preparedStatementExecutionBoList = dbExecutionList.stream().map(a -> ((PreparedStatementExecutionBo) a)).collect(Collectors.toList());
 
     Set<String> txIdSet = new HashSet<>();
-    txIdSet.add(sqlBoList.get(0).getTxId());
-    txIdSet.add(sqlBoList.get(1).getTxId());
-    txIdSet.add(sqlBoList.get(2).getTxId());
+    txIdSet.add(preparedStatementExecutionBoList.get(0).getTxId());
+    txIdSet.add(preparedStatementExecutionBoList.get(1).getTxId());
+    txIdSet.add(preparedStatementExecutionBoList.get(2).getTxId());
     Assertions.assertEquals(1, txIdSet.size());
 
     Set<String> dataSourcePortTrailIdSet = new HashSet<>();
-    dataSourcePortTrailIdSet.add(sqlBoList.get(0).getDataSourcePortTrailId());
-    dataSourcePortTrailIdSet.add(sqlBoList.get(1).getDataSourcePortTrailId());
-    dataSourcePortTrailIdSet.add(sqlBoList.get(2).getDataSourcePortTrailId());
+    dataSourcePortTrailIdSet.add(preparedStatementExecutionBoList.get(0).getDataSourcePortTrailId());
+    dataSourcePortTrailIdSet.add(preparedStatementExecutionBoList.get(1).getDataSourcePortTrailId());
+    dataSourcePortTrailIdSet.add(preparedStatementExecutionBoList.get(2).getDataSourcePortTrailId());
     Assertions.assertEquals(1, dataSourcePortTrailIdSet.size());
 
     Set<String> connectionPortTrailIdSet = new HashSet<>();
-    connectionPortTrailIdSet.add(sqlBoList.get(0).getConnectionPortTrailId());
-    connectionPortTrailIdSet.add(sqlBoList.get(1).getConnectionPortTrailId());
-    connectionPortTrailIdSet.add(sqlBoList.get(2).getConnectionPortTrailId());
+    connectionPortTrailIdSet.add(preparedStatementExecutionBoList.get(0).getConnectionPortTrailId());
+    connectionPortTrailIdSet.add(preparedStatementExecutionBoList.get(1).getConnectionPortTrailId());
+    connectionPortTrailIdSet.add(preparedStatementExecutionBoList.get(2).getConnectionPortTrailId());
     Assertions.assertEquals(1, connectionPortTrailIdSet.size());
 
     Set<String> statementPortTrailIdSet = new HashSet<>();
-    statementPortTrailIdSet.add(sqlBoList.get(0).getStatementPortTrailId());
-    statementPortTrailIdSet.add(sqlBoList.get(1).getStatementPortTrailId());
-    statementPortTrailIdSet.add(sqlBoList.get(2).getStatementPortTrailId());
+    statementPortTrailIdSet.add(preparedStatementExecutionBoList.get(0).getStatementPortTrailId());
+    statementPortTrailIdSet.add(preparedStatementExecutionBoList.get(1).getStatementPortTrailId());
+    statementPortTrailIdSet.add(preparedStatementExecutionBoList.get(2).getStatementPortTrailId());
     Assertions.assertEquals(1, statementPortTrailIdSet.size());
 
-    Assertions.assertEquals(1, sqlBoList.get(0).getPreparedStatementParameterWrapperList().size());
-    Assertions.assertEquals(1, sqlBoList.get(1).getPreparedStatementParameterWrapperList().size());
-    Assertions.assertEquals(1, sqlBoList.get(2).getPreparedStatementParameterWrapperList().size());
+    Assertions.assertEquals(1, preparedStatementExecutionBoList.get(0).getPreparedStatementParameterList().size());
+    Assertions.assertEquals(1, preparedStatementExecutionBoList.get(1).getPreparedStatementParameterList().size());
+    Assertions.assertEquals(1, preparedStatementExecutionBoList.get(2).getPreparedStatementParameterList().size());
 
-    Assertions.assertEquals(AbstractSqlExecutionBo.SQL_STATE_COMMITTED, sqlBoList.get(0).getSqlState());
-    Assertions.assertEquals(AbstractSqlExecutionBo.SQL_STATE_COMMITTED, sqlBoList.get(1).getSqlState());
-    Assertions.assertEquals(AbstractSqlExecutionBo.SQL_STATE_COMMITTED, sqlBoList.get(2).getSqlState());
+    Assertions.assertEquals(AbstractStatementExecutionBo.STATEMENT_STATE_COMMITTED, preparedStatementExecutionBoList.get(0).getStatementState());
+    Assertions.assertEquals(AbstractStatementExecutionBo.STATEMENT_STATE_COMMITTED, preparedStatementExecutionBoList.get(1).getStatementState());
+    Assertions.assertEquals(AbstractStatementExecutionBo.STATEMENT_STATE_COMMITTED, preparedStatementExecutionBoList.get(2).getStatementState());
 
-    Assertions.assertEquals(0, sqlBoList.get(0).getPreparedStatementParameterWrapperList().get(0).getOrderInStatement());
-    Assertions.assertEquals(1, sqlBoList.get(1).getPreparedStatementParameterWrapperList().get(0).getOrderInStatement());
-    Assertions.assertEquals(2, sqlBoList.get(2).getPreparedStatementParameterWrapperList().get(0).getOrderInStatement());
+    Assertions.assertEquals(1, preparedStatementExecutionBoList.get(0).getPreparedStatementParameterList().get(0).getOrderInStatement());
+    Assertions.assertEquals(2, preparedStatementExecutionBoList.get(1).getPreparedStatementParameterList().get(0).getOrderInStatement());
+    Assertions.assertEquals(3, preparedStatementExecutionBoList.get(2).getPreparedStatementParameterList().get(0).getOrderInStatement());
 
-    Assertions.assertEquals(0, sqlBoList.get(0).getPreparedStatementParameterWrapperList().get(0).getOrderInConnection());
-    Assertions.assertEquals(1, sqlBoList.get(1).getPreparedStatementParameterWrapperList().get(0).getOrderInConnection());
-    Assertions.assertEquals(2, sqlBoList.get(2).getPreparedStatementParameterWrapperList().get(0).getOrderInConnection());
+    Assertions.assertEquals(1, preparedStatementExecutionBoList.get(0).getPreparedStatementParameterList().get(0).getOrderInConnection());
+    Assertions.assertEquals(2, preparedStatementExecutionBoList.get(1).getPreparedStatementParameterList().get(0).getOrderInConnection());
+    Assertions.assertEquals(3, preparedStatementExecutionBoList.get(2).getPreparedStatementParameterList().get(0).getOrderInConnection());
 
-    Assertions.assertTrue(((Unary<String>) sqlBoList.get(0).getPreparedStatementParameterWrapperList().get(0).getParameterList().get(0)).getF1().replace("'", "").endsWith("0"));
-    Assertions.assertTrue(((Unary<String>) sqlBoList.get(1).getPreparedStatementParameterWrapperList().get(0).getParameterList().get(0)).getF1().replace("'", "").endsWith("1"));
-    Assertions.assertTrue(((Unary<String>) sqlBoList.get(2).getPreparedStatementParameterWrapperList().get(0).getParameterList().get(0)).getF1().replace("'", "").endsWith("2"));
+    Assertions.assertTrue(((Unary<String>) preparedStatementExecutionBoList.get(0).getPreparedStatementParameterList().get(0).getParameterList().get(0)).getF1().replace("'", "").endsWith("0"));
+    Assertions.assertTrue(((Unary<String>) preparedStatementExecutionBoList.get(1).getPreparedStatementParameterList().get(0).getParameterList().get(0)).getF1().replace("'", "").endsWith("1"));
+    Assertions.assertTrue(((Unary<String>) preparedStatementExecutionBoList.get(2).getPreparedStatementParameterList().get(0).getParameterList().get(0)).getF1().replace("'", "").endsWith("2"));
 
   }
 
@@ -101,58 +101,58 @@ public class SingleModeParameterizePortTrailTest extends SingleModeParameterizeJ
     test_preparedStatement_execute_parameterize_update_autoCommit_false_rollback(connection);
 
 
-    List<DbExecution> dbExecutionList = sqlWriter.getDbExecutionList();
+    List<DbExecution> dbExecutionList = dbWriter.getDbExecutionList();
     Assertions.assertEquals(3, dbExecutionList.size());
 
-    Assertions.assertInstanceOf(PreparedSqlExecutionBo.class, dbExecutionList.get(0));
-    Assertions.assertInstanceOf(PreparedSqlExecutionBo.class, dbExecutionList.get(1));
-    Assertions.assertInstanceOf(PreparedSqlExecutionBo.class, dbExecutionList.get(2));
+    Assertions.assertInstanceOf(PreparedStatementExecutionBo.class, dbExecutionList.get(0));
+    Assertions.assertInstanceOf(PreparedStatementExecutionBo.class, dbExecutionList.get(1));
+    Assertions.assertInstanceOf(PreparedStatementExecutionBo.class, dbExecutionList.get(2));
 
-    List<PreparedSqlExecutionBo> sqlBoList = dbExecutionList.stream().map(a -> ((PreparedSqlExecutionBo) a)).collect(Collectors.toList());
+    List<PreparedStatementExecutionBo> preparedStatementExecutionBoList = dbExecutionList.stream().map(a -> ((PreparedStatementExecutionBo) a)).collect(Collectors.toList());
 
     Set<String> txIdSet = new HashSet<>();
-    txIdSet.add(sqlBoList.get(0).getTxId());
-    txIdSet.add(sqlBoList.get(1).getTxId());
-    txIdSet.add(sqlBoList.get(2).getTxId());
+    txIdSet.add(preparedStatementExecutionBoList.get(0).getTxId());
+    txIdSet.add(preparedStatementExecutionBoList.get(1).getTxId());
+    txIdSet.add(preparedStatementExecutionBoList.get(2).getTxId());
     Assertions.assertEquals(1, txIdSet.size());
 
     Set<String> dataSourcePortTrailIdSet = new HashSet<>();
-    dataSourcePortTrailIdSet.add(sqlBoList.get(0).getDataSourcePortTrailId());
-    dataSourcePortTrailIdSet.add(sqlBoList.get(1).getDataSourcePortTrailId());
-    dataSourcePortTrailIdSet.add(sqlBoList.get(2).getDataSourcePortTrailId());
+    dataSourcePortTrailIdSet.add(preparedStatementExecutionBoList.get(0).getDataSourcePortTrailId());
+    dataSourcePortTrailIdSet.add(preparedStatementExecutionBoList.get(1).getDataSourcePortTrailId());
+    dataSourcePortTrailIdSet.add(preparedStatementExecutionBoList.get(2).getDataSourcePortTrailId());
     Assertions.assertEquals(1, dataSourcePortTrailIdSet.size());
 
     Set<String> connectionPortTrailIdSet = new HashSet<>();
-    connectionPortTrailIdSet.add(sqlBoList.get(0).getConnectionPortTrailId());
-    connectionPortTrailIdSet.add(sqlBoList.get(1).getConnectionPortTrailId());
-    connectionPortTrailIdSet.add(sqlBoList.get(2).getConnectionPortTrailId());
+    connectionPortTrailIdSet.add(preparedStatementExecutionBoList.get(0).getConnectionPortTrailId());
+    connectionPortTrailIdSet.add(preparedStatementExecutionBoList.get(1).getConnectionPortTrailId());
+    connectionPortTrailIdSet.add(preparedStatementExecutionBoList.get(2).getConnectionPortTrailId());
     Assertions.assertEquals(1, connectionPortTrailIdSet.size());
 
     Set<String> statementPortTrailIdSet = new HashSet<>();
-    statementPortTrailIdSet.add(sqlBoList.get(0).getStatementPortTrailId());
-    statementPortTrailIdSet.add(sqlBoList.get(1).getStatementPortTrailId());
-    statementPortTrailIdSet.add(sqlBoList.get(2).getStatementPortTrailId());
+    statementPortTrailIdSet.add(preparedStatementExecutionBoList.get(0).getStatementPortTrailId());
+    statementPortTrailIdSet.add(preparedStatementExecutionBoList.get(1).getStatementPortTrailId());
+    statementPortTrailIdSet.add(preparedStatementExecutionBoList.get(2).getStatementPortTrailId());
     Assertions.assertEquals(1, statementPortTrailIdSet.size());
 
-    Assertions.assertEquals(1, sqlBoList.get(0).getPreparedStatementParameterWrapperList().size());
-    Assertions.assertEquals(1, sqlBoList.get(1).getPreparedStatementParameterWrapperList().size());
-    Assertions.assertEquals(1, sqlBoList.get(2).getPreparedStatementParameterWrapperList().size());
+    Assertions.assertEquals(1, preparedStatementExecutionBoList.get(0).getPreparedStatementParameterList().size());
+    Assertions.assertEquals(1, preparedStatementExecutionBoList.get(1).getPreparedStatementParameterList().size());
+    Assertions.assertEquals(1, preparedStatementExecutionBoList.get(2).getPreparedStatementParameterList().size());
 
-    Assertions.assertEquals(AbstractSqlExecutionBo.SQL_STATE_ROLLBACK, sqlBoList.get(0).getSqlState());
-    Assertions.assertEquals(AbstractSqlExecutionBo.SQL_STATE_ROLLBACK, sqlBoList.get(1).getSqlState());
-    Assertions.assertEquals(AbstractSqlExecutionBo.SQL_STATE_ROLLBACK, sqlBoList.get(2).getSqlState());
+    Assertions.assertEquals(AbstractStatementExecutionBo.STATEMENT_STATE_ROLLBACK, preparedStatementExecutionBoList.get(0).getStatementState());
+    Assertions.assertEquals(AbstractStatementExecutionBo.STATEMENT_STATE_ROLLBACK, preparedStatementExecutionBoList.get(1).getStatementState());
+    Assertions.assertEquals(AbstractStatementExecutionBo.STATEMENT_STATE_ROLLBACK, preparedStatementExecutionBoList.get(2).getStatementState());
 
-    Assertions.assertEquals(0, sqlBoList.get(0).getPreparedStatementParameterWrapperList().get(0).getOrderInStatement());
-    Assertions.assertEquals(1, sqlBoList.get(1).getPreparedStatementParameterWrapperList().get(0).getOrderInStatement());
-    Assertions.assertEquals(2, sqlBoList.get(2).getPreparedStatementParameterWrapperList().get(0).getOrderInStatement());
+    Assertions.assertEquals(1, preparedStatementExecutionBoList.get(0).getPreparedStatementParameterList().get(0).getOrderInStatement());
+    Assertions.assertEquals(2, preparedStatementExecutionBoList.get(1).getPreparedStatementParameterList().get(0).getOrderInStatement());
+    Assertions.assertEquals(3, preparedStatementExecutionBoList.get(2).getPreparedStatementParameterList().get(0).getOrderInStatement());
 
-    Assertions.assertEquals(0, sqlBoList.get(0).getPreparedStatementParameterWrapperList().get(0).getOrderInConnection());
-    Assertions.assertEquals(1, sqlBoList.get(1).getPreparedStatementParameterWrapperList().get(0).getOrderInConnection());
-    Assertions.assertEquals(2, sqlBoList.get(2).getPreparedStatementParameterWrapperList().get(0).getOrderInConnection());
+    Assertions.assertEquals(1, preparedStatementExecutionBoList.get(0).getPreparedStatementParameterList().get(0).getOrderInConnection());
+    Assertions.assertEquals(2, preparedStatementExecutionBoList.get(1).getPreparedStatementParameterList().get(0).getOrderInConnection());
+    Assertions.assertEquals(3, preparedStatementExecutionBoList.get(2).getPreparedStatementParameterList().get(0).getOrderInConnection());
 
-    Assertions.assertTrue(((Unary<String>) sqlBoList.get(0).getPreparedStatementParameterWrapperList().get(0).getParameterList().get(0)).getF1().replace("'", "").endsWith("0"));
-    Assertions.assertTrue(((Unary<String>) sqlBoList.get(1).getPreparedStatementParameterWrapperList().get(0).getParameterList().get(0)).getF1().replace("'", "").endsWith("1"));
-    Assertions.assertTrue(((Unary<String>) sqlBoList.get(2).getPreparedStatementParameterWrapperList().get(0).getParameterList().get(0)).getF1().replace("'", "").endsWith("2"));
+    Assertions.assertTrue(((Unary<String>) preparedStatementExecutionBoList.get(0).getPreparedStatementParameterList().get(0).getParameterList().get(0)).getF1().replace("'", "").endsWith("0"));
+    Assertions.assertTrue(((Unary<String>) preparedStatementExecutionBoList.get(1).getPreparedStatementParameterList().get(0).getParameterList().get(0)).getF1().replace("'", "").endsWith("1"));
+    Assertions.assertTrue(((Unary<String>) preparedStatementExecutionBoList.get(2).getPreparedStatementParameterList().get(0).getParameterList().get(0)).getF1().replace("'", "").endsWith("2"));
 
   }
 
@@ -162,58 +162,58 @@ public class SingleModeParameterizePortTrailTest extends SingleModeParameterizeJ
     test_preparedStatement_execute_parameterize_update_autoCommit_true_commit(connection);
 
 
-    List<DbExecution> dbExecutionList = sqlWriter.getDbExecutionList();
+    List<DbExecution> dbExecutionList = dbWriter.getDbExecutionList();
     Assertions.assertEquals(3, dbExecutionList.size());
 
-    Assertions.assertInstanceOf(PreparedSqlExecutionBo.class, dbExecutionList.get(0));
-    Assertions.assertInstanceOf(PreparedSqlExecutionBo.class, dbExecutionList.get(1));
-    Assertions.assertInstanceOf(PreparedSqlExecutionBo.class, dbExecutionList.get(2));
+    Assertions.assertInstanceOf(PreparedStatementExecutionBo.class, dbExecutionList.get(0));
+    Assertions.assertInstanceOf(PreparedStatementExecutionBo.class, dbExecutionList.get(1));
+    Assertions.assertInstanceOf(PreparedStatementExecutionBo.class, dbExecutionList.get(2));
 
-    List<PreparedSqlExecutionBo> sqlBoList = dbExecutionList.stream().map(a -> ((PreparedSqlExecutionBo) a)).collect(Collectors.toList());
+    List<PreparedStatementExecutionBo> preparedStatementExecutionBoList = dbExecutionList.stream().map(a -> ((PreparedStatementExecutionBo) a)).collect(Collectors.toList());
 
     Set<String> txIdSet = new HashSet<>();
-    txIdSet.add(sqlBoList.get(0).getTxId());
-    txIdSet.add(sqlBoList.get(1).getTxId());
-    txIdSet.add(sqlBoList.get(2).getTxId());
+    txIdSet.add(preparedStatementExecutionBoList.get(0).getTxId());
+    txIdSet.add(preparedStatementExecutionBoList.get(1).getTxId());
+    txIdSet.add(preparedStatementExecutionBoList.get(2).getTxId());
     Assertions.assertEquals(3, txIdSet.size());
 
     Set<String> dataSourcePortTrailIdSet = new HashSet<>();
-    dataSourcePortTrailIdSet.add(sqlBoList.get(0).getDataSourcePortTrailId());
-    dataSourcePortTrailIdSet.add(sqlBoList.get(1).getDataSourcePortTrailId());
-    dataSourcePortTrailIdSet.add(sqlBoList.get(2).getDataSourcePortTrailId());
+    dataSourcePortTrailIdSet.add(preparedStatementExecutionBoList.get(0).getDataSourcePortTrailId());
+    dataSourcePortTrailIdSet.add(preparedStatementExecutionBoList.get(1).getDataSourcePortTrailId());
+    dataSourcePortTrailIdSet.add(preparedStatementExecutionBoList.get(2).getDataSourcePortTrailId());
     Assertions.assertEquals(1, dataSourcePortTrailIdSet.size());
 
     Set<String> connectionPortTrailIdSet = new HashSet<>();
-    connectionPortTrailIdSet.add(sqlBoList.get(0).getConnectionPortTrailId());
-    connectionPortTrailIdSet.add(sqlBoList.get(1).getConnectionPortTrailId());
-    connectionPortTrailIdSet.add(sqlBoList.get(2).getConnectionPortTrailId());
+    connectionPortTrailIdSet.add(preparedStatementExecutionBoList.get(0).getConnectionPortTrailId());
+    connectionPortTrailIdSet.add(preparedStatementExecutionBoList.get(1).getConnectionPortTrailId());
+    connectionPortTrailIdSet.add(preparedStatementExecutionBoList.get(2).getConnectionPortTrailId());
     Assertions.assertEquals(1, connectionPortTrailIdSet.size());
 
     Set<String> statementPortTrailIdSet = new HashSet<>();
-    statementPortTrailIdSet.add(sqlBoList.get(0).getStatementPortTrailId());
-    statementPortTrailIdSet.add(sqlBoList.get(1).getStatementPortTrailId());
-    statementPortTrailIdSet.add(sqlBoList.get(2).getStatementPortTrailId());
+    statementPortTrailIdSet.add(preparedStatementExecutionBoList.get(0).getStatementPortTrailId());
+    statementPortTrailIdSet.add(preparedStatementExecutionBoList.get(1).getStatementPortTrailId());
+    statementPortTrailIdSet.add(preparedStatementExecutionBoList.get(2).getStatementPortTrailId());
     Assertions.assertEquals(1, statementPortTrailIdSet.size());
 
-    Assertions.assertEquals(1, sqlBoList.get(0).getPreparedStatementParameterWrapperList().size());
-    Assertions.assertEquals(1, sqlBoList.get(1).getPreparedStatementParameterWrapperList().size());
-    Assertions.assertEquals(1, sqlBoList.get(2).getPreparedStatementParameterWrapperList().size());
+    Assertions.assertEquals(1, preparedStatementExecutionBoList.get(0).getPreparedStatementParameterList().size());
+    Assertions.assertEquals(1, preparedStatementExecutionBoList.get(1).getPreparedStatementParameterList().size());
+    Assertions.assertEquals(1, preparedStatementExecutionBoList.get(2).getPreparedStatementParameterList().size());
 
-    Assertions.assertEquals(AbstractSqlExecutionBo.SQL_STATE_COMMITTED, sqlBoList.get(0).getSqlState());
-    Assertions.assertEquals(AbstractSqlExecutionBo.SQL_STATE_COMMITTED, sqlBoList.get(1).getSqlState());
-    Assertions.assertEquals(AbstractSqlExecutionBo.SQL_STATE_COMMITTED, sqlBoList.get(2).getSqlState());
+    Assertions.assertEquals(AbstractStatementExecutionBo.STATEMENT_STATE_COMMITTED, preparedStatementExecutionBoList.get(0).getStatementState());
+    Assertions.assertEquals(AbstractStatementExecutionBo.STATEMENT_STATE_COMMITTED, preparedStatementExecutionBoList.get(1).getStatementState());
+    Assertions.assertEquals(AbstractStatementExecutionBo.STATEMENT_STATE_COMMITTED, preparedStatementExecutionBoList.get(2).getStatementState());
 
-    Assertions.assertEquals(0, sqlBoList.get(0).getPreparedStatementParameterWrapperList().get(0).getOrderInStatement());
-    Assertions.assertEquals(1, sqlBoList.get(1).getPreparedStatementParameterWrapperList().get(0).getOrderInStatement());
-    Assertions.assertEquals(2, sqlBoList.get(2).getPreparedStatementParameterWrapperList().get(0).getOrderInStatement());
+    Assertions.assertEquals(1, preparedStatementExecutionBoList.get(0).getPreparedStatementParameterList().get(0).getOrderInStatement());
+    Assertions.assertEquals(2, preparedStatementExecutionBoList.get(1).getPreparedStatementParameterList().get(0).getOrderInStatement());
+    Assertions.assertEquals(3, preparedStatementExecutionBoList.get(2).getPreparedStatementParameterList().get(0).getOrderInStatement());
 
-    Assertions.assertEquals(0, sqlBoList.get(0).getPreparedStatementParameterWrapperList().get(0).getOrderInConnection());
-    Assertions.assertEquals(1, sqlBoList.get(1).getPreparedStatementParameterWrapperList().get(0).getOrderInConnection());
-    Assertions.assertEquals(2, sqlBoList.get(2).getPreparedStatementParameterWrapperList().get(0).getOrderInConnection());
+    Assertions.assertEquals(1, preparedStatementExecutionBoList.get(0).getPreparedStatementParameterList().get(0).getOrderInConnection());
+    Assertions.assertEquals(2, preparedStatementExecutionBoList.get(1).getPreparedStatementParameterList().get(0).getOrderInConnection());
+    Assertions.assertEquals(3, preparedStatementExecutionBoList.get(2).getPreparedStatementParameterList().get(0).getOrderInConnection());
 
-    Assertions.assertTrue(((Unary<String>) sqlBoList.get(0).getPreparedStatementParameterWrapperList().get(0).getParameterList().get(0)).getF1().replace("'", "").endsWith("0"));
-    Assertions.assertTrue(((Unary<String>) sqlBoList.get(1).getPreparedStatementParameterWrapperList().get(0).getParameterList().get(0)).getF1().replace("'", "").endsWith("1"));
-    Assertions.assertTrue(((Unary<String>) sqlBoList.get(2).getPreparedStatementParameterWrapperList().get(0).getParameterList().get(0)).getF1().replace("'", "").endsWith("2"));
+    Assertions.assertTrue(((Unary<String>) preparedStatementExecutionBoList.get(0).getPreparedStatementParameterList().get(0).getParameterList().get(0)).getF1().replace("'", "").endsWith("0"));
+    Assertions.assertTrue(((Unary<String>) preparedStatementExecutionBoList.get(1).getPreparedStatementParameterList().get(0).getParameterList().get(0)).getF1().replace("'", "").endsWith("1"));
+    Assertions.assertTrue(((Unary<String>) preparedStatementExecutionBoList.get(2).getPreparedStatementParameterList().get(0).getParameterList().get(0)).getF1().replace("'", "").endsWith("2"));
 
   }
 
@@ -223,58 +223,58 @@ public class SingleModeParameterizePortTrailTest extends SingleModeParameterizeJ
     test_preparedStatement_execute_parameterize_update_autoCommit_true_rollback(connection);
 
 
-    List<DbExecution> dbExecutionList = sqlWriter.getDbExecutionList();
+    List<DbExecution> dbExecutionList = dbWriter.getDbExecutionList();
     Assertions.assertEquals(3, dbExecutionList.size());
 
-    Assertions.assertInstanceOf(PreparedSqlExecutionBo.class, dbExecutionList.get(0));
-    Assertions.assertInstanceOf(PreparedSqlExecutionBo.class, dbExecutionList.get(1));
-    Assertions.assertInstanceOf(PreparedSqlExecutionBo.class, dbExecutionList.get(2));
+    Assertions.assertInstanceOf(PreparedStatementExecutionBo.class, dbExecutionList.get(0));
+    Assertions.assertInstanceOf(PreparedStatementExecutionBo.class, dbExecutionList.get(1));
+    Assertions.assertInstanceOf(PreparedStatementExecutionBo.class, dbExecutionList.get(2));
 
-    List<PreparedSqlExecutionBo> sqlBoList = dbExecutionList.stream().map(a -> ((PreparedSqlExecutionBo) a)).collect(Collectors.toList());
+    List<PreparedStatementExecutionBo> preparedStatementExecutionBoList = dbExecutionList.stream().map(a -> ((PreparedStatementExecutionBo) a)).collect(Collectors.toList());
 
     Set<String> txIdSet = new HashSet<>();
-    txIdSet.add(sqlBoList.get(0).getTxId());
-    txIdSet.add(sqlBoList.get(1).getTxId());
-    txIdSet.add(sqlBoList.get(2).getTxId());
+    txIdSet.add(preparedStatementExecutionBoList.get(0).getTxId());
+    txIdSet.add(preparedStatementExecutionBoList.get(1).getTxId());
+    txIdSet.add(preparedStatementExecutionBoList.get(2).getTxId());
     Assertions.assertEquals(3, txIdSet.size());
 
     Set<String> dataSourcePortTrailIdSet = new HashSet<>();
-    dataSourcePortTrailIdSet.add(sqlBoList.get(0).getDataSourcePortTrailId());
-    dataSourcePortTrailIdSet.add(sqlBoList.get(1).getDataSourcePortTrailId());
-    dataSourcePortTrailIdSet.add(sqlBoList.get(2).getDataSourcePortTrailId());
+    dataSourcePortTrailIdSet.add(preparedStatementExecutionBoList.get(0).getDataSourcePortTrailId());
+    dataSourcePortTrailIdSet.add(preparedStatementExecutionBoList.get(1).getDataSourcePortTrailId());
+    dataSourcePortTrailIdSet.add(preparedStatementExecutionBoList.get(2).getDataSourcePortTrailId());
     Assertions.assertEquals(1, dataSourcePortTrailIdSet.size());
 
     Set<String> connectionPortTrailIdSet = new HashSet<>();
-    connectionPortTrailIdSet.add(sqlBoList.get(0).getConnectionPortTrailId());
-    connectionPortTrailIdSet.add(sqlBoList.get(1).getConnectionPortTrailId());
-    connectionPortTrailIdSet.add(sqlBoList.get(2).getConnectionPortTrailId());
+    connectionPortTrailIdSet.add(preparedStatementExecutionBoList.get(0).getConnectionPortTrailId());
+    connectionPortTrailIdSet.add(preparedStatementExecutionBoList.get(1).getConnectionPortTrailId());
+    connectionPortTrailIdSet.add(preparedStatementExecutionBoList.get(2).getConnectionPortTrailId());
     Assertions.assertEquals(1, connectionPortTrailIdSet.size());
 
     Set<String> statementPortTrailIdSet = new HashSet<>();
-    statementPortTrailIdSet.add(sqlBoList.get(0).getStatementPortTrailId());
-    statementPortTrailIdSet.add(sqlBoList.get(1).getStatementPortTrailId());
-    statementPortTrailIdSet.add(sqlBoList.get(2).getStatementPortTrailId());
+    statementPortTrailIdSet.add(preparedStatementExecutionBoList.get(0).getStatementPortTrailId());
+    statementPortTrailIdSet.add(preparedStatementExecutionBoList.get(1).getStatementPortTrailId());
+    statementPortTrailIdSet.add(preparedStatementExecutionBoList.get(2).getStatementPortTrailId());
     Assertions.assertEquals(1, statementPortTrailIdSet.size());
 
-    Assertions.assertEquals(1, sqlBoList.get(0).getPreparedStatementParameterWrapperList().size());
-    Assertions.assertEquals(1, sqlBoList.get(1).getPreparedStatementParameterWrapperList().size());
-    Assertions.assertEquals(1, sqlBoList.get(2).getPreparedStatementParameterWrapperList().size());
+    Assertions.assertEquals(1, preparedStatementExecutionBoList.get(0).getPreparedStatementParameterList().size());
+    Assertions.assertEquals(1, preparedStatementExecutionBoList.get(1).getPreparedStatementParameterList().size());
+    Assertions.assertEquals(1, preparedStatementExecutionBoList.get(2).getPreparedStatementParameterList().size());
 
-    Assertions.assertEquals(AbstractSqlExecutionBo.SQL_STATE_COMMITTED, sqlBoList.get(0).getSqlState());
-    Assertions.assertEquals(AbstractSqlExecutionBo.SQL_STATE_COMMITTED, sqlBoList.get(1).getSqlState());
-    Assertions.assertEquals(AbstractSqlExecutionBo.SQL_STATE_COMMITTED, sqlBoList.get(2).getSqlState());
+    Assertions.assertEquals(AbstractStatementExecutionBo.STATEMENT_STATE_COMMITTED, preparedStatementExecutionBoList.get(0).getStatementState());
+    Assertions.assertEquals(AbstractStatementExecutionBo.STATEMENT_STATE_COMMITTED, preparedStatementExecutionBoList.get(1).getStatementState());
+    Assertions.assertEquals(AbstractStatementExecutionBo.STATEMENT_STATE_COMMITTED, preparedStatementExecutionBoList.get(2).getStatementState());
 
-    Assertions.assertEquals(0, sqlBoList.get(0).getPreparedStatementParameterWrapperList().get(0).getOrderInStatement());
-    Assertions.assertEquals(1, sqlBoList.get(1).getPreparedStatementParameterWrapperList().get(0).getOrderInStatement());
-    Assertions.assertEquals(2, sqlBoList.get(2).getPreparedStatementParameterWrapperList().get(0).getOrderInStatement());
+    Assertions.assertEquals(1, preparedStatementExecutionBoList.get(0).getPreparedStatementParameterList().get(0).getOrderInStatement());
+    Assertions.assertEquals(2, preparedStatementExecutionBoList.get(1).getPreparedStatementParameterList().get(0).getOrderInStatement());
+    Assertions.assertEquals(3, preparedStatementExecutionBoList.get(2).getPreparedStatementParameterList().get(0).getOrderInStatement());
 
-    Assertions.assertEquals(0, sqlBoList.get(0).getPreparedStatementParameterWrapperList().get(0).getOrderInConnection());
-    Assertions.assertEquals(1, sqlBoList.get(1).getPreparedStatementParameterWrapperList().get(0).getOrderInConnection());
-    Assertions.assertEquals(2, sqlBoList.get(2).getPreparedStatementParameterWrapperList().get(0).getOrderInConnection());
+    Assertions.assertEquals(1, preparedStatementExecutionBoList.get(0).getPreparedStatementParameterList().get(0).getOrderInConnection());
+    Assertions.assertEquals(2, preparedStatementExecutionBoList.get(1).getPreparedStatementParameterList().get(0).getOrderInConnection());
+    Assertions.assertEquals(3, preparedStatementExecutionBoList.get(2).getPreparedStatementParameterList().get(0).getOrderInConnection());
 
-    Assertions.assertTrue(((Unary<String>) sqlBoList.get(0).getPreparedStatementParameterWrapperList().get(0).getParameterList().get(0)).getF1().replace("'", "").endsWith("0"));
-    Assertions.assertTrue(((Unary<String>) sqlBoList.get(1).getPreparedStatementParameterWrapperList().get(0).getParameterList().get(0)).getF1().replace("'", "").endsWith("1"));
-    Assertions.assertTrue(((Unary<String>) sqlBoList.get(2).getPreparedStatementParameterWrapperList().get(0).getParameterList().get(0)).getF1().replace("'", "").endsWith("2"));
+    Assertions.assertTrue(((Unary<String>) preparedStatementExecutionBoList.get(0).getPreparedStatementParameterList().get(0).getParameterList().get(0)).getF1().replace("'", "").endsWith("0"));
+    Assertions.assertTrue(((Unary<String>) preparedStatementExecutionBoList.get(1).getPreparedStatementParameterList().get(0).getParameterList().get(0)).getF1().replace("'", "").endsWith("1"));
+    Assertions.assertTrue(((Unary<String>) preparedStatementExecutionBoList.get(2).getPreparedStatementParameterList().get(0).getParameterList().get(0)).getF1().replace("'", "").endsWith("2"));
 
   }
 
@@ -284,58 +284,58 @@ public class SingleModeParameterizePortTrailTest extends SingleModeParameterizeJ
     test_preparedStatement_execute_parameterize_query_autoCommit_false_commit(connection);
 
 
-    List<DbExecution> dbExecutionList = sqlWriter.getDbExecutionList();
+    List<DbExecution> dbExecutionList = dbWriter.getDbExecutionList();
     Assertions.assertEquals(3, dbExecutionList.size());
 
-    Assertions.assertInstanceOf(PreparedSqlExecutionBo.class, dbExecutionList.get(0));
-    Assertions.assertInstanceOf(PreparedSqlExecutionBo.class, dbExecutionList.get(1));
-    Assertions.assertInstanceOf(PreparedSqlExecutionBo.class, dbExecutionList.get(2));
+    Assertions.assertInstanceOf(PreparedStatementExecutionBo.class, dbExecutionList.get(0));
+    Assertions.assertInstanceOf(PreparedStatementExecutionBo.class, dbExecutionList.get(1));
+    Assertions.assertInstanceOf(PreparedStatementExecutionBo.class, dbExecutionList.get(2));
 
-    List<PreparedSqlExecutionBo> sqlBoList = dbExecutionList.stream().map(a -> ((PreparedSqlExecutionBo) a)).collect(Collectors.toList());
+    List<PreparedStatementExecutionBo> preparedStatementExecutionBoList = dbExecutionList.stream().map(a -> ((PreparedStatementExecutionBo) a)).collect(Collectors.toList());
 
     Set<String> txIdSet = new HashSet<>();
-    txIdSet.add(sqlBoList.get(0).getTxId());
-    txIdSet.add(sqlBoList.get(1).getTxId());
-    txIdSet.add(sqlBoList.get(2).getTxId());
+    txIdSet.add(preparedStatementExecutionBoList.get(0).getTxId());
+    txIdSet.add(preparedStatementExecutionBoList.get(1).getTxId());
+    txIdSet.add(preparedStatementExecutionBoList.get(2).getTxId());
     Assertions.assertEquals(1, txIdSet.size());
 
     Set<String> dataSourcePortTrailIdSet = new HashSet<>();
-    dataSourcePortTrailIdSet.add(sqlBoList.get(0).getDataSourcePortTrailId());
-    dataSourcePortTrailIdSet.add(sqlBoList.get(1).getDataSourcePortTrailId());
-    dataSourcePortTrailIdSet.add(sqlBoList.get(2).getDataSourcePortTrailId());
+    dataSourcePortTrailIdSet.add(preparedStatementExecutionBoList.get(0).getDataSourcePortTrailId());
+    dataSourcePortTrailIdSet.add(preparedStatementExecutionBoList.get(1).getDataSourcePortTrailId());
+    dataSourcePortTrailIdSet.add(preparedStatementExecutionBoList.get(2).getDataSourcePortTrailId());
     Assertions.assertEquals(1, dataSourcePortTrailIdSet.size());
 
     Set<String> connectionPortTrailIdSet = new HashSet<>();
-    connectionPortTrailIdSet.add(sqlBoList.get(0).getConnectionPortTrailId());
-    connectionPortTrailIdSet.add(sqlBoList.get(1).getConnectionPortTrailId());
-    connectionPortTrailIdSet.add(sqlBoList.get(2).getConnectionPortTrailId());
+    connectionPortTrailIdSet.add(preparedStatementExecutionBoList.get(0).getConnectionPortTrailId());
+    connectionPortTrailIdSet.add(preparedStatementExecutionBoList.get(1).getConnectionPortTrailId());
+    connectionPortTrailIdSet.add(preparedStatementExecutionBoList.get(2).getConnectionPortTrailId());
     Assertions.assertEquals(1, connectionPortTrailIdSet.size());
 
     Set<String> statementPortTrailIdSet = new HashSet<>();
-    statementPortTrailIdSet.add(sqlBoList.get(0).getStatementPortTrailId());
-    statementPortTrailIdSet.add(sqlBoList.get(1).getStatementPortTrailId());
-    statementPortTrailIdSet.add(sqlBoList.get(2).getStatementPortTrailId());
+    statementPortTrailIdSet.add(preparedStatementExecutionBoList.get(0).getStatementPortTrailId());
+    statementPortTrailIdSet.add(preparedStatementExecutionBoList.get(1).getStatementPortTrailId());
+    statementPortTrailIdSet.add(preparedStatementExecutionBoList.get(2).getStatementPortTrailId());
     Assertions.assertEquals(1, statementPortTrailIdSet.size());
 
-    Assertions.assertEquals(1, sqlBoList.get(0).getPreparedStatementParameterWrapperList().size());
-    Assertions.assertEquals(1, sqlBoList.get(1).getPreparedStatementParameterWrapperList().size());
-    Assertions.assertEquals(1, sqlBoList.get(2).getPreparedStatementParameterWrapperList().size());
+    Assertions.assertEquals(1, preparedStatementExecutionBoList.get(0).getPreparedStatementParameterList().size());
+    Assertions.assertEquals(1, preparedStatementExecutionBoList.get(1).getPreparedStatementParameterList().size());
+    Assertions.assertEquals(1, preparedStatementExecutionBoList.get(2).getPreparedStatementParameterList().size());
 
-    Assertions.assertEquals(AbstractSqlExecutionBo.SQL_STATE_QUERY, sqlBoList.get(0).getSqlState());
-    Assertions.assertEquals(AbstractSqlExecutionBo.SQL_STATE_QUERY, sqlBoList.get(1).getSqlState());
-    Assertions.assertEquals(AbstractSqlExecutionBo.SQL_STATE_QUERY, sqlBoList.get(2).getSqlState());
+    Assertions.assertEquals(AbstractStatementExecutionBo.STATEMENT_STATE_QUERY, preparedStatementExecutionBoList.get(0).getStatementState());
+    Assertions.assertEquals(AbstractStatementExecutionBo.STATEMENT_STATE_QUERY, preparedStatementExecutionBoList.get(1).getStatementState());
+    Assertions.assertEquals(AbstractStatementExecutionBo.STATEMENT_STATE_QUERY, preparedStatementExecutionBoList.get(2).getStatementState());
 
-    Assertions.assertEquals(0, sqlBoList.get(0).getPreparedStatementParameterWrapperList().get(0).getOrderInStatement());
-    Assertions.assertEquals(1, sqlBoList.get(1).getPreparedStatementParameterWrapperList().get(0).getOrderInStatement());
-    Assertions.assertEquals(2, sqlBoList.get(2).getPreparedStatementParameterWrapperList().get(0).getOrderInStatement());
+    Assertions.assertEquals(1, preparedStatementExecutionBoList.get(0).getPreparedStatementParameterList().get(0).getOrderInStatement());
+    Assertions.assertEquals(2, preparedStatementExecutionBoList.get(1).getPreparedStatementParameterList().get(0).getOrderInStatement());
+    Assertions.assertEquals(3, preparedStatementExecutionBoList.get(2).getPreparedStatementParameterList().get(0).getOrderInStatement());
 
-    Assertions.assertEquals(0, sqlBoList.get(0).getPreparedStatementParameterWrapperList().get(0).getOrderInConnection());
-    Assertions.assertEquals(1, sqlBoList.get(1).getPreparedStatementParameterWrapperList().get(0).getOrderInConnection());
-    Assertions.assertEquals(2, sqlBoList.get(2).getPreparedStatementParameterWrapperList().get(0).getOrderInConnection());
+    Assertions.assertEquals(1, preparedStatementExecutionBoList.get(0).getPreparedStatementParameterList().get(0).getOrderInConnection());
+    Assertions.assertEquals(2, preparedStatementExecutionBoList.get(1).getPreparedStatementParameterList().get(0).getOrderInConnection());
+    Assertions.assertEquals(3, preparedStatementExecutionBoList.get(2).getPreparedStatementParameterList().get(0).getOrderInConnection());
 
-    Assertions.assertTrue(((Unary<String>) sqlBoList.get(0).getPreparedStatementParameterWrapperList().get(0).getParameterList().get(0)).getF1().replace("'", "").endsWith("0"));
-    Assertions.assertTrue(((Unary<String>) sqlBoList.get(1).getPreparedStatementParameterWrapperList().get(0).getParameterList().get(0)).getF1().replace("'", "").endsWith("1"));
-    Assertions.assertTrue(((Unary<String>) sqlBoList.get(2).getPreparedStatementParameterWrapperList().get(0).getParameterList().get(0)).getF1().replace("'", "").endsWith("2"));
+    Assertions.assertTrue(((Unary<String>) preparedStatementExecutionBoList.get(0).getPreparedStatementParameterList().get(0).getParameterList().get(0)).getF1().replace("'", "").endsWith("0"));
+    Assertions.assertTrue(((Unary<String>) preparedStatementExecutionBoList.get(1).getPreparedStatementParameterList().get(0).getParameterList().get(0)).getF1().replace("'", "").endsWith("1"));
+    Assertions.assertTrue(((Unary<String>) preparedStatementExecutionBoList.get(2).getPreparedStatementParameterList().get(0).getParameterList().get(0)).getF1().replace("'", "").endsWith("2"));
 
   }
 
@@ -345,58 +345,58 @@ public class SingleModeParameterizePortTrailTest extends SingleModeParameterizeJ
     test_preparedStatement_execute_parameterize_query_autoCommit_false_rollback(connection);
 
 
-    List<DbExecution> dbExecutionList = sqlWriter.getDbExecutionList();
+    List<DbExecution> dbExecutionList = dbWriter.getDbExecutionList();
     Assertions.assertEquals(3, dbExecutionList.size());
 
-    Assertions.assertInstanceOf(PreparedSqlExecutionBo.class, dbExecutionList.get(0));
-    Assertions.assertInstanceOf(PreparedSqlExecutionBo.class, dbExecutionList.get(1));
-    Assertions.assertInstanceOf(PreparedSqlExecutionBo.class, dbExecutionList.get(2));
+    Assertions.assertInstanceOf(PreparedStatementExecutionBo.class, dbExecutionList.get(0));
+    Assertions.assertInstanceOf(PreparedStatementExecutionBo.class, dbExecutionList.get(1));
+    Assertions.assertInstanceOf(PreparedStatementExecutionBo.class, dbExecutionList.get(2));
 
-    List<PreparedSqlExecutionBo> sqlBoList = dbExecutionList.stream().map(a -> ((PreparedSqlExecutionBo) a)).collect(Collectors.toList());
+    List<PreparedStatementExecutionBo> preparedStatementExecutionBoList = dbExecutionList.stream().map(a -> ((PreparedStatementExecutionBo) a)).collect(Collectors.toList());
 
     Set<String> txIdSet = new HashSet<>();
-    txIdSet.add(sqlBoList.get(0).getTxId());
-    txIdSet.add(sqlBoList.get(1).getTxId());
-    txIdSet.add(sqlBoList.get(2).getTxId());
+    txIdSet.add(preparedStatementExecutionBoList.get(0).getTxId());
+    txIdSet.add(preparedStatementExecutionBoList.get(1).getTxId());
+    txIdSet.add(preparedStatementExecutionBoList.get(2).getTxId());
     Assertions.assertEquals(1, txIdSet.size());
 
     Set<String> dataSourcePortTrailIdSet = new HashSet<>();
-    dataSourcePortTrailIdSet.add(sqlBoList.get(0).getDataSourcePortTrailId());
-    dataSourcePortTrailIdSet.add(sqlBoList.get(1).getDataSourcePortTrailId());
-    dataSourcePortTrailIdSet.add(sqlBoList.get(2).getDataSourcePortTrailId());
+    dataSourcePortTrailIdSet.add(preparedStatementExecutionBoList.get(0).getDataSourcePortTrailId());
+    dataSourcePortTrailIdSet.add(preparedStatementExecutionBoList.get(1).getDataSourcePortTrailId());
+    dataSourcePortTrailIdSet.add(preparedStatementExecutionBoList.get(2).getDataSourcePortTrailId());
     Assertions.assertEquals(1, dataSourcePortTrailIdSet.size());
 
     Set<String> connectionPortTrailIdSet = new HashSet<>();
-    connectionPortTrailIdSet.add(sqlBoList.get(0).getConnectionPortTrailId());
-    connectionPortTrailIdSet.add(sqlBoList.get(1).getConnectionPortTrailId());
-    connectionPortTrailIdSet.add(sqlBoList.get(2).getConnectionPortTrailId());
+    connectionPortTrailIdSet.add(preparedStatementExecutionBoList.get(0).getConnectionPortTrailId());
+    connectionPortTrailIdSet.add(preparedStatementExecutionBoList.get(1).getConnectionPortTrailId());
+    connectionPortTrailIdSet.add(preparedStatementExecutionBoList.get(2).getConnectionPortTrailId());
     Assertions.assertEquals(1, connectionPortTrailIdSet.size());
 
     Set<String> statementPortTrailIdSet = new HashSet<>();
-    statementPortTrailIdSet.add(sqlBoList.get(0).getStatementPortTrailId());
-    statementPortTrailIdSet.add(sqlBoList.get(1).getStatementPortTrailId());
-    statementPortTrailIdSet.add(sqlBoList.get(2).getStatementPortTrailId());
+    statementPortTrailIdSet.add(preparedStatementExecutionBoList.get(0).getStatementPortTrailId());
+    statementPortTrailIdSet.add(preparedStatementExecutionBoList.get(1).getStatementPortTrailId());
+    statementPortTrailIdSet.add(preparedStatementExecutionBoList.get(2).getStatementPortTrailId());
     Assertions.assertEquals(1, statementPortTrailIdSet.size());
 
-    Assertions.assertEquals(1, sqlBoList.get(0).getPreparedStatementParameterWrapperList().size());
-    Assertions.assertEquals(1, sqlBoList.get(1).getPreparedStatementParameterWrapperList().size());
-    Assertions.assertEquals(1, sqlBoList.get(2).getPreparedStatementParameterWrapperList().size());
+    Assertions.assertEquals(1, preparedStatementExecutionBoList.get(0).getPreparedStatementParameterList().size());
+    Assertions.assertEquals(1, preparedStatementExecutionBoList.get(1).getPreparedStatementParameterList().size());
+    Assertions.assertEquals(1, preparedStatementExecutionBoList.get(2).getPreparedStatementParameterList().size());
 
-    Assertions.assertEquals(AbstractSqlExecutionBo.SQL_STATE_QUERY, sqlBoList.get(0).getSqlState());
-    Assertions.assertEquals(AbstractSqlExecutionBo.SQL_STATE_QUERY, sqlBoList.get(1).getSqlState());
-    Assertions.assertEquals(AbstractSqlExecutionBo.SQL_STATE_QUERY, sqlBoList.get(2).getSqlState());
+    Assertions.assertEquals(AbstractStatementExecutionBo.STATEMENT_STATE_QUERY, preparedStatementExecutionBoList.get(0).getStatementState());
+    Assertions.assertEquals(AbstractStatementExecutionBo.STATEMENT_STATE_QUERY, preparedStatementExecutionBoList.get(1).getStatementState());
+    Assertions.assertEquals(AbstractStatementExecutionBo.STATEMENT_STATE_QUERY, preparedStatementExecutionBoList.get(2).getStatementState());
 
-    Assertions.assertEquals(0, sqlBoList.get(0).getPreparedStatementParameterWrapperList().get(0).getOrderInStatement());
-    Assertions.assertEquals(1, sqlBoList.get(1).getPreparedStatementParameterWrapperList().get(0).getOrderInStatement());
-    Assertions.assertEquals(2, sqlBoList.get(2).getPreparedStatementParameterWrapperList().get(0).getOrderInStatement());
+    Assertions.assertEquals(1, preparedStatementExecutionBoList.get(0).getPreparedStatementParameterList().get(0).getOrderInStatement());
+    Assertions.assertEquals(2, preparedStatementExecutionBoList.get(1).getPreparedStatementParameterList().get(0).getOrderInStatement());
+    Assertions.assertEquals(3, preparedStatementExecutionBoList.get(2).getPreparedStatementParameterList().get(0).getOrderInStatement());
 
-    Assertions.assertEquals(0, sqlBoList.get(0).getPreparedStatementParameterWrapperList().get(0).getOrderInConnection());
-    Assertions.assertEquals(1, sqlBoList.get(1).getPreparedStatementParameterWrapperList().get(0).getOrderInConnection());
-    Assertions.assertEquals(2, sqlBoList.get(2).getPreparedStatementParameterWrapperList().get(0).getOrderInConnection());
+    Assertions.assertEquals(1, preparedStatementExecutionBoList.get(0).getPreparedStatementParameterList().get(0).getOrderInConnection());
+    Assertions.assertEquals(2, preparedStatementExecutionBoList.get(1).getPreparedStatementParameterList().get(0).getOrderInConnection());
+    Assertions.assertEquals(3, preparedStatementExecutionBoList.get(2).getPreparedStatementParameterList().get(0).getOrderInConnection());
 
-    Assertions.assertTrue(((Unary<String>) sqlBoList.get(0).getPreparedStatementParameterWrapperList().get(0).getParameterList().get(0)).getF1().replace("'", "").endsWith("0"));
-    Assertions.assertTrue(((Unary<String>) sqlBoList.get(1).getPreparedStatementParameterWrapperList().get(0).getParameterList().get(0)).getF1().replace("'", "").endsWith("1"));
-    Assertions.assertTrue(((Unary<String>) sqlBoList.get(2).getPreparedStatementParameterWrapperList().get(0).getParameterList().get(0)).getF1().replace("'", "").endsWith("2"));
+    Assertions.assertTrue(((Unary<String>) preparedStatementExecutionBoList.get(0).getPreparedStatementParameterList().get(0).getParameterList().get(0)).getF1().replace("'", "").endsWith("0"));
+    Assertions.assertTrue(((Unary<String>) preparedStatementExecutionBoList.get(1).getPreparedStatementParameterList().get(0).getParameterList().get(0)).getF1().replace("'", "").endsWith("1"));
+    Assertions.assertTrue(((Unary<String>) preparedStatementExecutionBoList.get(2).getPreparedStatementParameterList().get(0).getParameterList().get(0)).getF1().replace("'", "").endsWith("2"));
 
   }
 
@@ -406,58 +406,58 @@ public class SingleModeParameterizePortTrailTest extends SingleModeParameterizeJ
     test_preparedStatement_execute_parameterize_query_autoCommit_true_commit(connection);
 
 
-    List<DbExecution> dbExecutionList = sqlWriter.getDbExecutionList();
+    List<DbExecution> dbExecutionList = dbWriter.getDbExecutionList();
     Assertions.assertEquals(3, dbExecutionList.size());
 
-    Assertions.assertInstanceOf(PreparedSqlExecutionBo.class, dbExecutionList.get(0));
-    Assertions.assertInstanceOf(PreparedSqlExecutionBo.class, dbExecutionList.get(1));
-    Assertions.assertInstanceOf(PreparedSqlExecutionBo.class, dbExecutionList.get(2));
+    Assertions.assertInstanceOf(PreparedStatementExecutionBo.class, dbExecutionList.get(0));
+    Assertions.assertInstanceOf(PreparedStatementExecutionBo.class, dbExecutionList.get(1));
+    Assertions.assertInstanceOf(PreparedStatementExecutionBo.class, dbExecutionList.get(2));
 
-    List<PreparedSqlExecutionBo> sqlBoList = dbExecutionList.stream().map(a -> ((PreparedSqlExecutionBo) a)).collect(Collectors.toList());
+    List<PreparedStatementExecutionBo> preparedStatementExecutionBoList = dbExecutionList.stream().map(a -> ((PreparedStatementExecutionBo) a)).collect(Collectors.toList());
 
     Set<String> txIdSet = new HashSet<>();
-    txIdSet.add(sqlBoList.get(0).getTxId());
-    txIdSet.add(sqlBoList.get(1).getTxId());
-    txIdSet.add(sqlBoList.get(2).getTxId());
+    txIdSet.add(preparedStatementExecutionBoList.get(0).getTxId());
+    txIdSet.add(preparedStatementExecutionBoList.get(1).getTxId());
+    txIdSet.add(preparedStatementExecutionBoList.get(2).getTxId());
     Assertions.assertEquals(3, txIdSet.size());
 
     Set<String> dataSourcePortTrailIdSet = new HashSet<>();
-    dataSourcePortTrailIdSet.add(sqlBoList.get(0).getDataSourcePortTrailId());
-    dataSourcePortTrailIdSet.add(sqlBoList.get(1).getDataSourcePortTrailId());
-    dataSourcePortTrailIdSet.add(sqlBoList.get(2).getDataSourcePortTrailId());
+    dataSourcePortTrailIdSet.add(preparedStatementExecutionBoList.get(0).getDataSourcePortTrailId());
+    dataSourcePortTrailIdSet.add(preparedStatementExecutionBoList.get(1).getDataSourcePortTrailId());
+    dataSourcePortTrailIdSet.add(preparedStatementExecutionBoList.get(2).getDataSourcePortTrailId());
     Assertions.assertEquals(1, dataSourcePortTrailIdSet.size());
 
     Set<String> connectionPortTrailIdSet = new HashSet<>();
-    connectionPortTrailIdSet.add(sqlBoList.get(0).getConnectionPortTrailId());
-    connectionPortTrailIdSet.add(sqlBoList.get(1).getConnectionPortTrailId());
-    connectionPortTrailIdSet.add(sqlBoList.get(2).getConnectionPortTrailId());
+    connectionPortTrailIdSet.add(preparedStatementExecutionBoList.get(0).getConnectionPortTrailId());
+    connectionPortTrailIdSet.add(preparedStatementExecutionBoList.get(1).getConnectionPortTrailId());
+    connectionPortTrailIdSet.add(preparedStatementExecutionBoList.get(2).getConnectionPortTrailId());
     Assertions.assertEquals(1, connectionPortTrailIdSet.size());
 
     Set<String> statementPortTrailIdSet = new HashSet<>();
-    statementPortTrailIdSet.add(sqlBoList.get(0).getStatementPortTrailId());
-    statementPortTrailIdSet.add(sqlBoList.get(1).getStatementPortTrailId());
-    statementPortTrailIdSet.add(sqlBoList.get(2).getStatementPortTrailId());
+    statementPortTrailIdSet.add(preparedStatementExecutionBoList.get(0).getStatementPortTrailId());
+    statementPortTrailIdSet.add(preparedStatementExecutionBoList.get(1).getStatementPortTrailId());
+    statementPortTrailIdSet.add(preparedStatementExecutionBoList.get(2).getStatementPortTrailId());
     Assertions.assertEquals(1, statementPortTrailIdSet.size());
 
-    Assertions.assertEquals(1, sqlBoList.get(0).getPreparedStatementParameterWrapperList().size());
-    Assertions.assertEquals(1, sqlBoList.get(1).getPreparedStatementParameterWrapperList().size());
-    Assertions.assertEquals(1, sqlBoList.get(2).getPreparedStatementParameterWrapperList().size());
+    Assertions.assertEquals(1, preparedStatementExecutionBoList.get(0).getPreparedStatementParameterList().size());
+    Assertions.assertEquals(1, preparedStatementExecutionBoList.get(1).getPreparedStatementParameterList().size());
+    Assertions.assertEquals(1, preparedStatementExecutionBoList.get(2).getPreparedStatementParameterList().size());
 
-    Assertions.assertEquals(AbstractSqlExecutionBo.SQL_STATE_QUERY, sqlBoList.get(0).getSqlState());
-    Assertions.assertEquals(AbstractSqlExecutionBo.SQL_STATE_QUERY, sqlBoList.get(1).getSqlState());
-    Assertions.assertEquals(AbstractSqlExecutionBo.SQL_STATE_QUERY, sqlBoList.get(2).getSqlState());
+    Assertions.assertEquals(AbstractStatementExecutionBo.STATEMENT_STATE_QUERY, preparedStatementExecutionBoList.get(0).getStatementState());
+    Assertions.assertEquals(AbstractStatementExecutionBo.STATEMENT_STATE_QUERY, preparedStatementExecutionBoList.get(1).getStatementState());
+    Assertions.assertEquals(AbstractStatementExecutionBo.STATEMENT_STATE_QUERY, preparedStatementExecutionBoList.get(2).getStatementState());
 
-    Assertions.assertEquals(0, sqlBoList.get(0).getPreparedStatementParameterWrapperList().get(0).getOrderInStatement());
-    Assertions.assertEquals(1, sqlBoList.get(1).getPreparedStatementParameterWrapperList().get(0).getOrderInStatement());
-    Assertions.assertEquals(2, sqlBoList.get(2).getPreparedStatementParameterWrapperList().get(0).getOrderInStatement());
+    Assertions.assertEquals(1, preparedStatementExecutionBoList.get(0).getPreparedStatementParameterList().get(0).getOrderInStatement());
+    Assertions.assertEquals(2, preparedStatementExecutionBoList.get(1).getPreparedStatementParameterList().get(0).getOrderInStatement());
+    Assertions.assertEquals(3, preparedStatementExecutionBoList.get(2).getPreparedStatementParameterList().get(0).getOrderInStatement());
 
-    Assertions.assertEquals(0, sqlBoList.get(0).getPreparedStatementParameterWrapperList().get(0).getOrderInConnection());
-    Assertions.assertEquals(1, sqlBoList.get(1).getPreparedStatementParameterWrapperList().get(0).getOrderInConnection());
-    Assertions.assertEquals(2, sqlBoList.get(2).getPreparedStatementParameterWrapperList().get(0).getOrderInConnection());
+    Assertions.assertEquals(1, preparedStatementExecutionBoList.get(0).getPreparedStatementParameterList().get(0).getOrderInConnection());
+    Assertions.assertEquals(2, preparedStatementExecutionBoList.get(1).getPreparedStatementParameterList().get(0).getOrderInConnection());
+    Assertions.assertEquals(3, preparedStatementExecutionBoList.get(2).getPreparedStatementParameterList().get(0).getOrderInConnection());
 
-    Assertions.assertTrue(((Unary<String>) sqlBoList.get(0).getPreparedStatementParameterWrapperList().get(0).getParameterList().get(0)).getF1().replace("'", "").endsWith("0"));
-    Assertions.assertTrue(((Unary<String>) sqlBoList.get(1).getPreparedStatementParameterWrapperList().get(0).getParameterList().get(0)).getF1().replace("'", "").endsWith("1"));
-    Assertions.assertTrue(((Unary<String>) sqlBoList.get(2).getPreparedStatementParameterWrapperList().get(0).getParameterList().get(0)).getF1().replace("'", "").endsWith("2"));
+    Assertions.assertTrue(((Unary<String>) preparedStatementExecutionBoList.get(0).getPreparedStatementParameterList().get(0).getParameterList().get(0)).getF1().replace("'", "").endsWith("0"));
+    Assertions.assertTrue(((Unary<String>) preparedStatementExecutionBoList.get(1).getPreparedStatementParameterList().get(0).getParameterList().get(0)).getF1().replace("'", "").endsWith("1"));
+    Assertions.assertTrue(((Unary<String>) preparedStatementExecutionBoList.get(2).getPreparedStatementParameterList().get(0).getParameterList().get(0)).getF1().replace("'", "").endsWith("2"));
 
   }
 
@@ -467,58 +467,58 @@ public class SingleModeParameterizePortTrailTest extends SingleModeParameterizeJ
     test_preparedStatement_execute_parameterize_query_autoCommit_true_rollback(connection);
 
 
-    List<DbExecution> dbExecutionList = sqlWriter.getDbExecutionList();
+    List<DbExecution> dbExecutionList = dbWriter.getDbExecutionList();
     Assertions.assertEquals(3, dbExecutionList.size());
 
-    Assertions.assertInstanceOf(PreparedSqlExecutionBo.class, dbExecutionList.get(0));
-    Assertions.assertInstanceOf(PreparedSqlExecutionBo.class, dbExecutionList.get(1));
-    Assertions.assertInstanceOf(PreparedSqlExecutionBo.class, dbExecutionList.get(2));
+    Assertions.assertInstanceOf(PreparedStatementExecutionBo.class, dbExecutionList.get(0));
+    Assertions.assertInstanceOf(PreparedStatementExecutionBo.class, dbExecutionList.get(1));
+    Assertions.assertInstanceOf(PreparedStatementExecutionBo.class, dbExecutionList.get(2));
 
-    List<PreparedSqlExecutionBo> sqlBoList = dbExecutionList.stream().map(a -> ((PreparedSqlExecutionBo) a)).collect(Collectors.toList());
+    List<PreparedStatementExecutionBo> preparedStatementExecutionBoList = dbExecutionList.stream().map(a -> ((PreparedStatementExecutionBo) a)).collect(Collectors.toList());
 
     Set<String> txIdSet = new HashSet<>();
-    txIdSet.add(sqlBoList.get(0).getTxId());
-    txIdSet.add(sqlBoList.get(1).getTxId());
-    txIdSet.add(sqlBoList.get(2).getTxId());
+    txIdSet.add(preparedStatementExecutionBoList.get(0).getTxId());
+    txIdSet.add(preparedStatementExecutionBoList.get(1).getTxId());
+    txIdSet.add(preparedStatementExecutionBoList.get(2).getTxId());
     Assertions.assertEquals(3, txIdSet.size());
 
     Set<String> dataSourcePortTrailIdSet = new HashSet<>();
-    dataSourcePortTrailIdSet.add(sqlBoList.get(0).getDataSourcePortTrailId());
-    dataSourcePortTrailIdSet.add(sqlBoList.get(1).getDataSourcePortTrailId());
-    dataSourcePortTrailIdSet.add(sqlBoList.get(2).getDataSourcePortTrailId());
+    dataSourcePortTrailIdSet.add(preparedStatementExecutionBoList.get(0).getDataSourcePortTrailId());
+    dataSourcePortTrailIdSet.add(preparedStatementExecutionBoList.get(1).getDataSourcePortTrailId());
+    dataSourcePortTrailIdSet.add(preparedStatementExecutionBoList.get(2).getDataSourcePortTrailId());
     Assertions.assertEquals(1, dataSourcePortTrailIdSet.size());
 
     Set<String> connectionPortTrailIdSet = new HashSet<>();
-    connectionPortTrailIdSet.add(sqlBoList.get(0).getConnectionPortTrailId());
-    connectionPortTrailIdSet.add(sqlBoList.get(1).getConnectionPortTrailId());
-    connectionPortTrailIdSet.add(sqlBoList.get(2).getConnectionPortTrailId());
+    connectionPortTrailIdSet.add(preparedStatementExecutionBoList.get(0).getConnectionPortTrailId());
+    connectionPortTrailIdSet.add(preparedStatementExecutionBoList.get(1).getConnectionPortTrailId());
+    connectionPortTrailIdSet.add(preparedStatementExecutionBoList.get(2).getConnectionPortTrailId());
     Assertions.assertEquals(1, connectionPortTrailIdSet.size());
 
     Set<String> statementPortTrailIdSet = new HashSet<>();
-    statementPortTrailIdSet.add(sqlBoList.get(0).getStatementPortTrailId());
-    statementPortTrailIdSet.add(sqlBoList.get(1).getStatementPortTrailId());
-    statementPortTrailIdSet.add(sqlBoList.get(2).getStatementPortTrailId());
+    statementPortTrailIdSet.add(preparedStatementExecutionBoList.get(0).getStatementPortTrailId());
+    statementPortTrailIdSet.add(preparedStatementExecutionBoList.get(1).getStatementPortTrailId());
+    statementPortTrailIdSet.add(preparedStatementExecutionBoList.get(2).getStatementPortTrailId());
     Assertions.assertEquals(1, statementPortTrailIdSet.size());
 
-    Assertions.assertEquals(1, sqlBoList.get(0).getPreparedStatementParameterWrapperList().size());
-    Assertions.assertEquals(1, sqlBoList.get(1).getPreparedStatementParameterWrapperList().size());
-    Assertions.assertEquals(1, sqlBoList.get(2).getPreparedStatementParameterWrapperList().size());
+    Assertions.assertEquals(1, preparedStatementExecutionBoList.get(0).getPreparedStatementParameterList().size());
+    Assertions.assertEquals(1, preparedStatementExecutionBoList.get(1).getPreparedStatementParameterList().size());
+    Assertions.assertEquals(1, preparedStatementExecutionBoList.get(2).getPreparedStatementParameterList().size());
 
-    Assertions.assertEquals(AbstractSqlExecutionBo.SQL_STATE_QUERY, sqlBoList.get(0).getSqlState());
-    Assertions.assertEquals(AbstractSqlExecutionBo.SQL_STATE_QUERY, sqlBoList.get(1).getSqlState());
-    Assertions.assertEquals(AbstractSqlExecutionBo.SQL_STATE_QUERY, sqlBoList.get(2).getSqlState());
+    Assertions.assertEquals(AbstractStatementExecutionBo.STATEMENT_STATE_QUERY, preparedStatementExecutionBoList.get(0).getStatementState());
+    Assertions.assertEquals(AbstractStatementExecutionBo.STATEMENT_STATE_QUERY, preparedStatementExecutionBoList.get(1).getStatementState());
+    Assertions.assertEquals(AbstractStatementExecutionBo.STATEMENT_STATE_QUERY, preparedStatementExecutionBoList.get(2).getStatementState());
 
-    Assertions.assertEquals(0, sqlBoList.get(0).getPreparedStatementParameterWrapperList().get(0).getOrderInStatement());
-    Assertions.assertEquals(1, sqlBoList.get(1).getPreparedStatementParameterWrapperList().get(0).getOrderInStatement());
-    Assertions.assertEquals(2, sqlBoList.get(2).getPreparedStatementParameterWrapperList().get(0).getOrderInStatement());
+    Assertions.assertEquals(1, preparedStatementExecutionBoList.get(0).getPreparedStatementParameterList().get(0).getOrderInStatement());
+    Assertions.assertEquals(2, preparedStatementExecutionBoList.get(1).getPreparedStatementParameterList().get(0).getOrderInStatement());
+    Assertions.assertEquals(3, preparedStatementExecutionBoList.get(2).getPreparedStatementParameterList().get(0).getOrderInStatement());
 
-    Assertions.assertEquals(0, sqlBoList.get(0).getPreparedStatementParameterWrapperList().get(0).getOrderInConnection());
-    Assertions.assertEquals(1, sqlBoList.get(1).getPreparedStatementParameterWrapperList().get(0).getOrderInConnection());
-    Assertions.assertEquals(2, sqlBoList.get(2).getPreparedStatementParameterWrapperList().get(0).getOrderInConnection());
+    Assertions.assertEquals(1, preparedStatementExecutionBoList.get(0).getPreparedStatementParameterList().get(0).getOrderInConnection());
+    Assertions.assertEquals(2, preparedStatementExecutionBoList.get(1).getPreparedStatementParameterList().get(0).getOrderInConnection());
+    Assertions.assertEquals(3, preparedStatementExecutionBoList.get(2).getPreparedStatementParameterList().get(0).getOrderInConnection());
 
-    Assertions.assertTrue(((Unary<String>) sqlBoList.get(0).getPreparedStatementParameterWrapperList().get(0).getParameterList().get(0)).getF1().replace("'", "").endsWith("0"));
-    Assertions.assertTrue(((Unary<String>) sqlBoList.get(1).getPreparedStatementParameterWrapperList().get(0).getParameterList().get(0)).getF1().replace("'", "").endsWith("1"));
-    Assertions.assertTrue(((Unary<String>) sqlBoList.get(2).getPreparedStatementParameterWrapperList().get(0).getParameterList().get(0)).getF1().replace("'", "").endsWith("2"));
+    Assertions.assertTrue(((Unary<String>) preparedStatementExecutionBoList.get(0).getPreparedStatementParameterList().get(0).getParameterList().get(0)).getF1().replace("'", "").endsWith("0"));
+    Assertions.assertTrue(((Unary<String>) preparedStatementExecutionBoList.get(1).getPreparedStatementParameterList().get(0).getParameterList().get(0)).getF1().replace("'", "").endsWith("1"));
+    Assertions.assertTrue(((Unary<String>) preparedStatementExecutionBoList.get(2).getPreparedStatementParameterList().get(0).getParameterList().get(0)).getF1().replace("'", "").endsWith("2"));
 
   }
 

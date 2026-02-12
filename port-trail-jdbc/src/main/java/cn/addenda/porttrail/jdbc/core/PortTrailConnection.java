@@ -3,8 +3,8 @@ package cn.addenda.porttrail.jdbc.core;
 import cn.addenda.porttrail.common.util.UuidUtils;
 import cn.addenda.porttrail.infrastructure.log.PortTrailLogger;
 import cn.addenda.porttrail.infrastructure.tx.TxContext;
-import cn.addenda.porttrail.infrastructure.writer.SqlWriter;
-import cn.addenda.porttrail.jdbc.bo.AbstractSqlBoQueue;
+import cn.addenda.porttrail.infrastructure.writer.DbWriter;
+import cn.addenda.porttrail.jdbc.bo.AbstractStatementExecutionBoQueue;
 import lombok.Getter;
 
 import java.sql.*;
@@ -26,28 +26,28 @@ public class PortTrailConnection extends AbstractPortTrailConnection implements 
 
   private final PortTrailLogger portTrailLogger;
 
-  private final SqlWriter sqlWriter;
+  private final DbWriter dbWriter;
 
   @Getter
-  private AbstractSqlBoQueue abstractSqlBoQueue;
+  private AbstractStatementExecutionBoQueue abstractStatementExecutionBoQueue;
 
   @Getter
   private boolean ifAutoCommit;
 
-  public PortTrailConnection(Connection connection, PortTrailLogger portTrailLogger, SqlWriter sqlWriter) throws SQLException {
+  public PortTrailConnection(Connection connection, PortTrailLogger portTrailLogger, DbWriter dbWriter) throws SQLException {
     super(connection);
     this.portTrailId = UuidUtils.generateUuid();
     newTxId();
     this.portTrailLogger = portTrailLogger;
-    this.sqlWriter = sqlWriter;
-    this.abstractSqlBoQueue = new AbstractSqlBoQueue(sqlWriter);
+    this.dbWriter = dbWriter;
+    this.abstractStatementExecutionBoQueue = new AbstractStatementExecutionBoQueue(dbWriter);
     this.ifAutoCommit = connection.getAutoCommit();
   }
 
   public void reset() throws SQLException {
     newTxId();
 //    this.portTrailId = UuidUtils.generateUuid();
-    this.abstractSqlBoQueue.reset();
+    this.abstractStatementExecutionBoQueue.reset();
     this.ifAutoCommit = connection.getAutoCommit();
     closePortTrail();
   }
@@ -64,7 +64,7 @@ public class PortTrailConnection extends AbstractPortTrailConnection implements 
     // false -> true: 提交execute但还未提交的数据
     if (ifAutoCommit != autoCommit) {
       if (autoCommit) {
-        abstractSqlBoQueue.propagateCommitted();
+        abstractStatementExecutionBoQueue.propagateCommitted();
       }
     }
     // true -> true
@@ -86,14 +86,14 @@ public class PortTrailConnection extends AbstractPortTrailConnection implements 
   public void commit() throws SQLException {
     connection.commit();
     newTxId();
-    abstractSqlBoQueue.propagateCommitted();
+    abstractStatementExecutionBoQueue.propagateCommitted();
   }
 
   @Override
   public void rollback() throws SQLException {
     connection.rollback();
     newTxId();
-    abstractSqlBoQueue.propagateRollback();
+    abstractStatementExecutionBoQueue.propagateRollback();
   }
 
   @Override
@@ -253,7 +253,7 @@ public class PortTrailConnection extends AbstractPortTrailConnection implements 
 
   @Override
   public void closePortTrail() throws SQLException {
-    synchronized (abstractSqlBoQueue) {
+    synchronized (abstractStatementExecutionBoQueue) {
       // 按照先申请资源后释放的步骤，在Connection关闭的时候，其创造的Statement和PreparedStatement一定都关闭完成了。
       // 但是，为了在遇到异常步骤时尽可能减少内存泄漏，在close这里还是释放一下
       closeAllPortTrailStatement();
@@ -264,19 +264,19 @@ public class PortTrailConnection extends AbstractPortTrailConnection implements 
   private final Map<String, PortTrailPreparedStatement> portTrailPreparedStatementMap = new HashMap<>();
 
   private void addPortTrailPreparedStatement(PortTrailPreparedStatement portTrailPreparedStatement) {
-    synchronized (abstractSqlBoQueue) {
+    synchronized (abstractStatementExecutionBoQueue) {
       portTrailPreparedStatementMap.put(portTrailPreparedStatement.getPortTrailId(), portTrailPreparedStatement);
     }
   }
 
   public void removePortTrailStatement(PortTrailPreparedStatement portTrailPreparedStatement) {
-    synchronized (abstractSqlBoQueue) {
+    synchronized (abstractStatementExecutionBoQueue) {
       portTrailPreparedStatementMap.remove(portTrailPreparedStatement.getPortTrailId());
     }
   }
 
   private void closeAllPortTrailPreparedStatement() throws SQLException {
-    synchronized (abstractSqlBoQueue) {
+    synchronized (abstractStatementExecutionBoQueue) {
       Set<Map.Entry<String, PortTrailPreparedStatement>> entries = new HashSet<>(portTrailPreparedStatementMap.entrySet());
       for (Map.Entry<String, PortTrailPreparedStatement> entry : entries) {
         PortTrailPreparedStatement portTrailPreparedStatement = entry.getValue();
@@ -294,19 +294,19 @@ public class PortTrailConnection extends AbstractPortTrailConnection implements 
   private final Map<String, PortTrailStatement> portTrailStatementMap = new HashMap<>();
 
   private void addPortTrailStatement(PortTrailStatement portTrailStatement) {
-    synchronized (abstractSqlBoQueue) {
+    synchronized (abstractStatementExecutionBoQueue) {
       portTrailStatementMap.put(portTrailStatement.getPortTrailId(), portTrailStatement);
     }
   }
 
   public void removePortTrailStatement(PortTrailStatement portTrailStatement) {
-    synchronized (abstractSqlBoQueue) {
+    synchronized (abstractStatementExecutionBoQueue) {
       portTrailStatementMap.remove(portTrailStatement.getPortTrailId());
     }
   }
 
   private void closeAllPortTrailStatement() throws SQLException {
-    synchronized (abstractSqlBoQueue) {
+    synchronized (abstractStatementExecutionBoQueue) {
       Set<Map.Entry<String, PortTrailStatement>> entries = new HashSet<>(portTrailStatementMap.entrySet());
       for (Map.Entry<String, PortTrailStatement> entry : entries) {
         PortTrailStatement portTrailStatement = entry.getValue();

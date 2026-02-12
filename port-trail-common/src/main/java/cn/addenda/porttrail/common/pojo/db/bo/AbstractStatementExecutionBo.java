@@ -7,13 +7,13 @@ import lombok.Setter;
 import lombok.ToString;
 
 @ToString
-public abstract class AbstractSqlExecutionBo implements DbExecution {
+public abstract class AbstractStatementExecutionBo implements DbExecution {
 
-  public static final String SQL_STATE_NEW = "NEW";
-  public static final String SQL_STATE_QUERY = "QUERY";
-  public static final String SQL_STATE_COMMITTED = "COMMITTED";
-  public static final String SQL_STATE_ROLLBACK = "ROLLBACK";
-  public static final String SQL_STATE_UNKNOWN = "UNKNOWN";
+  public static final String STATEMENT_STATE_NEW = "NEW";
+  public static final String STATEMENT_STATE_QUERY = "QUERY";
+  public static final String STATEMENT_STATE_COMMITTED = "COMMITTED";
+  public static final String STATEMENT_STATE_ROLLBACK = "ROLLBACK";
+  public static final String STATEMENT_STATE_UNKNOWN = "UNKNOWN";
 
   private String dataSourcePortTrailId;
   private String connectionPortTrailId;
@@ -21,7 +21,7 @@ public abstract class AbstractSqlExecutionBo implements DbExecution {
 
   @Setter
   @Getter
-  private String sqlState;
+  private String statementState;
 
   @Setter
   @Getter
@@ -37,19 +37,19 @@ public abstract class AbstractSqlExecutionBo implements DbExecution {
 
   private EntryPointSnapshot entryPointSnapshot;
 
-  protected AbstractSqlExecutionBo(
+  protected AbstractStatementExecutionBo(
           String dataSourcePortTrailId, String connectionPortTrailId, String statementPortTrailId,
-          String sqlState, String txId, Long start, Long end) {
+          String statementState, String txId, Long start, Long end) {
     this.dataSourcePortTrailId = dataSourcePortTrailId;
     this.connectionPortTrailId = connectionPortTrailId;
     this.statementPortTrailId = statementPortTrailId;
-    this.sqlState = sqlState;
+    this.statementState = statementState;
     this.txId = txId;
     this.start = start;
     this.end = end;
   }
 
-  protected AbstractSqlExecutionBo() {
+  protected AbstractStatementExecutionBo() {
   }
 
   @Override

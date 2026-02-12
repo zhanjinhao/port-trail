@@ -1,5 +1,6 @@
-package cn.addenda.porttrail.common.pojo.db;
+package cn.addenda.porttrail.common.pojo.db.bo;
 
+import cn.addenda.porttrail.common.pojo.db.SqlOrder;
 import cn.addenda.porttrail.common.tuple.Tuple;
 import lombok.Getter;
 import lombok.Setter;
@@ -9,7 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @ToString
-public class PreparedStatementParameterWrapper implements SqlOrder {
+public class PreparedStatementParameter implements SqlOrder {
 
   public static final byte[] UN_SUPPORTED_PARAMETER = new byte[]{-1};
 
@@ -29,7 +30,7 @@ public class PreparedStatementParameterWrapper implements SqlOrder {
 
   private int orderInConnection;
 
-  public PreparedStatementParameterWrapper() {
+  public PreparedStatementParameter() {
   }
 
   public void set(int index, String setMethod, Tuple parameter) {
@@ -50,16 +51,16 @@ public class PreparedStatementParameterWrapper implements SqlOrder {
     parameterList = new ArrayList<>();
   }
 
-  public PreparedStatementParameterWrapper deepClone() {
-    PreparedStatementParameterWrapper preparedStatementParameterWrapper = new PreparedStatementParameterWrapper();
-    preparedStatementParameterWrapper.orderInStatement = orderInStatement;
-    preparedStatementParameterWrapper.orderInConnection = orderInConnection;
-    preparedStatementParameterWrapper.capacity = capacity;
-    preparedStatementParameterWrapper.setMethodList = new ArrayList<>(setMethodList);
+  public PreparedStatementParameter deepClone() {
+    PreparedStatementParameter preparedStatementParameter = new PreparedStatementParameter();
+    preparedStatementParameter.orderInStatement = orderInStatement;
+    preparedStatementParameter.orderInConnection = orderInConnection;
+    preparedStatementParameter.capacity = capacity;
+    preparedStatementParameter.setMethodList = new ArrayList<>(setMethodList);
     // parameterList不需要再deepClone了，因为PreparedStatementParameterWrapper只能替换，不能更新，所以parameter不会被修改
-    preparedStatementParameterWrapper.parameterList = new ArrayList<>(parameterList);
+    preparedStatementParameter.parameterList = new ArrayList<>(parameterList);
 
-    return preparedStatementParameterWrapper;
+    return preparedStatementParameter;
   }
 
   @Override

@@ -37,8 +37,8 @@ public class LinkFacade {
 
   static String httpFacadeImpl;
   static HttpFacade httpFacade;
-  static String sendPreparedSqlExecutionUrl;
-  static String sendSqlExecutionUrl;
+  static String sendPreparedStatementExecutionUrl;
+  static String sendStatementExecutionUrl;
   static String sendDbConfigUrl;
   static String sendHttpRequestUrl;
   static String sendHttpResponseUrl;
@@ -61,19 +61,19 @@ public class LinkFacade {
       }
     };
     acceptWithLinkClassLoader(runnable);
-    sendPreparedSqlExecutionUrl = AgentPackage.getAgentProperties().getProperty("sendPreparedSqlExecution.url");
-    sendSqlExecutionUrl = AgentPackage.getAgentProperties().getProperty("sendSqlExecution.url");
+    sendPreparedStatementExecutionUrl = AgentPackage.getAgentProperties().getProperty("sendPreparedStatementExecution.url");
+    sendStatementExecutionUrl = AgentPackage.getAgentProperties().getProperty("sendStatementExecution.url");
     sendDbConfigUrl = AgentPackage.getAgentProperties().getProperty("sendDbConfig.url");
     sendHttpRequestUrl = AgentPackage.getAgentProperties().getProperty("sendHttpRequest.url");
     sendHttpResponseUrl = AgentPackage.getAgentProperties().getProperty("sendHttpResponse.url");
   }
 
-  public static void sendSqlExecution(byte[] sqlExecution) {
-    httpFacade.sendRequest(sendSqlExecutionUrl, CompressUtils.compress(sqlExecution));
+  public static void sendStatementExecution(byte[] bytes) {
+    httpFacade.sendRequest(sendStatementExecutionUrl, CompressUtils.compress(bytes));
   }
 
-  public static void sendPreparedSqlExecution(byte[] preparedSqlExecution) {
-    httpFacade.sendRequest(sendPreparedSqlExecutionUrl, CompressUtils.compress(preparedSqlExecution));
+  public static void sendPreparedStatementExecution(byte[] bytes) {
+    httpFacade.sendRequest(sendPreparedStatementExecutionUrl, CompressUtils.compress(bytes));
   }
 
   public static void sendDbConfig(String dbConfig) {

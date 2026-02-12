@@ -3,11 +3,11 @@ package cn.addenda.porttrail.agent.transform.interceptor.driver.mysql;
 import cn.addenda.porttrail.agent.log.AgentPortTrailLoggerFactory;
 import cn.addenda.porttrail.agent.transform.interceptor.Interceptor;
 import cn.addenda.porttrail.agent.transform.interceptor.datasource.hikari.HikariConcurrentBagBorrowInterceptor;
-import cn.addenda.porttrail.agent.writer.sql.AgentSqlWriter;
+import cn.addenda.porttrail.agent.writer.db.AgentDbWriter;
 import cn.addenda.porttrail.common.pojo.db.bo.DbConfigBo;
 import cn.addenda.porttrail.infrastructure.entrypoint.EntryPointStackContext;
 import cn.addenda.porttrail.infrastructure.log.PortTrailLogger;
-import cn.addenda.porttrail.infrastructure.writer.SqlWriter;
+import cn.addenda.porttrail.infrastructure.writer.DbWriter;
 import cn.addenda.porttrail.jdbc.core.PortTrailConnection;
 import net.bytebuddy.implementation.bind.annotation.*;
 
@@ -18,7 +18,7 @@ import java.util.concurrent.Callable;
 
 public class MySQLDriverConnectInterceptor implements Interceptor {
 
-  private final SqlWriter sqlWriter;
+  private final DbWriter dbWriter;
 
   private final PortTrailLogger portTrailConnectionPortTrailLogger;
 
@@ -26,7 +26,7 @@ public class MySQLDriverConnectInterceptor implements Interceptor {
           AgentPortTrailLoggerFactory.getInstance().getPortTrailLogger(HikariConcurrentBagBorrowInterceptor.class);
 
   public MySQLDriverConnectInterceptor() {
-    this.sqlWriter = AgentSqlWriter.getInstance();
+    this.dbWriter = AgentDbWriter.getInstance();
     this.portTrailConnectionPortTrailLogger = AgentPortTrailLoggerFactory.getInstance().getPortTrailLogger(PortTrailConnection.class);
   }
 
@@ -58,7 +58,7 @@ public class MySQLDriverConnectInterceptor implements Interceptor {
     }
 
     PortTrailConnection portTrailConnection = new PortTrailConnection(
-            (Connection) call, portTrailConnectionPortTrailLogger, sqlWriter);
+            (Connection) call, portTrailConnectionPortTrailLogger, dbWriter);
 
     DbConfigBo dbConfigBo = new DbConfigBo();
     dbConfigBo.setJdbcUrl((String) targetMethodArgs[0]);
@@ -70,7 +70,7 @@ public class MySQLDriverConnectInterceptor implements Interceptor {
     dbConfigBo.setStatementPortTrailId(null);
     dbConfigBo.setEntryPointSnapshot(EntryPointStackContext.snapshot());
 
-    sqlWriter.writeConfig(dbConfigBo);
+    dbWriter.writeDbConfig(dbConfigBo);
 
     return portTrailConnection;
   }

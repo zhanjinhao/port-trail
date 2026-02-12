@@ -4,7 +4,7 @@ import cn.addenda.porttrail.jdbc.util.SqlUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-class SqlWrapperUtilsTest {
+class SqlUtilsTest {
 
   @Test
   void test1() {

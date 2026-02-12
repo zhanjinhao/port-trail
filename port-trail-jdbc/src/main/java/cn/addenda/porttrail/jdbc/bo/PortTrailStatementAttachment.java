@@ -1,84 +1,84 @@
 package cn.addenda.porttrail.jdbc.bo;
 
 import cn.addenda.porttrail.jdbc.core.PortTrailStatement;
-import cn.addenda.porttrail.common.pojo.db.SqlWrapper;
-import cn.addenda.porttrail.common.pojo.db.bo.SqlExecutionBo;
+import cn.addenda.porttrail.common.pojo.db.StatementSql;
+import cn.addenda.porttrail.common.pojo.db.bo.StatementExecutionBo;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * 存储一个{@link PortTrailStatement}里执行的SQL。
+ * 存储一个{@link PortTrailStatement}里执行的DbExecution。
  */
 public class PortTrailStatementAttachment {
 
-  protected SqlExecutionBo stashedSqlBo;
+  protected StatementExecutionBo stashedStatementExecutionBo;
   private final AtomicInteger orderGenerator = new AtomicInteger(1);
   private final AtomicInteger batchTmpOrderGenerator = new AtomicInteger(1);
-  protected final AbstractSqlBoQueue abstractSqlBoQueue;
+  protected final AbstractStatementExecutionBoQueue abstractStatementExecutionBoQueue;
   protected final String dataSourcePortTrailId;
   protected final String connectionPortTrailId;
   protected final String statementPortTrailId;
 
-  public PortTrailStatementAttachment(AbstractSqlBoQueue abstractSqlBoQueue,
+  public PortTrailStatementAttachment(AbstractStatementExecutionBoQueue abstractStatementExecutionBoQueue,
                                       String dataSourcePortTrailId, String connectionPortTrailId, String statementPortTrailId) {
-    this.abstractSqlBoQueue = abstractSqlBoQueue;
+    this.abstractStatementExecutionBoQueue = abstractStatementExecutionBoQueue;
     this.dataSourcePortTrailId = dataSourcePortTrailId;
     this.connectionPortTrailId = connectionPortTrailId;
     this.statementPortTrailId = statementPortTrailId;
   }
 
-  public void executeSql(String sqlState,
+  public void executeSql(String statementState,
                          String sql, String txId, long start, long end) {
-    synchronized (abstractSqlBoQueue) {
-      SqlExecutionBo sqlBo = new SqlExecutionBo(dataSourcePortTrailId, connectionPortTrailId, statementPortTrailId,
-              sqlState, SqlWrapper.of(sql, getNextOrder(), abstractSqlBoQueue.getNextOrder()), txId, start, end);
-      abstractSqlBoQueue.output(sqlBo);
+    synchronized (abstractStatementExecutionBoQueue) {
+      StatementExecutionBo statementExecutionBo = new StatementExecutionBo(dataSourcePortTrailId, connectionPortTrailId, statementPortTrailId,
+              statementState, StatementSql.of(sql, getNextOrder(), abstractStatementExecutionBoQueue.getNextOrder()), txId, start, end);
+      abstractStatementExecutionBoQueue.output(statementExecutionBo);
     }
   }
 
-  public void executeBatch(String sqlState,
+  public void executeBatch(String statementState,
                            String txId, long start, long end) {
-    synchronized (abstractSqlBoQueue) {
-      if (stashedSqlBo != null) {
-        for (SqlWrapper sqlWrapper : stashedSqlBo.getSqlWrapperList()) {
-          sqlWrapper.setOrderInStatement(getNextOrder());
-          sqlWrapper.setOrderInConnection(abstractSqlBoQueue.getNextOrder());
+    synchronized (abstractStatementExecutionBoQueue) {
+      if (stashedStatementExecutionBo != null) {
+        for (StatementSql statementSql : stashedStatementExecutionBo.getStatementSqlList()) {
+          statementSql.setOrderInStatement(getNextOrder());
+          statementSql.setOrderInConnection(abstractStatementExecutionBoQueue.getNextOrder());
         }
-        executeBatch2(sqlState, txId, start, end);
+        executeBatch2(statementState, txId, start, end);
       }
     }
   }
 
-  protected void executeBatch2(String sqlState,
+  protected void executeBatch2(String statementState,
                                String txId, long start, long end) {
-    synchronized (abstractSqlBoQueue) {
-      stashedSqlBo.setSqlState(sqlState);
-      stashedSqlBo.setDataSourcePortTrailId(dataSourcePortTrailId);
-      stashedSqlBo.setConnectionPortTrailId(connectionPortTrailId);
-      stashedSqlBo.setStatementPortTrailId(statementPortTrailId);
-      stashedSqlBo.setTxId(txId);
-      stashedSqlBo.setStart(start);
-      stashedSqlBo.setEnd(end);
-      abstractSqlBoQueue.output(stashedSqlBo);
-      stashedSqlBo = null;
+    synchronized (abstractStatementExecutionBoQueue) {
+      stashedStatementExecutionBo.setStatementState(statementState);
+      stashedStatementExecutionBo.setDataSourcePortTrailId(dataSourcePortTrailId);
+      stashedStatementExecutionBo.setConnectionPortTrailId(connectionPortTrailId);
+      stashedStatementExecutionBo.setStatementPortTrailId(statementPortTrailId);
+      stashedStatementExecutionBo.setTxId(txId);
+      stashedStatementExecutionBo.setStart(start);
+      stashedStatementExecutionBo.setEnd(end);
+      abstractStatementExecutionBoQueue.output(stashedStatementExecutionBo);
+      stashedStatementExecutionBo = null;
     }
   }
 
   public void clearBatch() {
-    synchronized (abstractSqlBoQueue) {
-      if (stashedSqlBo != null) {
-        stashedSqlBo.clear();
-        stashedSqlBo = null;
+    synchronized (abstractStatementExecutionBoQueue) {
+      if (stashedStatementExecutionBo != null) {
+        stashedStatementExecutionBo.clear();
+        stashedStatementExecutionBo = null;
       }
     }
   }
 
   public void addBatchSql(String sql) {
-    synchronized (abstractSqlBoQueue) {
-      if (stashedSqlBo == null) {
-        stashedSqlBo = new SqlExecutionBo();
+    synchronized (abstractStatementExecutionBoQueue) {
+      if (stashedStatementExecutionBo == null) {
+        stashedStatementExecutionBo = new StatementExecutionBo();
       }
-      stashedSqlBo.getSqlWrapperList().add(SqlWrapper.of(sql, getNextBatchTmpOrder(), abstractSqlBoQueue.getNextBatchTmpOrder()));
+      stashedStatementExecutionBo.getStatementSqlList().add(StatementSql.of(sql, getNextBatchTmpOrder(), abstractStatementExecutionBoQueue.getNextBatchTmpOrder()));
     }
   }
 

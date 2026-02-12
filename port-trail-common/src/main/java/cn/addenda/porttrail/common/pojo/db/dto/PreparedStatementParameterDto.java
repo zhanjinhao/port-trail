@@ -1,4 +1,4 @@
-package cn.addenda.porttrail.common.pojo.db;
+package cn.addenda.porttrail.common.pojo.db.dto;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -10,7 +10,7 @@ import java.util.List;
 @Setter
 @Getter
 @ToString
-public class PreparedSqlParameter implements Serializable {
+public class PreparedStatementParameterDto implements Serializable {
 
   private static final long serialVersionUID = 1L;
 

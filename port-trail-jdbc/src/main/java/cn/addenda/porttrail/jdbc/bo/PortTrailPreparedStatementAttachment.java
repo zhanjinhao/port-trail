@@ -1,8 +1,8 @@
 package cn.addenda.porttrail.jdbc.bo;
 
-import cn.addenda.porttrail.common.pojo.db.SqlWrapper;
-import cn.addenda.porttrail.common.pojo.db.bo.PreparedSqlExecutionBo;
-import cn.addenda.porttrail.common.pojo.db.PreparedStatementParameterWrapper;
+import cn.addenda.porttrail.common.pojo.db.StatementSql;
+import cn.addenda.porttrail.common.pojo.db.bo.PreparedStatementExecutionBo;
+import cn.addenda.porttrail.common.pojo.db.bo.PreparedStatementParameter;
 import cn.addenda.porttrail.common.pojo.db.SqlOrder;
 import cn.addenda.porttrail.common.tuple.Binary;
 import cn.addenda.porttrail.common.tuple.Ternary;
@@ -17,76 +17,76 @@ import java.util.Comparator;
 import java.util.List;
 
 /**
- * 存储一个{@link PortTrailPreparedStatement}里执行的SQL。 <br/>
+ * 存储一个{@link PortTrailPreparedStatement}里执行的DbExecution。 <br/>
  * 由于{@link PreparedStatement}具有{@link Statement}的功能，所以{@link PortTrailPreparedStatementAttachment}需要具有{@link PortTrailStatementAttachment}的功能。
  */
 public class PortTrailPreparedStatementAttachment extends PortTrailStatementAttachment {
 
   @Getter
   private final String parameterizedSql;
-  private final PreparedStatementParameterWrapper preparedStatementParameterWrapper;
-  protected PreparedSqlExecutionBo stashedPreparedSqlBo;
+  private final PreparedStatementParameter preparedStatementParameter;
+  protected PreparedStatementExecutionBo stashedPreparedStatementExecutionBo;
 
-  public PortTrailPreparedStatementAttachment(String parameterizedSql, AbstractSqlBoQueue abstractSqlBoQueue,
+  public PortTrailPreparedStatementAttachment(String parameterizedSql, AbstractStatementExecutionBoQueue abstractStatementExecutionBoQueue,
                                               String dataSourcePortTrailId, String connectionPortTrailId, String statementPortTrailId) {
-    super(abstractSqlBoQueue, dataSourcePortTrailId, connectionPortTrailId, statementPortTrailId);
+    super(abstractStatementExecutionBoQueue, dataSourcePortTrailId, connectionPortTrailId, statementPortTrailId);
     this.parameterizedSql = parameterizedSql;
-    this.preparedStatementParameterWrapper = new PreparedStatementParameterWrapper();
+    this.preparedStatementParameter = new PreparedStatementParameter();
   }
 
-  public void executePreparedSql(String sqlState, String txId, long start, long end) {
-    synchronized (abstractSqlBoQueue) {
-      PreparedSqlExecutionBo preparedSqlBo =
-              new PreparedSqlExecutionBo(dataSourcePortTrailId, connectionPortTrailId, statementPortTrailId,
-                      sqlState, parameterizedSql, snapshotParameterForSingle(), txId, start, end);
-      abstractSqlBoQueue.output(preparedSqlBo);
+  public void executePreparedSql(String statementState, String txId, long start, long end) {
+    synchronized (abstractStatementExecutionBoQueue) {
+      PreparedStatementExecutionBo preparedStatementExecutionBo =
+              new PreparedStatementExecutionBo(dataSourcePortTrailId, connectionPortTrailId, statementPortTrailId,
+                      statementState, parameterizedSql, snapshotParameterForSingle(), txId, start, end);
+      abstractStatementExecutionBoQueue.output(preparedStatementExecutionBo);
     }
   }
 
   @Override
-  public void executeBatch(String sqlState, String txId, long start, long end) {
-    synchronized (abstractSqlBoQueue) {
-      if (stashedSqlBo == null) {
-        if (stashedPreparedSqlBo == null) {
+  public void executeBatch(String statementState, String txId, long start, long end) {
+    synchronized (abstractStatementExecutionBoQueue) {
+      if (stashedStatementExecutionBo == null) {
+        if (stashedPreparedStatementExecutionBo == null) {
           return;
         } else {
-          for (PreparedStatementParameterWrapper wrapper : stashedPreparedSqlBo.getPreparedStatementParameterWrapperList()) {
+          for (PreparedStatementParameter wrapper : stashedPreparedStatementExecutionBo.getPreparedStatementParameterList()) {
             wrapper.setOrderInStatement(getNextOrder());
-            wrapper.setOrderInConnection(abstractSqlBoQueue.getNextOrder());
+            wrapper.setOrderInConnection(abstractStatementExecutionBoQueue.getNextOrder());
           }
-          output(sqlState, txId, start, end);
+          output(statementState, txId, start, end);
         }
       } else {
-        if (stashedPreparedSqlBo == null) {
-          super.executeBatch(sqlState, txId, start, end);
+        if (stashedPreparedStatementExecutionBo == null) {
+          super.executeBatch(statementState, txId, start, end);
         } else {
           setOrder();
-          super.executeBatch2(sqlState, txId, start, end);
-          output(sqlState, txId, start, end);
+          super.executeBatch2(statementState, txId, start, end);
+          output(statementState, txId, start, end);
         }
       }
     }
   }
 
-  private void output(String sqlState, String txId, long start, long end) {
-    stashedPreparedSqlBo.setSqlState(sqlState);
-    stashedPreparedSqlBo.setDataSourcePortTrailId(dataSourcePortTrailId);
-    stashedPreparedSqlBo.setConnectionPortTrailId(connectionPortTrailId);
-    stashedPreparedSqlBo.setStatementPortTrailId(statementPortTrailId);
-    stashedPreparedSqlBo.setTxId(txId);
-    stashedPreparedSqlBo.setStart(start);
-    stashedPreparedSqlBo.setEnd(end);
-    abstractSqlBoQueue.output(stashedPreparedSqlBo);
-    stashedPreparedSqlBo = null;
+  private void output(String statementState, String txId, long start, long end) {
+    stashedPreparedStatementExecutionBo.setStatementState(statementState);
+    stashedPreparedStatementExecutionBo.setDataSourcePortTrailId(dataSourcePortTrailId);
+    stashedPreparedStatementExecutionBo.setConnectionPortTrailId(connectionPortTrailId);
+    stashedPreparedStatementExecutionBo.setStatementPortTrailId(statementPortTrailId);
+    stashedPreparedStatementExecutionBo.setTxId(txId);
+    stashedPreparedStatementExecutionBo.setStart(start);
+    stashedPreparedStatementExecutionBo.setEnd(end);
+    abstractStatementExecutionBoQueue.output(stashedPreparedStatementExecutionBo);
+    stashedPreparedStatementExecutionBo = null;
   }
 
   private void setOrder() {
-    // stashSqlBo和stashedPreparedSqlBo的order是addBatch的顺序
-    List<PreparedStatementParameterWrapper> wrapperList = stashedPreparedSqlBo.getPreparedStatementParameterWrapperList();
-    List<SqlWrapper> sqlWrapperList = stashedSqlBo.getSqlWrapperList();
+    // stashStatementExecutionBo和stashedPreparedStatementExecutionBo的order是addBatch的顺序
+    List<PreparedStatementParameter> preparedStatementParameterList = stashedPreparedStatementExecutionBo.getPreparedStatementParameterList();
+    List<StatementSql> statementSqlList = stashedStatementExecutionBo.getStatementSqlList();
     List<SqlOrder> sqlOrderList = new ArrayList<>();
-    sqlOrderList.addAll(wrapperList);
-    sqlOrderList.addAll(sqlWrapperList);
+    sqlOrderList.addAll(preparedStatementParameterList);
+    sqlOrderList.addAll(statementSqlList);
 
     // 处理orderInStatement
     sqlOrderList.sort(Comparator.comparing(SqlOrder::getOrderInStatement));
@@ -96,69 +96,69 @@ public class PortTrailPreparedStatementAttachment extends PortTrailStatementAtta
     // 处理orderInConnection
     sqlOrderList.sort(Comparator.comparing(SqlOrder::getOrderInConnection));
     for (SqlOrder sqlOrder : sqlOrderList) {
-      sqlOrder.setOrderInConnection(abstractSqlBoQueue.getNextOrder());
+      sqlOrder.setOrderInConnection(abstractStatementExecutionBoQueue.getNextOrder());
     }
   }
 
   @Override
   public void clearBatch() {
-    synchronized (abstractSqlBoQueue) {
+    synchronized (abstractStatementExecutionBoQueue) {
       super.clearBatch();
-      if (stashedPreparedSqlBo != null) {
-        stashedPreparedSqlBo.clear();
-        stashedPreparedSqlBo = null;
+      if (stashedPreparedStatementExecutionBo != null) {
+        stashedPreparedStatementExecutionBo.clear();
+        stashedPreparedStatementExecutionBo = null;
       }
     }
   }
 
   public void addBatchPreparedSql() {
-    synchronized (abstractSqlBoQueue) {
-      if (stashedPreparedSqlBo == null) {
-        stashedPreparedSqlBo = new PreparedSqlExecutionBo(parameterizedSql);
+    synchronized (abstractStatementExecutionBoQueue) {
+      if (stashedPreparedStatementExecutionBo == null) {
+        stashedPreparedStatementExecutionBo = new PreparedStatementExecutionBo(parameterizedSql);
       }
-      stashedPreparedSqlBo.getPreparedStatementParameterWrapperList().add(snapshotParameterForBatch());
+      stashedPreparedStatementExecutionBo.getPreparedStatementParameterList().add(snapshotParameterForBatch());
     }
   }
 
   /**
    * 有序性指的是：按照execute时的顺序
    */
-  private PreparedStatementParameterWrapper snapshotParameterForBatch() {
-    preparedStatementParameterWrapper.setOrderInStatement(getNextBatchTmpOrder());
-    preparedStatementParameterWrapper.setOrderInConnection(abstractSqlBoQueue.getNextBatchTmpOrder());
-    return preparedStatementParameterWrapper.deepClone();
+  private PreparedStatementParameter snapshotParameterForBatch() {
+    preparedStatementParameter.setOrderInStatement(getNextBatchTmpOrder());
+    preparedStatementParameter.setOrderInConnection(abstractStatementExecutionBoQueue.getNextBatchTmpOrder());
+    return preparedStatementParameter.deepClone();
   }
 
   /**
    * 有序性指的是：按照execute时的顺序
    */
-  private PreparedStatementParameterWrapper snapshotParameterForSingle() {
-    preparedStatementParameterWrapper.setOrderInStatement(getNextOrder());
-    preparedStatementParameterWrapper.setOrderInConnection(abstractSqlBoQueue.getNextOrder());
-    return preparedStatementParameterWrapper.deepClone();
+  private PreparedStatementParameter snapshotParameterForSingle() {
+    preparedStatementParameter.setOrderInStatement(getNextOrder());
+    preparedStatementParameter.setOrderInConnection(abstractStatementExecutionBoQueue.getNextOrder());
+    return preparedStatementParameter.deepClone();
   }
 
   public void set(int parameterIndex, String setMethod, Unary<?> unary) {
-    synchronized (abstractSqlBoQueue) {
-      preparedStatementParameterWrapper.set(parameterIndex - 1, setMethod, unary);
+    synchronized (abstractStatementExecutionBoQueue) {
+      preparedStatementParameter.set(parameterIndex - 1, setMethod, unary);
     }
   }
 
   public void set(int parameterIndex, String setMethod, Binary<?, ?> binary) {
-    synchronized (abstractSqlBoQueue) {
-      preparedStatementParameterWrapper.set(parameterIndex - 1, setMethod, binary);
+    synchronized (abstractStatementExecutionBoQueue) {
+      preparedStatementParameter.set(parameterIndex - 1, setMethod, binary);
     }
   }
 
   public void set(int parameterIndex, String setMethod, Ternary<?, ?, ?> ternary) {
-    synchronized (abstractSqlBoQueue) {
-      preparedStatementParameterWrapper.set(parameterIndex - 1, setMethod, ternary);
+    synchronized (abstractStatementExecutionBoQueue) {
+      preparedStatementParameter.set(parameterIndex - 1, setMethod, ternary);
     }
   }
 
   public void clearPreparedStatementParameterWrapper() {
-    synchronized (abstractSqlBoQueue) {
-      preparedStatementParameterWrapper.clear();
+    synchronized (abstractStatementExecutionBoQueue) {
+      preparedStatementParameter.clear();
     }
   }
 

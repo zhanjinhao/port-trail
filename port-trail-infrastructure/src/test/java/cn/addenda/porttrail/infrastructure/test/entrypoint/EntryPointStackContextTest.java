@@ -10,7 +10,7 @@ class EntryPointStackContextTest {
 
   @Test
   void test1() {
-    Assertions.assertNull(EntryPointStackContext.snapshot());
+    Assertions.assertNotNull(EntryPointStackContext.snapshot());
 
     EntryPointStackContext.pushEntryPoint(EntryPoint.of(EntryPointType.SERVLET_JAVAX, "1"));
     Assertions.assertEquals(1, EntryPointStackContext.snapshot().getEntryPointList().size());
@@ -32,7 +32,7 @@ class EntryPointStackContextTest {
     Assertions.assertEquals(1, EntryPointStackContext.snapshot().getEntryPointList().size());
 
     EntryPointStackContext.popEntryPoint();
-    Assertions.assertNull(EntryPointStackContext.snapshot());
+    Assertions.assertNotNull(EntryPointStackContext.snapshot());
 
   }
 

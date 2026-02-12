@@ -3,7 +3,7 @@ package cn.addenda.porttrail.jdbc.core;
 import cn.addenda.porttrail.infrastructure.log.PortTrailLogger;
 import cn.addenda.porttrail.infrastructure.log.PortTrailLoggerFactory;
 import cn.addenda.porttrail.common.util.UuidUtils;
-import cn.addenda.porttrail.infrastructure.writer.SqlWriter;
+import cn.addenda.porttrail.infrastructure.writer.DbWriter;
 import lombok.Getter;
 
 import javax.sql.DataSource;
@@ -30,17 +30,17 @@ public class PortTrailDataSource extends WrapperAdapter implements DataSource, P
 
   private final PortTrailLogger portTrailLogger;
 
-  private final SqlWriter sqlWriter;
+  private final DbWriter dbWriter;
 
   private final String portTrailId;
 
   private final PortTrailLogger portTrailDataSourceConnectionPortTrailLogger;
 
-  public PortTrailDataSource(DataSource dataSource, PortTrailLoggerFactory portTrailLoggerFactory, SqlWriter sqlWriter) {
+  public PortTrailDataSource(DataSource dataSource, PortTrailLoggerFactory portTrailLoggerFactory, DbWriter dbWriter) {
     this.dataSource = dataSource;
     this.portTrailLoggerFactory = portTrailLoggerFactory;
     this.portTrailLogger = portTrailLoggerFactory.getPortTrailLogger(PortTrailDataSource.class);
-    this.sqlWriter = sqlWriter;
+    this.dbWriter = dbWriter;
     this.portTrailId = UuidUtils.generateUuid();
 
     this.portTrailDataSourceConnectionPortTrailLogger = portTrailLoggerFactory.getPortTrailLogger(PortTrailDataSourceConnection.class);
@@ -50,7 +50,7 @@ public class PortTrailDataSource extends WrapperAdapter implements DataSource, P
   public Connection getConnection() throws SQLException {
     Connection connection = dataSource.getConnection();
     PortTrailConnection portTrailConnection = new PortTrailDataSourceConnection(
-            connection, this, portTrailDataSourceConnectionPortTrailLogger, sqlWriter);
+            connection, this, portTrailDataSourceConnectionPortTrailLogger, dbWriter);
 
     addPortTrailConnection(portTrailConnection);
 
@@ -61,7 +61,7 @@ public class PortTrailDataSource extends WrapperAdapter implements DataSource, P
   public Connection getConnection(String username, String password) throws SQLException {
     Connection connection = dataSource.getConnection(username, password);
     PortTrailConnection portTrailConnection = new PortTrailDataSourceConnection(
-            connection, this, portTrailDataSourceConnectionPortTrailLogger, sqlWriter);
+            connection, this, portTrailDataSourceConnectionPortTrailLogger, dbWriter);
 
     addPortTrailConnection(portTrailConnection);
 

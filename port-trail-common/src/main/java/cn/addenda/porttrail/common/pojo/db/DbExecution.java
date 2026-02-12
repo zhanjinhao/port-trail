@@ -10,8 +10,8 @@ import java.sql.PreparedStatement;
  */
 public interface DbExecution {
 
-  String DB_EXECUTION_TYPE_SQL = "SQL";
-  String DB_EXECUTION_TYPE_PREPARED_SQL = "PREPARED_SQL";
+  String DB_EXECUTION_TYPE_STATEMENT = "STATEMENT";
+  String DB_EXECUTION_TYPE_PREPARED_STATEMENT = "PREPARED_STATEMENT";
   String DB_EXECUTION_TYPE_CONFIG = "CONFIG";
 
   String getDbExecutionType();

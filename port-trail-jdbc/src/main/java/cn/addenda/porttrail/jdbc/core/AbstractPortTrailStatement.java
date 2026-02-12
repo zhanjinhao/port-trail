@@ -2,9 +2,9 @@ package cn.addenda.porttrail.jdbc.core;
 
 
 import cn.addenda.porttrail.common.util.UuidUtils;
-import cn.addenda.porttrail.common.pojo.db.bo.AbstractSqlExecutionBo;
+import cn.addenda.porttrail.common.pojo.db.bo.AbstractStatementExecutionBo;
 import cn.addenda.porttrail.jdbc.bo.PortTrailStatementAttachment;
-import cn.addenda.porttrail.jdbc.bo.AbstractSqlBoQueue;
+import cn.addenda.porttrail.jdbc.bo.AbstractStatementExecutionBoQueue;
 import cn.addenda.porttrail.jdbc.util.SqlUtils;
 
 import java.sql.*;
@@ -191,8 +191,8 @@ public abstract class AbstractPortTrailStatement<T extends Statement, P extends 
     }
   }
 
-  protected String getInitialSqlStateByIfAutoCommit() {
-    return getIfAutoCommit() ? AbstractSqlExecutionBo.SQL_STATE_COMMITTED : AbstractSqlExecutionBo.SQL_STATE_NEW;
+  protected String getInitialStatementStateByIfAutoCommit() {
+    return getIfAutoCommit() ? AbstractStatementExecutionBo.STATEMENT_STATE_COMMITTED : AbstractStatementExecutionBo.STATEMENT_STATE_NEW;
   }
 
   protected boolean getIfAutoCommit() {
@@ -233,8 +233,8 @@ public abstract class AbstractPortTrailStatement<T extends Statement, P extends 
    * batch update
    */
   protected void executeBatchUpdate(long start) {
-    String sqlState = getInitialSqlStateByIfAutoCommit();
-    portTrailStatementSqlAttachment.executeBatch(sqlState, getTxId(), start, curMills());
+    String statementState = getInitialStatementStateByIfAutoCommit();
+    portTrailStatementSqlAttachment.executeBatch(statementState, getTxId(), start, curMills());
     newTxIdIfAutoCommit();
   }
 
@@ -247,13 +247,13 @@ public abstract class AbstractPortTrailStatement<T extends Statement, P extends 
   }
 
   protected void executeUpdate(String sql, long start) {
-    String sqlState = getInitialSqlStateByIfAutoCommit();
-    portTrailStatementSqlAttachment.executeSql(sqlState, sql, getTxId(), start, curMills());
+    String statementState = getInitialStatementStateByIfAutoCommit();
+    portTrailStatementSqlAttachment.executeSql(statementState, sql, getTxId(), start, curMills());
     newTxIdIfAutoCommit();
   }
 
   protected void executeQuery(String sql, long start) {
-    portTrailStatementSqlAttachment.executeSql(AbstractSqlExecutionBo.SQL_STATE_QUERY, sql, getTxId(), start, curMills());
+    portTrailStatementSqlAttachment.executeSql(AbstractStatementExecutionBo.STATEMENT_STATE_QUERY, sql, getTxId(), start, curMills());
     newTxIdIfAutoCommit();
   }
 
@@ -268,8 +268,8 @@ public abstract class AbstractPortTrailStatement<T extends Statement, P extends 
     return portTrailConnection.getPortTrailId();
   }
 
-  protected AbstractSqlBoQueue getExecutionQueue() {
-    return portTrailConnection.getAbstractSqlBoQueue();
+  protected AbstractStatementExecutionBoQueue getExecutionQueue() {
+    return portTrailConnection.getAbstractStatementExecutionBoQueue();
   }
 
 }

@@ -1,7 +1,7 @@
 package cn.addenda.porttrail.jdbc.core;
 
 import cn.addenda.porttrail.infrastructure.log.PortTrailLogger;
-import cn.addenda.porttrail.infrastructure.writer.SqlWriter;
+import cn.addenda.porttrail.infrastructure.writer.DbWriter;
 import lombok.Getter;
 
 import java.sql.Connection;
@@ -17,8 +17,8 @@ public class PortTrailDataSourceConnection extends PortTrailConnection {
   private final PortTrailDataSource portTrailDataSource;
 
   public PortTrailDataSourceConnection(Connection connection, PortTrailDataSource portTrailDataSource,
-                                       PortTrailLogger portTrailLogger, SqlWriter sqlWriter) throws SQLException {
-    super(connection, portTrailLogger, sqlWriter);
+                                       PortTrailLogger portTrailLogger, DbWriter dbWriter) throws SQLException {
+    super(connection, portTrailLogger, dbWriter);
     this.portTrailDataSource = portTrailDataSource;
   }
 

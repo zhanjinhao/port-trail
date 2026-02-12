@@ -1,4 +1,4 @@
-package cn.addenda.porttrail.agent.writer.sql;
+package cn.addenda.porttrail.agent.writer.db;
 
 import cn.addenda.porttrail.agent.AgentPackage;
 import cn.addenda.porttrail.agent.PortTrailAgentStartException;
@@ -10,27 +10,27 @@ import cn.addenda.porttrail.common.util.StringUtils;
 import cn.addenda.porttrail.infrastructure.jvm.JVMShutdown;
 import cn.addenda.porttrail.infrastructure.jvm.JVMShutdownCallback;
 import cn.addenda.porttrail.infrastructure.log.PortTrailLogger;
-import cn.addenda.porttrail.infrastructure.writer.SqlWriter;
+import cn.addenda.porttrail.infrastructure.writer.DbWriter;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
 
 /**
- * Config需要保证一定先于SQL输出
+ * DbConfig需要保证一定先于DbStatement输出
  * <p>
  * 两个功能：
  * 1、本地缓存 <br/>
  * 2、按ConnectionPortTrailId做Hash <br/>
  */
-public class AgentSqlWriter extends AbstractAgentWriter implements SqlWriter {
+public class AgentDbWriter extends AbstractAgentWriter implements DbWriter {
 
   private static final PortTrailLogger log =
-          AgentPortTrailLoggerFactory.getInstance().getPortTrailLogger(AgentSqlWriter.class);
+          AgentPortTrailLoggerFactory.getInstance().getPortTrailLogger(AgentDbWriter.class);
 
-  private static AgentSqlWriter instance;
+  private static AgentDbWriter instance;
 
-  private final List<SqlWriter> sqlWriterList;
+  private final List<DbWriter> dbWriterList;
 
   private final int hashSlotCount;
 
@@ -38,28 +38,28 @@ public class AgentSqlWriter extends AbstractAgentWriter implements SqlWriter {
 
   private final List<DbExecutionConsumer> dbExecutionConsumerList;
 
-  private AgentSqlWriter() {
+  private AgentDbWriter() {
     this.hashSlotCount = initHashSlotCount();
     this.dbExecutionQueueSize = initDbExecutionQueueSize();
-    this.sqlWriterList = initSqlWriter();
+    this.dbWriterList = initDbWriter();
     this.dbExecutionConsumerList = initExecutionConsumerList();
     initJvmShutdown();
   }
 
   private int initDbExecutionQueueSize() {
     Properties agentProperties = AgentPackage.getAgentProperties();
-    String property = agentProperties.getProperty("sqlWriter.dbExecutionQueue.size");
+    String property = agentProperties.getProperty("dbWriter.dbExecutionQueue.size");
     try {
       return Integer.parseInt(property);
     } catch (Exception e) {
-      throw new PortTrailAgentStartException(String.format("加载sqlWriter.dbExecutionQueue.size异常，配置值为：%s", property), e);
+      throw new PortTrailAgentStartException(String.format("dbWriter.dbExecutionQueue.size异常，配置值为：%s", property), e);
     }
   }
 
-  public static AgentSqlWriter getInstance() {
-    synchronized (AgentSqlWriter.class) {
+  public static AgentDbWriter getInstance() {
+    synchronized (AgentDbWriter.class) {
       if (instance == null) {
-        instance = new AgentSqlWriter();
+        instance = new AgentDbWriter();
       }
       return instance;
     }
@@ -67,26 +67,26 @@ public class AgentSqlWriter extends AbstractAgentWriter implements SqlWriter {
 
   private int initHashSlotCount() {
     Properties agentProperties = AgentPackage.getAgentProperties();
-    String property = agentProperties.getProperty("sqlWriter.hashSlotCount");
+    String property = agentProperties.getProperty("dbWriter.hashSlotCount");
     try {
       return Integer.parseInt(property);
     } catch (Exception e) {
-      throw new PortTrailAgentStartException(String.format("加载sqlWriter.hashSlotCount异常，配置值为：%s", property), e);
+      throw new PortTrailAgentStartException(String.format("加载dbWriter.hashSlotCount异常，配置值为：%s", property), e);
     }
   }
 
-  private List<SqlWriter> initSqlWriter() {
-    List<SqlWriter> tmpList = new ArrayList<>();
+  private List<DbWriter> initDbWriter() {
+    List<DbWriter> tmpList = new ArrayList<>();
     Properties agentProperties = AgentPackage.getAgentProperties();
-    String sqlWriterImplClass = agentProperties.getProperty("sqlWriter.impl");
-    if (sqlWriterImplClass == null || sqlWriterImplClass.isEmpty()) {
+    String dbWriterImplClass = agentProperties.getProperty("dbWriter.impl");
+    if (dbWriterImplClass == null || dbWriterImplClass.isEmpty()) {
       return tmpList;
     }
 
-    String[] sqlWriterImplClassnames = sqlWriterImplClass.split(",");
-    for (String sqlWriterImplClassname : sqlWriterImplClassnames) {
-      log.debug("init sqlWriter.impl[{}] success.", sqlWriterImplClassname);
-      Optional.ofNullable(init(sqlWriterImplClassname)).ifPresent(tmpList::add);
+    String[] dbWriterImplClassnames = dbWriterImplClass.split(",");
+    for (String dbWriterImplClassname : dbWriterImplClassnames) {
+      log.debug("init dbWriter.impl[{}] success.", dbWriterImplClassname);
+      Optional.ofNullable(init(dbWriterImplClassname)).ifPresent(tmpList::add);
     }
     return tmpList;
   }
@@ -99,12 +99,12 @@ public class AgentSqlWriter extends AbstractAgentWriter implements SqlWriter {
     return tmpList;
   }
 
-  private SqlWriter init(String className) {
+  private DbWriter init(String className) {
     try {
       Class<?> clazz = Class.forName(className);
-      return (SqlWriter) clazz.newInstance();
+      return (DbWriter) clazz.newInstance();
     } catch (Exception e) {
-      log.error("初始化SqlWriter[{}]失败。", className, e);
+      log.error("初始化DbWriter[{}]失败。", className, e);
       return null;
     }
   }
@@ -116,17 +116,17 @@ public class AgentSqlWriter extends AbstractAgentWriter implements SqlWriter {
   }
 
   @Override
-  public void writeSql(DbExecution dbExecution) {
+  public void writeStatement(DbExecution dbExecution) {
     offer(dbExecution);
   }
 
   @Override
-  public void writePreparedSql(DbExecution dbExecution) {
+  public void writePreparedStatement(DbExecution dbExecution) {
     offer(dbExecution);
   }
 
   @Override
-  public void writeConfig(DbExecution dbExecution) {
+  public void writeDbConfig(DbExecution dbExecution) {
     offer(dbExecution);
   }
 
@@ -159,7 +159,7 @@ public class AgentSqlWriter extends AbstractAgentWriter implements SqlWriter {
       this.dbExecutionConsumerThread = new Thread(this::run);
       this.dbExecutionConsumerThread.setDaemon(true);
       this.name = String.format("DbExecutionConsumer-%s)", StringUtils.expandWithSpecifiedChar(String.valueOf(hashIndex), '0', 2));
-      this.dbExecutionConsumerThread.setName(String.format("AgentSqlWriter-%s-Thread", name));
+      this.dbExecutionConsumerThread.setName(String.format("AgentDbWriter-%s-Thread", name));
       this.dbExecutionConsumerThread.start();
       this.ifRunning = true;
     }
@@ -243,31 +243,31 @@ public class AgentSqlWriter extends AbstractAgentWriter implements SqlWriter {
 
     private boolean write(DbExecution dbExecution, boolean ifEnableRetry) {
       boolean ifWriteSuccess = true;
-      for (SqlWriter sqlWriter : sqlWriterList) {
+      for (DbWriter dbWriter : dbWriterList) {
         try {
           if (DbExecution.DB_EXECUTION_TYPE_CONFIG.equals(dbExecution.getDbExecutionType())) {
             if (ifEnableRetry) {
-              retrySend(sqlWriter::writeConfig, dbExecution, 10);
+              retrySend(dbWriter::writeDbConfig, dbExecution, 10);
             } else {
-              sqlWriter.writeConfig(dbExecution);
+              dbWriter.writeDbConfig(dbExecution);
             }
-          } else if (DbExecution.DB_EXECUTION_TYPE_SQL.equals(dbExecution.getDbExecutionType())) {
+          } else if (DbExecution.DB_EXECUTION_TYPE_STATEMENT.equals(dbExecution.getDbExecutionType())) {
             if (ifEnableRetry) {
-              retrySend(sqlWriter::writeSql, dbExecution, 2);
+              retrySend(dbWriter::writeStatement, dbExecution, 2);
             } else {
-              sqlWriter.writeSql(dbExecution);
+              dbWriter.writeStatement(dbExecution);
             }
-          } else if (DbExecution.DB_EXECUTION_TYPE_PREPARED_SQL.equals(dbExecution.getDbExecutionType())) {
+          } else if (DbExecution.DB_EXECUTION_TYPE_PREPARED_STATEMENT.equals(dbExecution.getDbExecutionType())) {
             if (ifEnableRetry) {
-              retrySend(sqlWriter::writePreparedSql, dbExecution, 2);
+              retrySend(dbWriter::writePreparedStatement, dbExecution, 2);
             } else {
-              sqlWriter.writePreparedSql(dbExecution);
+              dbWriter.writePreparedStatement(dbExecution);
             }
           } else {
-            log.error("[{}] dbExecutionType is not support. DbExecution is [{}].", sqlWriter, LinkFacade.toStr(dbExecution));
+            log.error("[{}] dbExecutionType is not support. DbExecution is [{}].", dbWriter, LinkFacade.toStr(dbExecution));
           }
         } catch (Exception t) {
-          log.error("[{}] write error. DbExecution is [{}].", sqlWriter, LinkFacade.toStr(dbExecution), t);
+          log.error("[{}] write error. DbExecution is [{}].", dbWriter, LinkFacade.toStr(dbExecution), t);
           ifWriteSuccess = false;
         }
       }

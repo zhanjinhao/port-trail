@@ -7,7 +7,7 @@ import lombok.ToString;
 import java.io.Serializable;
 
 @ToString
-public class SqlWrapper implements SqlOrder, Serializable {
+public class StatementSql implements SqlOrder, Serializable {
 
   private static final long serialVersionUID = 1L;
 
@@ -19,21 +19,21 @@ public class SqlWrapper implements SqlOrder, Serializable {
 
   private int orderInConnection;
 
-  public SqlWrapper() {
+  public StatementSql() {
   }
 
-  public static SqlWrapper of(String sql, int orderInStatement, int orderInConnection) {
-    SqlWrapper sqlWrapper = new SqlWrapper();
-    sqlWrapper.setSql(sql);
-    sqlWrapper.setOrderInStatement(orderInStatement);
-    sqlWrapper.setOrderInConnection(orderInConnection);
-    return sqlWrapper;
+  public static StatementSql of(String sql, int orderInStatement, int orderInConnection) {
+    StatementSql statementSql = new StatementSql();
+    statementSql.setSql(sql);
+    statementSql.setOrderInStatement(orderInStatement);
+    statementSql.setOrderInConnection(orderInConnection);
+    return statementSql;
   }
 
-  public static SqlWrapper of(String sql) {
-    SqlWrapper sqlWrapper = new SqlWrapper();
-    sqlWrapper.setSql(sql);
-    return sqlWrapper;
+  public static StatementSql of(String sql) {
+    StatementSql statementSql = new StatementSql();
+    statementSql.setSql(sql);
+    return statementSql;
   }
 
   @Override

@@ -1,6 +1,6 @@
 package cn.addenda.porttrail.jdbc.core;
 
-import cn.addenda.porttrail.common.pojo.db.bo.AbstractSqlExecutionBo;
+import cn.addenda.porttrail.common.pojo.db.bo.AbstractStatementExecutionBo;
 import cn.addenda.porttrail.common.tuple.Binary;
 import cn.addenda.porttrail.common.tuple.Ternary;
 import cn.addenda.porttrail.common.tuple.Unary;
@@ -14,7 +14,7 @@ import java.net.URL;
 import java.sql.*;
 import java.util.Calendar;
 
-import static cn.addenda.porttrail.common.pojo.db.PreparedStatementParameterWrapper.UN_SUPPORTED_PARAMETER;
+import static cn.addenda.porttrail.common.pojo.db.bo.PreparedStatementParameter.UN_SUPPORTED_PARAMETER;
 
 /**
  * @author addenda
@@ -580,13 +580,13 @@ public class PortTrailPreparedStatement
   }
 
   private void executeUpdate(long start) {
-    String sqlState = getInitialSqlStateByIfAutoCommit();
-    portTrailStatementSqlAttachment.executePreparedSql(sqlState, getTxId(), start, curMills());
+    String statementState = getInitialStatementStateByIfAutoCommit();
+    portTrailStatementSqlAttachment.executePreparedSql(statementState, getTxId(), start, curMills());
     newTxIdIfAutoCommit();
   }
 
   private void executeQuery(long start) {
-    portTrailStatementSqlAttachment.executePreparedSql(AbstractSqlExecutionBo.SQL_STATE_QUERY, getTxId(), start, curMills());
+    portTrailStatementSqlAttachment.executePreparedSql(AbstractStatementExecutionBo.STATEMENT_STATE_QUERY, getTxId(), start, curMills());
     newTxIdIfAutoCommit();
   }
 
