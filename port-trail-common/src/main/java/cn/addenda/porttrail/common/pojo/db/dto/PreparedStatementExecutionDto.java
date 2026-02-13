@@ -29,6 +29,9 @@ public class PreparedStatementExecutionDto extends AbstractDbDto {
 
   private List<PreparedStatementParameterDto> preparedStatementParameterDtoList = new ArrayList<>();
 
+  public PreparedStatementExecutionDto() {
+  }
+
   public PreparedStatementExecutionDto(PreparedStatementExecutionBo preparedStatementExecutionBo) {
     this.setDataSourcePortTrailId(preparedStatementExecutionBo.getDataSourcePortTrailId());
     this.setConnectionPortTrailId(preparedStatementExecutionBo.getConnectionPortTrailId());

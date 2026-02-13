@@ -1,8 +1,8 @@
-package cn.addenda.porttrail.common.pojo.http.bo;
+package cn.addenda.porttrail.common.pojo.servlet.bo;
 
 import java.nio.charset.StandardCharsets;
 
-public abstract class AbstractHttpExecution implements HttpExecution {
+public abstract class AbstractServletExecution implements ServletExecution {
 
   public static final String UNSUPPORTED_CONTENT_TYPE = "UNSUPPORTED_CONTENT_TYPE";
 
@@ -10,15 +10,15 @@ public abstract class AbstractHttpExecution implements HttpExecution {
 
   public static final String DEFAULT_CHARSET = StandardCharsets.UTF_8.name();
 
-  private final String requestId;
+  private final String executionId;
 
-  protected AbstractHttpExecution(String requestId) {
-    this.requestId = requestId;
+  protected AbstractServletExecution(String executionId) {
+    this.executionId = executionId;
   }
 
   @Override
-  public String getRequestId() {
-    return requestId;
+  public String getExecutionId() {
+    return executionId;
   }
 
 }

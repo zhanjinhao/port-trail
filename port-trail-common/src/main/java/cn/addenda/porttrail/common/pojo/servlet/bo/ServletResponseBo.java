@@ -1,8 +1,8 @@
-package cn.addenda.porttrail.common.pojo.http.bo;
+package cn.addenda.porttrail.common.pojo.servlet.bo;
 
 import cn.addenda.porttrail.common.constant.MediaType;
-import cn.addenda.porttrail.common.pojo.http.dto.AbstractHttpDto;
-import cn.addenda.porttrail.common.pojo.http.dto.HttpResponseDto;
+import cn.addenda.porttrail.common.pojo.servlet.dto.AbstractServletDto;
+import cn.addenda.porttrail.common.pojo.servlet.dto.ServletResponseDto;
 import cn.addenda.porttrail.common.util.JdkSerializationUtils;
 import lombok.Getter;
 import lombok.Setter;
@@ -16,15 +16,15 @@ import java.util.Optional;
 @Setter
 @Getter
 @ToString
-public class HttpResponseBo extends AbstractHttpExecution {
+public class ServletResponseBo extends AbstractServletExecution {
 
   public static final String BODY_EMPTY = "BODY_EMPTY";
   public static final String BODY_EXCEED_LENGTH = "BODY_EXCEED_LENGTH";
   public static final String DOWNLOAD_UNKNOWN_FILENAME = "DOWNLOAD_UNKNOWN_FILENAME";
   public static final int UNKNOWN_CONTENT_LENGTH = -2;
 
-  public HttpResponseBo(String requestId) {
-    super(requestId);
+  public ServletResponseBo(String executionId) {
+    super(executionId);
   }
 
   // response.getContentType()：优先于headerMap
@@ -48,26 +48,26 @@ public class HttpResponseBo extends AbstractHttpExecution {
   /**
    * {@link MediaType#ifResponseTextContentType(String)} : {@link String}
    * {@link MediaType#ifResponseBinaryContentType(String)} : {@link String} filename
-   * 其他：{@link AbstractHttpExecution#UNSUPPORTED_CONTENT_TYPE}
+   * 其他：{@link AbstractServletExecution#UNSUPPORTED_CONTENT_TYPE}
    */
   private Object body;
 
-  public HttpResponseBo(HttpResponseDto httpResponseDto) {
-    super(httpResponseDto.getRequestId());
-    this.setContentType(httpResponseDto.getContentType());
-    this.setCharsetEncoding(httpResponseDto.getCharsetEncoding());
-    this.setContentLength(httpResponseDto.getContentLength());
-    this.setDatetime(httpResponseDto.getDatetime());
+  public ServletResponseBo(ServletResponseDto servletResponseDto) {
+    super(servletResponseDto.getExecutionId());
+    this.setContentType(servletResponseDto.getContentType());
+    this.setCharsetEncoding(servletResponseDto.getCharsetEncoding());
+    this.setContentLength(servletResponseDto.getContentLength());
+    this.setDatetime(servletResponseDto.getDatetime());
     this.setLocale(
-            Optional.ofNullable(httpResponseDto.getLocale())
+            Optional.ofNullable(servletResponseDto.getLocale())
                     .map(LocaleData::new).orElse(null)
     );
-    this.setStatus(httpResponseDto.getStatus());
-    this.setHeaderMap(httpResponseDto.getHeaderMap());
-    byte[] bodyOfDto = httpResponseDto.getBody();
+    this.setStatus(servletResponseDto.getStatus());
+    this.setHeaderMap(servletResponseDto.getHeaderMap());
+    byte[] bodyOfDto = servletResponseDto.getBody();
     if (bodyOfDto == null) {
       this.setBody(null);
-    } else if (Arrays.equals(AbstractHttpDto.UNSUPPORTED_CONTENT_TYPE, bodyOfDto)) {
+    } else if (Arrays.equals(AbstractServletDto.UNSUPPORTED_CONTENT_TYPE, bodyOfDto)) {
       this.setBody(UNSUPPORTED_CONTENT_TYPE);
     } else {
       Object obj = JdkSerializationUtils.deserialize(bodyOfDto);
@@ -81,7 +81,7 @@ public class HttpResponseBo extends AbstractHttpExecution {
   }
 
   @Override
-  public String getHttpExecutionType() {
-    return HTTP_EXECUTION_TYPE_RESPONSE;
+  public String getServletExecutionType() {
+    return SERVLET_EXECUTION_TYPE_RESPONSE;
   }
 }

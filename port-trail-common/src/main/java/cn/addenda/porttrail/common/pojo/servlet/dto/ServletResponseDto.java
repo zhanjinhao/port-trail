@@ -1,8 +1,8 @@
-package cn.addenda.porttrail.common.pojo.http.dto;
+package cn.addenda.porttrail.common.pojo.servlet.dto;
 
 import cn.addenda.porttrail.common.constant.MediaType;
-import cn.addenda.porttrail.common.pojo.http.bo.AbstractHttpExecution;
-import cn.addenda.porttrail.common.pojo.http.bo.HttpResponseBo;
+import cn.addenda.porttrail.common.pojo.servlet.bo.AbstractServletExecution;
+import cn.addenda.porttrail.common.pojo.servlet.bo.ServletResponseBo;
 import cn.addenda.porttrail.common.util.JdkSerializationUtils;
 import lombok.Getter;
 import lombok.Setter;
@@ -17,7 +17,7 @@ import java.util.Optional;
 @Setter
 @Getter
 @ToString
-public class HttpResponseDto extends AbstractHttpDto {
+public class ServletResponseDto extends AbstractServletDto {
 
   // response.getContentType()：优先于headerMap
   private String contentType;
@@ -40,28 +40,28 @@ public class HttpResponseDto extends AbstractHttpDto {
   /**
    * {@link MediaType#ifResponseTextContentType(String)} : {@link String}
    * {@link MediaType#ifResponseBinaryContentType(String)} : {@link String} filename
-   * 其他：{@link AbstractHttpDto#UNSUPPORTED_CONTENT_TYPE}
+   * 其他：{@link AbstractServletDto#UNSUPPORTED_CONTENT_TYPE}
    */
   private byte[] body;
 
-  public HttpResponseDto(String requestId) {
-    super(requestId);
+  public ServletResponseDto(String executionId) {
+    super(executionId);
   }
 
-  public HttpResponseDto(HttpResponseBo httpResponseBo) {
-    super(httpResponseBo.getRequestId());
-    this.setContentType(httpResponseBo.getContentType());
-    this.setCharsetEncoding(httpResponseBo.getCharsetEncoding());
-    this.setContentLength(httpResponseBo.getContentLength());
-    this.setDatetime(httpResponseBo.getDatetime());
+  public ServletResponseDto(ServletResponseBo servletResponseBo) {
+    super(servletResponseBo.getExecutionId());
+    this.setContentType(servletResponseBo.getContentType());
+    this.setCharsetEncoding(servletResponseBo.getCharsetEncoding());
+    this.setContentLength(servletResponseBo.getContentLength());
+    this.setDatetime(servletResponseBo.getDatetime());
     this.setLocale(
-            Optional.ofNullable(httpResponseBo.getLocale())
+            Optional.ofNullable(servletResponseBo.getLocale())
                     .map(LocaleDataDto::new).orElse(null)
     );
-    this.setStatus(httpResponseBo.getStatus());
-    this.setHeaderMap(httpResponseBo.getHeaderMap());
-    Object bodyOfBo = httpResponseBo.getBody();
-    if (Objects.equals(AbstractHttpExecution.UNSUPPORTED_CONTENT_TYPE, bodyOfBo)) {
+    this.setStatus(servletResponseBo.getStatus());
+    this.setHeaderMap(servletResponseBo.getHeaderMap());
+    Object bodyOfBo = servletResponseBo.getBody();
+    if (Objects.equals(AbstractServletExecution.UNSUPPORTED_CONTENT_TYPE, bodyOfBo)) {
       this.setBody(UNSUPPORTED_CONTENT_TYPE);
     } else if (bodyOfBo instanceof Serializable) {
       this.setBody(JdkSerializationUtils.serialize(bodyOfBo));

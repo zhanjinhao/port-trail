@@ -172,7 +172,7 @@ public class AgentDbWriter extends AbstractAgentWriter implements DbWriter {
         return;
       }
       boolean offer;
-      if (DbExecution.DB_EXECUTION_TYPE_CONFIG.equals(dbExecution.getDbExecutionType())) {
+      if (DbExecution.DB_EXECUTION_TYPE_DB_CONFIG.equals(dbExecution.getDbExecutionType())) {
         offer = retryOffer(dbExecutionQueue::offer, dbExecution);
       } else {
         offer = dbExecutionQueue.offer(dbExecution);
@@ -180,7 +180,7 @@ public class AgentDbWriter extends AbstractAgentWriter implements DbWriter {
 
       if (!offer) {
         // Config数据如果offer失败，需要缓存起来
-        if (DbExecution.DB_EXECUTION_TYPE_CONFIG.equals(dbExecution.getDbExecutionType())) {
+        if (DbExecution.DB_EXECUTION_TYPE_DB_CONFIG.equals(dbExecution.getDbExecutionType())) {
           offerFailedConfigDbExecutionMap.put(dbExecution.getConnectionPortTrailId(), dbExecution);
         }
         log.error("[{}]的队列已满，无法接收DbExecution[{}]。", name, LinkFacade.toStr(dbExecution));
@@ -245,7 +245,7 @@ public class AgentDbWriter extends AbstractAgentWriter implements DbWriter {
       boolean ifWriteSuccess = true;
       for (DbWriter dbWriter : dbWriterList) {
         try {
-          if (DbExecution.DB_EXECUTION_TYPE_CONFIG.equals(dbExecution.getDbExecutionType())) {
+          if (DbExecution.DB_EXECUTION_TYPE_DB_CONFIG.equals(dbExecution.getDbExecutionType())) {
             if (ifEnableRetry) {
               retrySend(dbWriter::writeDbConfig, dbExecution, 10);
             } else {

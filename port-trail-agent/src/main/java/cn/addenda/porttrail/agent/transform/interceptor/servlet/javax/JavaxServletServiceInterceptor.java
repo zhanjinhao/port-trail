@@ -6,18 +6,14 @@ import cn.addenda.porttrail.agent.log.AgentPortTrailLoggerFactory;
 import cn.addenda.porttrail.agent.transform.OverrideCallable;
 import cn.addenda.porttrail.agent.transform.interceptor.AbstractDeduplicationEntryPointInterceptor;
 import cn.addenda.porttrail.agent.transform.interceptor.Interceptor;
-import cn.addenda.porttrail.agent.writer.http.AgentHttpWriter;
+import cn.addenda.porttrail.agent.writer.servlet.AgentServletWriter;
 import cn.addenda.porttrail.common.constant.MediaType;
 import cn.addenda.porttrail.common.entrypoint.EntryPoint;
 import cn.addenda.porttrail.common.entrypoint.EntryPointType;
-import cn.addenda.porttrail.common.pojo.http.bo.HttpRequestFormData;
-import cn.addenda.porttrail.common.pojo.http.bo.LocaleData;
-import cn.addenda.porttrail.common.pojo.http.bo.AbstractHttpExecution;
-import cn.addenda.porttrail.common.pojo.http.bo.HttpRequestBo;
-import cn.addenda.porttrail.common.pojo.http.bo.HttpResponseBo;
+import cn.addenda.porttrail.common.pojo.servlet.bo.*;
 import cn.addenda.porttrail.common.util.UuidUtils;
 import cn.addenda.porttrail.infrastructure.log.PortTrailLogger;
-import cn.addenda.porttrail.infrastructure.writer.HttpWriter;
+import cn.addenda.porttrail.infrastructure.writer.ServletWriter;
 import net.bytebuddy.implementation.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
@@ -25,11 +21,12 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.Part;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Method;
+import java.net.URLDecoder;
 import java.util.*;
 
 public class JavaxServletServiceInterceptor extends AbstractDeduplicationEntryPointInterceptor implements Interceptor {
 
-  private final HttpWriter httpWriter;
+  private final ServletWriter servletWriter;
 
   private final int requestMaxBodyLength;
 
@@ -39,7 +36,7 @@ public class JavaxServletServiceInterceptor extends AbstractDeduplicationEntryPo
           AgentPortTrailLoggerFactory.getInstance().getPortTrailLogger(JavaxServletServiceInterceptor.class);
 
   public JavaxServletServiceInterceptor() {
-    this.httpWriter = AgentHttpWriter.getInstance();
+    this.servletWriter = AgentServletWriter.getInstance();
     this.requestMaxBodyLength = initRequestMaxBodyLength();
     this.responseMaxBodyLength = initResponseMaxBodyLength();
   }
@@ -47,22 +44,22 @@ public class JavaxServletServiceInterceptor extends AbstractDeduplicationEntryPo
   private int initRequestMaxBodyLength() {
     Properties agentProperties = AgentPackage.getAgentProperties();
     // in kb
-    String property = agentProperties.getProperty("httpWriter.request.maxBodyLength");
+    String property = agentProperties.getProperty("servletWriter.request.maxBodyLength");
     try {
       return Integer.parseInt(property) * 1024;
     } catch (Exception e) {
-      throw new PortTrailAgentStartException(String.format("加载httpWriter.request.maxBodyLength异常，配置值为：%s", property), e);
+      throw new PortTrailAgentStartException(String.format("加载servletWriter.request.maxBodyLength异常，配置值为：%s", property), e);
     }
   }
 
   private int initResponseMaxBodyLength() {
     Properties agentProperties = AgentPackage.getAgentProperties();
-    String property = agentProperties.getProperty("httpWriter.response.maxBodyLength");
+    String property = agentProperties.getProperty("servletWriter.response.maxBodyLength");
     try {
       // in kb
       return Integer.parseInt(property) * 1024;
     } catch (Exception e) {
-      throw new PortTrailAgentStartException(String.format("加载httpWriter.response.maxBodyLength异常，配置值为：%s", property), e);
+      throw new PortTrailAgentStartException(String.format("加载servletWriter.response.maxBodyLength异常，配置值为：%s", property), e);
     }
   }
 
@@ -94,7 +91,7 @@ public class JavaxServletServiceInterceptor extends AbstractDeduplicationEntryPo
 
     log.info("TargetObj is [{}] and it's classloader is [{}].", targetObj, targetObj.getClass().getClassLoader());
 
-    String requestId = UuidUtils.generateUuid();
+    String executionId = UuidUtils.generateUuid();
 
     return callWithEntryPoint(request.getRequestURI(), () -> {
 
@@ -110,61 +107,61 @@ public class JavaxServletServiceInterceptor extends AbstractDeduplicationEntryPo
 
       Object call = zuper.call(targetMethodArgs);
 
-      // ---------------
-      // 处理HttpRequest
-      // ---------------
-      HttpRequestBo httpRequestBo = assembleHttpRequestBo(request, requestId);
+      // ------------------
+      // 处理ServletRequest
+      // ------------------
+      ServletRequestBo servletRequestBo = assembleServletRequestBo(request, executionId);
       if (requestWrapper != null) {
-        httpRequestBo.setContentLength(requestWrapper.getCachedContent().size());
-        if (httpRequestBo.getContentType() == null) {
-          httpRequestBo.setBody(null);
+        servletRequestBo.setContentLength(requestWrapper.getCachedContent().size());
+        if (servletRequestBo.getContentType() == null) {
+          servletRequestBo.setBody(null);
         } else {
           if (MediaType.ifRequestTextContentType(requestContentType)) {
-            httpRequestBo.setBody(extractTextRequestBody(requestWrapper, requestId));
+            servletRequestBo.setBody(extractTextRequestBody(requestWrapper, executionId));
           } else if (MediaType.ifRequestMultipartFormContentType(requestContentType)) {
-            httpRequestBo.setBody(extractMultipartFormRequestBody(requestWrapper.getParts()));
+            servletRequestBo.setBody(extractMultipartFormRequestBody(requestWrapper.getParts(), requestWrapper));
           } else if (MediaType.ifRequestBinaryContentType(requestContentType)) {
-            httpRequestBo.setBody(HttpRequestBo.BODY_BYTE_ARRAY);
+            servletRequestBo.setBody(ServletRequestBo.BODY_BYTE_ARRAY);
           }
         }
       } else {
-        httpRequestBo.setContentLength(HttpRequestBo.UNKNOWN_CONTENT_LENGTH);
-        httpRequestBo.setBody(AbstractHttpExecution.UNSUPPORTED_CONTENT_TYPE);
+        servletRequestBo.setContentLength(ServletRequestBo.UNKNOWN_CONTENT_LENGTH);
+        servletRequestBo.setBody(AbstractServletExecution.UNSUPPORTED_CONTENT_TYPE);
       }
-      httpWriter.writeHttpRequest(httpRequestBo);
+      servletWriter.writeServletRequest(servletRequestBo);
 
-      // ----------------
-      // 处理HttpResponse
-      // ----------------
+      // -------------------
+      // 处理ServletResponse
+      // -------------------
       String responseContentType = response.getContentType();
-      HttpResponseBo httpResponseBo = assembleHttpResponseBo(response, requestId);
+      ServletResponseBo servletResponseBo = assembleServletResponseBo(response, executionId);
       if (MediaType.ifResponseContentType(responseContentType)) {
-        httpResponseBo.setContentLength(responseWrapper.getContentSize());
+        servletResponseBo.setContentLength(responseWrapper.getContentSize());
         if (MediaType.ifResponseTextContentType(responseContentType)) {
-          httpResponseBo.setBody(extractTextResponseBody(responseWrapper, requestId));
+          servletResponseBo.setBody(extractTextResponseBody(responseWrapper, executionId));
         } else if (MediaType.ifResponseBinaryContentType(responseContentType)) {
-          httpResponseBo.setBody(extractBinaryResponseBody(response));
+          servletResponseBo.setBody(extractBinaryResponseBody(response, servletRequestBo.getCharsetEncoding()));
         }
       } else {
-        httpResponseBo.setContentLength(HttpResponseBo.UNKNOWN_CONTENT_LENGTH);
-        httpResponseBo.setBody(AbstractHttpExecution.UNSUPPORTED_CONTENT_TYPE);
+        servletResponseBo.setContentLength(ServletResponseBo.UNKNOWN_CONTENT_LENGTH);
+        servletResponseBo.setBody(AbstractServletExecution.UNSUPPORTED_CONTENT_TYPE);
       }
-      httpWriter.writeHttpResponse(httpResponseBo);
+      servletWriter.writeServletResponse(servletResponseBo);
 
       return call;
     });
 
   }
 
-  private HttpRequestBo assembleHttpRequestBo(HttpServletRequest request, String requestId) {
-    HttpRequestBo httpRequestBo = new HttpRequestBo(requestId);
-    httpRequestBo.setVersion(request.getProtocol());
-    httpRequestBo.setScheme(request.getScheme());
-    httpRequestBo.setMethod(request.getMethod());
-    httpRequestBo.setUri(request.getRequestURI());
-    httpRequestBo.setQueryString(request.getQueryString());
-    httpRequestBo.setContentType(request.getContentType());
-    httpRequestBo.setCharsetEncoding(request.getCharacterEncoding());
+  private ServletRequestBo assembleServletRequestBo(HttpServletRequest request, String executionId) {
+    ServletRequestBo servletRequestBo = new ServletRequestBo(executionId);
+    servletRequestBo.setVersion(request.getProtocol());
+    servletRequestBo.setScheme(request.getScheme());
+    servletRequestBo.setMethod(request.getMethod());
+    servletRequestBo.setUri(request.getRequestURI());
+    servletRequestBo.setQueryString(request.getQueryString());
+    servletRequestBo.setContentType(request.getContentType());
+    servletRequestBo.setCharsetEncoding(request.getCharacterEncoding());
     Map<String, List<String>> headerMap = new HashMap<>();
     Enumeration<String> headerNames = request.getHeaderNames();
     while (headerNames.hasMoreElements()) {
@@ -176,90 +173,95 @@ public class JavaxServletServiceInterceptor extends AbstractDeduplicationEntryPo
       }
       headerMap.put(headerName, headerValueList);
     }
-    httpRequestBo.setHeaderMap(headerMap);
-    httpRequestBo.setDatetime(System.currentTimeMillis());
-    httpRequestBo.setAllContentLength(request.getContentLength());
+    servletRequestBo.setHeaderMap(headerMap);
+    servletRequestBo.setDatetime(System.currentTimeMillis());
+    servletRequestBo.setAllContentLength(request.getContentLength());
     Locale locale = request.getLocale();
     if (locale != null) {
-      httpRequestBo.setLocale(new LocaleData(locale.getLanguage(), locale.getCountry(), locale.getVariant()));
+      servletRequestBo.setLocale(new LocaleData(locale.getLanguage(), locale.getCountry(), locale.getVariant()));
     }
-    return httpRequestBo;
+    return servletRequestBo;
   }
 
-  private String extractTextRequestBody(JavaxContentCachingRequestWrapper request, String requestId) {
+  private String extractTextRequestBody(JavaxContentCachingRequestWrapper request, String executionId) {
     // 如果请求体里有body，但是Controller未使用，body为blank
     byte[] contentAsByteArray = request.getContentAsByteArray();
     if (contentAsByteArray.length > 0) {
       if (request.getRequest().getContentLength() > requestMaxBodyLength) {
-        return HttpRequestBo.BODY_EXCEED_LENGTH;
+        return ServletRequestBo.BODY_EXCEED_LENGTH;
       } else {
-        return convertBytesToString(contentAsByteArray, request.getCharacterEncoding(), requestId);
+        return convertBytesToString(contentAsByteArray, request.getCharacterEncoding(), executionId);
       }
     }
-    return HttpRequestBo.BODY_EMPTY;
+    return ServletRequestBo.BODY_EMPTY;
   }
 
-  private List<HttpRequestFormData> extractMultipartFormRequestBody(Collection<Part> parts) {
-    List<HttpRequestFormData> httpRequestFormDataList = new ArrayList<>();
+  private ServletRequestFormDataList extractMultipartFormRequestBody(Collection<Part> parts, HttpServletRequest request) {
+    ServletRequestFormDataList servletRequestFormDataList = new ServletRequestFormDataList();
     for (Part part : parts) {
-      HttpRequestFormData httpRequestFormData = new HttpRequestFormData();
-      httpRequestFormDataList.add(httpRequestFormData);
-      httpRequestFormData.setName(part.getName());
-      httpRequestFormData.setSize(part.getSize());
+      ServletRequestFormData servletRequestFormData = new ServletRequestFormData();
+      servletRequestFormDataList.add(servletRequestFormData);
+      servletRequestFormData.setContentType(part.getContentType());
+      servletRequestFormData.setName(part.getName());
+      servletRequestFormData.setSize(part.getSize());
       Map<String, List<String>> headerMap = new HashMap<>();
       Collection<String> headerNames = part.getHeaderNames();
       for (String headerName : headerNames) {
         headerMap.put(headerName, new ArrayList<>(part.getHeaders(headerName)));
       }
-      httpRequestFormData.setHeaderMap(headerMap);
+      servletRequestFormData.setHeaderMap(headerMap);
+      servletRequestFormData.setSubmittedFileName(part.getSubmittedFileName());
+      if (servletRequestFormData.getSubmittedFileName() == null) {
+        servletRequestFormData.setValues(request.getParameterValues(part.getName()));
+      }
     }
-    return httpRequestFormDataList;
+    return servletRequestFormDataList;
   }
 
-  private HttpResponseBo assembleHttpResponseBo(HttpServletResponse response, String requestId) {
-    HttpResponseBo httpResponseBo = new HttpResponseBo(requestId);
-    httpResponseBo.setContentType(response.getContentType());
-    httpResponseBo.setDatetime(System.currentTimeMillis());
+  private ServletResponseBo assembleServletResponseBo(HttpServletResponse response, String executionId) {
+    ServletResponseBo servletResponseBo = new ServletResponseBo(executionId);
+    servletResponseBo.setContentType(response.getContentType());
+    servletResponseBo.setDatetime(System.currentTimeMillis());
     Locale locale = response.getLocale();
     if (locale != null) {
-      httpResponseBo.setLocale(new LocaleData(locale.getLanguage(), locale.getCountry(), locale.getVariant()));
+      servletResponseBo.setLocale(new LocaleData(locale.getLanguage(), locale.getCountry(), locale.getVariant()));
     }
-    httpResponseBo.setCharsetEncoding(response.getCharacterEncoding());
-    httpResponseBo.setStatus(response.getStatus());
+    servletResponseBo.setCharsetEncoding(response.getCharacterEncoding());
+    servletResponseBo.setStatus(response.getStatus());
     // 这里能获取到的header是在程序里设置的。在Tomcat或Jetty里设置的获取不到。
     Map<String, List<String>> headerMap = new HashMap<>();
     Collection<String> headerNames = response.getHeaderNames();
     for (String headerName : headerNames) {
       headerMap.put(headerName, new ArrayList<>(response.getHeaders(headerName)));
     }
-    httpResponseBo.setHeaderMap(headerMap);
+    servletResponseBo.setHeaderMap(headerMap);
 
-    return httpResponseBo;
+    return servletResponseBo;
   }
 
-  private String extractTextResponseBody(JavaxContentCachingResponseWrapper response, String requestId) {
+  private String extractTextResponseBody(JavaxContentCachingResponseWrapper response, String executionId) {
     byte[] contentAsByteArray = response.getContentAsByteArray();
     if (contentAsByteArray.length > 0) {
       if (contentAsByteArray.length > responseMaxBodyLength) {
-        return HttpResponseBo.BODY_EXCEED_LENGTH;
+        return ServletResponseBo.BODY_EXCEED_LENGTH;
       } else {
-        return convertBytesToString(contentAsByteArray, response.getCharacterEncoding(), requestId);
+        return convertBytesToString(contentAsByteArray, response.getCharacterEncoding(), executionId);
       }
     }
-    return HttpResponseBo.BODY_EMPTY;
+    return ServletResponseBo.BODY_EMPTY;
   }
 
-  private String extractBinaryResponseBody(HttpServletResponse response) {
+  private String extractBinaryResponseBody(HttpServletResponse response, String charsetEncoding) {
     // 解析 ，获取attachment的filename
     String header = response.getHeader("Content-Disposition");
     if (header == null || header.isEmpty()) {
-      return HttpResponseBo.DOWNLOAD_UNKNOWN_FILENAME;
+      return ServletResponseBo.DOWNLOAD_UNKNOWN_FILENAME;
     } else {
       String lowerInput = header.toLowerCase();
       String target = "filename=";
       int index = lowerInput.indexOf(target);
       if (index == -1) {
-        return HttpResponseBo.DOWNLOAD_UNKNOWN_FILENAME;
+        return ServletResponseBo.DOWNLOAD_UNKNOWN_FILENAME;
       }
       // 使用原字符串截取保持原始大小写
       String result = header.substring(index + target.length());
@@ -273,17 +275,28 @@ public class JavaxServletServiceInterceptor extends AbstractDeduplicationEntryPo
       if (result.startsWith("\"") && result.endsWith("\"") && result.length() > 1) {
         result = result.substring(1, result.length() - 1);
       }
-      return result.isEmpty() ? HttpResponseBo.DOWNLOAD_UNKNOWN_FILENAME : result;
+      if (result.isEmpty()) {
+        return ServletResponseBo.DOWNLOAD_UNKNOWN_FILENAME;
+      }
+
+      if (charsetEncoding == null) {
+        return result;
+      }
+      try {
+        return URLDecoder.decode(result, charsetEncoding);
+      } catch (UnsupportedEncodingException e) {
+        return result;
+      }
     }
   }
 
-  private String convertBytesToString(byte[] bytes, String characterEncoding, String requestId) {
+  private String convertBytesToString(byte[] bytes, String characterEncoding, String executionId) {
     try {
-      return new String(bytes, (characterEncoding == null || characterEncoding.isEmpty()) ? AbstractHttpExecution.DEFAULT_CHARSET : characterEncoding);
+      return new String(bytes, (characterEncoding == null || characterEncoding.isEmpty()) ? AbstractServletExecution.DEFAULT_CHARSET : characterEncoding);
     } catch (UnsupportedEncodingException e) {
-      log.error("unsupported response character encoding [{}:{}], requestId: [{}].", characterEncoding, AbstractHttpExecution.DEFAULT_CHARSET, requestId);
+      log.error("unsupported response character encoding [{}:{}], executionId: [{}].", characterEncoding, AbstractServletExecution.DEFAULT_CHARSET, executionId);
     }
-    return AbstractHttpExecution.UNSUPPORTED_CHARSET_ENCODING;
+    return AbstractServletExecution.UNSUPPORTED_CHARSET_ENCODING;
   }
 
   @Override

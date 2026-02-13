@@ -27,6 +27,9 @@ public class StatementExecutionDto extends AbstractDbDto {
 
   private List<StatementSqlDto> statementSqlDtoList = new ArrayList<>();
 
+  public StatementExecutionDto() {
+  }
+
   public StatementExecutionDto(StatementExecutionBo statementExecutionBo) {
     this.setDataSourcePortTrailId(statementExecutionBo.getDataSourcePortTrailId());
     this.setConnectionPortTrailId(statementExecutionBo.getConnectionPortTrailId());

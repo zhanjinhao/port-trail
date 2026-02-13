@@ -117,6 +117,7 @@
               <target>
                 <echo message="Base dir: ${project.basedir}"/>
                 <delete dir="${project.basedir}/logs"/>
+                <delete dir="${project.basedir}/logs-test"/>
               </target>
             </configuration>
           </execution>

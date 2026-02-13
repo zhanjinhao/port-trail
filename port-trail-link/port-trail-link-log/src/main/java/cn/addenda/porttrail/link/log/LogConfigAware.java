@@ -28,8 +28,8 @@ public class LogConfigAware {
   }
 
   @LinkPropertiesAware(value = FacadeType.LOG)
-  public static void setLogProperties(Properties httpProperties) {
-    LogConfigAware.logProperties = httpProperties;
+  public static void setLogProperties(Properties logProperties) {
+    LogConfigAware.logProperties = logProperties;
   }
 
 }

@@ -21,6 +21,9 @@ public class DbConfigDto extends AbstractDbDto {
 
   private EntryPointSnapshot entryPointSnapshot;
 
+  public DbConfigDto() {
+  }
+
   public DbConfigDto(DbConfigBo dbConfigBo) {
     this.setJdbcUrl(dbConfigBo.getJdbcUrl());
     this.setUser(dbConfigBo.getUser());

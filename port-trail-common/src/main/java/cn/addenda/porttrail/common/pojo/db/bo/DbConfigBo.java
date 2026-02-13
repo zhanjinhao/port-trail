@@ -49,7 +49,7 @@ public class DbConfigBo implements DbExecution {
 
   @Override
   public String getDbExecutionType() {
-    return DbExecution.DB_EXECUTION_TYPE_CONFIG;
+    return DbExecution.DB_EXECUTION_TYPE_DB_CONFIG;
   }
 
   @Override

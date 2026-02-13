@@ -31,7 +31,7 @@ public class AbstractStatementExecutionBoQueue {
       dbWriter.writeStatement(abstractStatementExecutionBo);
     } else if (DbExecution.DB_EXECUTION_TYPE_PREPARED_STATEMENT.equals(abstractStatementExecutionBo.getDbExecutionType())) {
       dbWriter.writePreparedStatement(abstractStatementExecutionBo);
-    } else if (DbExecution.DB_EXECUTION_TYPE_CONFIG.equals(abstractStatementExecutionBo.getDbExecutionType())) {
+    } else if (DbExecution.DB_EXECUTION_TYPE_DB_CONFIG.equals(abstractStatementExecutionBo.getDbExecutionType())) {
       dbWriter.writeDbConfig(abstractStatementExecutionBo);
     } else {
       throw new UnsupportedOperationException();
