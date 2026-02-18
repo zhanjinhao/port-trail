@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.addenda.porttrail.server.mapper.EstEntryPointMapper">
+  <resultMap type="cn.addenda.porttrail.server.entity.EstEntryPoint" id="EstEntryPointMap">
+    <id property="id" column="id" jdbcType="BIGINT"/>
+  </resultMap>
+
+  <sql id="allColumn">
+    `id`, `entry_point_type`, `detail`, `entry_id`, `entry_point_snapshot_id`
+  </sql>
+
+  <sql id="setCondition">
+    <if test="entryPointType != null">
+      `entry_point_type` = #{entryPointType,jdbcType=VARCHAR},
+    </if>
+    <if test="detail != null">
+      `detail` = #{detail,jdbcType=VARCHAR},
+    </if>
+    <if test="entryId != null">
+      `entry_id` = #{entryId,jdbcType=BIGINT},
+    </if>
+    <if test="entryPointSnapshotId != null">
+      `entry_point_snapshot_id` = #{entryPointSnapshotId,jdbcType=BIGINT},
+    </if>
+  </sql>
+
+  <sql id="queryCondition">
+    <if test="id != null">
+      and `id` = #{id,jdbcType=BIGINT}
+    </if>
+    <if test="entryPointType != null">
+      and `entry_point_type` = #{entryPointType,jdbcType=VARCHAR}
+    </if>
+    <if test="detail != null">
+      and `detail` = #{detail,jdbcType=VARCHAR}
+    </if>
+    <if test="entryId != null">
+      and `entry_id` = #{entryId,jdbcType=BIGINT}
+    </if>
+    <if test="entryPointSnapshotId != null">
+      and `entry_point_snapshot_id` = #{entryPointSnapshotId,jdbcType=BIGINT}
+    </if>
+  </sql>
+
+  <insert id="insert" keyProperty="id" useGeneratedKeys="true">
+    insert into t_est_entry_point
+    <trim prefix="set" suffixOverrides=",">
+      id = #{id,jdbcType=BIGINT},
+      <include refid="setCondition"/>
+    </trim>
+  </insert>
+
+  <update id="updateById">
+    update t_est_entry_point
+    <trim prefix="set" suffixOverrides=",">
+      <include refid="setCondition"/>
+    </trim>
+    where id = #{id,jdbcType=BIGINT}
+    and delete_flag = 'N'
+  </update>
+
+  <delete id="deleteById">
+    update t_est_entry_point
+    set delete_flag = 'Y',
+        delete_dt   = now(3)
+    where id = #{id,jdbcType=BIGINT}
+      and delete_flag = 'N'
+  </delete>
+
+  <delete id="deleteByEntity">
+    update t_est_entry_point set delete_flag = 'Y', delete_dt = now(3)
+    <trim prefix="where" prefixOverrides="and">
+      <include refid="queryCondition"/>
+      and delete_flag = 'N'
+    </trim>
+  </delete>
+
+  <select id="queryByEntity" resultMap="EstEntryPointMap">
+    select
+    <include refid="allColumn"/>
+    from t_est_entry_point
+    <trim prefix="where" prefixOverrides="and">
+      <include refid="queryCondition"/>
+      and delete_flag = 'N'
+    </trim>
+  </select>
+
+  <select id="queryById" resultMap="EstEntryPointMap">
+    select
+    <include refid="allColumn"/>
+    from t_est_entry_point
+    <trim prefix="where" prefixOverrides="and">
+      id = #{id,jdbcType=BIGINT}
+      and delete_flag = 'N'
+    </trim>
+  </select>
+
+  <select id="queryByIdList" resultMap="EstEntryPointMap">
+    select
+    <include refid="allColumn"/>
+    from t_est_entry_point
+    <trim prefix="where" prefixOverrides="and">
+      id in
+      <foreach collection="idList" open="(" close=")" item="id" separator=",">
+        #{id,jdbcType=BIGINT}
+      </foreach>
+      and delete_flag = 'N'
+    </trim>
+  </select>
+
+  <select id="countByEntity" resultType="java.lang.Long">
+    select count(*) from t_est_entry_point
+    <trim prefix="where" prefixOverrides="and">
+      <include refid="queryCondition"/>
+      and delete_flag = 'N'
+    </trim>
+  </select>
+</mapper>

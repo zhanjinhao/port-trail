@@ -9,6 +9,8 @@ import cn.addenda.porttrail.common.pojo.db.dto.PreparedStatementExecutionDto;
 import cn.addenda.porttrail.common.pojo.db.dto.StatementExecutionDto;
 import cn.addenda.porttrail.common.util.CompressUtils;
 import cn.addenda.porttrail.common.util.JdkSerializationUtils;
+import cn.addenda.porttrail.server.biz.DbExecutionBiz;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -18,9 +20,13 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("dbExecution")
 public class DbExecutionController {
 
+  @Autowired
+  private DbExecutionBiz dbExecutionBiz;
+
   @PostMapping("receiveDbConfig")
   public void receiveDbConfig(@RequestBody DbConfigDto dbConfigDto) {
     DbConfigBo dbConfigBo = new DbConfigBo(dbConfigDto);
+    dbExecutionBiz.handleDbConfig(dbConfigDto);
     System.out.println(JacksonUtils.toStr(dbConfigBo) + " of " + JacksonUtils.toStr(dbConfigDto.getServiceRuntimeInfo()));
   }
 
@@ -31,6 +37,7 @@ public class DbExecutionController {
     // 可以通过 JacksonUtils 或其他方式反序列化
     StatementExecutionDto statementExecutionDto = (StatementExecutionDto) JdkSerializationUtils.deserialize(bytes);
     StatementExecutionBo statementExecutionBo = new StatementExecutionBo(statementExecutionDto);
+    dbExecutionBiz.handleStatementExecution(statementExecutionDto);
     System.out.println(JacksonUtils.toStr(statementExecutionBo) + " of " + JacksonUtils.toStr(statementExecutionDto.getServiceRuntimeInfo()));
   }
 
@@ -41,6 +48,7 @@ public class DbExecutionController {
     // 可以通过 JacksonUtils 或其他方式反序列化
     PreparedStatementExecutionDto preparedStatementExecutionDto = (PreparedStatementExecutionDto) JdkSerializationUtils.deserialize(bytes);
     PreparedStatementExecutionBo preparedStatementExecutionBo = new PreparedStatementExecutionBo(preparedStatementExecutionDto);
+    dbExecutionBiz.handlePreparedStatementExecution(preparedStatementExecutionDto);
     System.out.println(JacksonUtils.toStr(preparedStatementExecutionBo) + " of " + JacksonUtils.toStr(preparedStatementExecutionDto.getServiceRuntimeInfo()));
   }
 

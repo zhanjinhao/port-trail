@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.addenda.porttrail.server.mapper.EstDbConfigMapper">
+  <resultMap type="cn.addenda.porttrail.server.entity.EstDbConfig" id="EstDbConfigMap">
+    <id property="id" column="id" jdbcType="BIGINT"/>
+  </resultMap>
+
+  <sql id="allColumn">
+    `id`, `system_code`, `service_name`, `image_name`, `env`, `instance_id`, `data_source_port_trail_id`, `connection_port_trail_id`, `statement_port_trail_id`, `jdbc_url`, `user`, `password`, `driver_name`, `entry_point_snapshot_id`
+  </sql>
+
+  <sql id="setCondition">
+    <if test="systemCode != null">
+      `system_code` = #{systemCode,jdbcType=VARCHAR},
+    </if>
+    <if test="serviceName != null">
+      `service_name` = #{serviceName,jdbcType=VARCHAR},
+    </if>
+    <if test="imageName != null">
+      `image_name` = #{imageName,jdbcType=VARCHAR},
+    </if>
+    <if test="env != null">
+      `env` = #{env,jdbcType=VARCHAR},
+    </if>
+    <if test="instanceId != null">
+      `instance_id` = #{instanceId,jdbcType=VARCHAR},
+    </if>
+    <if test="dataSourcePortTrailId != null">
+      `data_source_port_trail_id` = #{dataSourcePortTrailId,jdbcType=VARCHAR},
+    </if>
+    <if test="connectionPortTrailId != null">
+      `connection_port_trail_id` = #{connectionPortTrailId,jdbcType=VARCHAR},
+    </if>
+    <if test="statementPortTrailId != null">
+      `statement_port_trail_id` = #{statementPortTrailId,jdbcType=VARCHAR},
+    </if>
+    <if test="jdbcUrl != null">
+      `jdbc_url` = #{jdbcUrl,jdbcType=VARCHAR},
+    </if>
+    <if test="user != null">
+      `user` = #{user,jdbcType=VARCHAR},
+    </if>
+    <if test="password != null">
+      `password` = #{password,jdbcType=VARCHAR},
+    </if>
+    <if test="driverName != null">
+      `driver_name` = #{driverName,jdbcType=VARCHAR},
+    </if>
+    <if test="entryPointSnapshotId != null">
+      `entry_point_snapshot_id` = #{entryPointSnapshotId,jdbcType=BIGINT},
+    </if>
+  </sql>
+
+  <sql id="queryCondition">
+    <if test="id != null">
+      and `id` = #{id,jdbcType=BIGINT}
+    </if>
+    <if test="systemCode != null">
+      and `system_code` = #{systemCode,jdbcType=VARCHAR}
+    </if>
+    <if test="serviceName != null">
+      and `service_name` = #{serviceName,jdbcType=VARCHAR}
+    </if>
+    <if test="imageName != null">
+      and `image_name` = #{imageName,jdbcType=VARCHAR}
+    </if>
+    <if test="env != null">
+      and `env` = #{env,jdbcType=VARCHAR}
+    </if>
+    <if test="instanceId != null">
+      and `instance_id` = #{instanceId,jdbcType=VARCHAR}
+    </if>
+    <if test="dataSourcePortTrailId != null">
+      and `data_source_port_trail_id` = #{dataSourcePortTrailId,jdbcType=VARCHAR}
+    </if>
+    <if test="connectionPortTrailId != null">
+      and `connection_port_trail_id` = #{connectionPortTrailId,jdbcType=VARCHAR}
+    </if>
+    <if test="statementPortTrailId != null">
+      and `statement_port_trail_id` = #{statementPortTrailId,jdbcType=VARCHAR}
+    </if>
+    <if test="jdbcUrl != null">
+      and `jdbc_url` = #{jdbcUrl,jdbcType=VARCHAR}
+    </if>
+    <if test="user != null">
+      and `user` = #{user,jdbcType=VARCHAR}
+    </if>
+    <if test="password != null">
+      and `password` = #{password,jdbcType=VARCHAR}
+    </if>
+    <if test="driverName != null">
+      and `driver_name` = #{driverName,jdbcType=VARCHAR}
+    </if>
+    <if test="entryPointSnapshotId != null">
+      and `entry_point_snapshot_id` = #{entryPointSnapshotId,jdbcType=BIGINT}
+    </if>
+  </sql>
+
+  <insert id="insert" keyProperty="id" useGeneratedKeys="true">
+    insert into t_est_db_config
+    <trim prefix="set" suffixOverrides=",">
+      id = #{id,jdbcType=BIGINT},
+      <include refid="setCondition"/>
+    </trim>
+  </insert>
+
+  <update id="updateById">
+    update t_est_db_config
+    <trim prefix="set" suffixOverrides=",">
+      <include refid="setCondition"/>
+    </trim>
+    where id = #{id,jdbcType=BIGINT}
+    and delete_flag = 'N'
+  </update>
+
+  <delete id="deleteById">
+    update t_est_db_config
+    set delete_flag = 'Y',
+        delete_dt   = now(3)
+    where id = #{id,jdbcType=BIGINT}
+      and delete_flag = 'N'
+  </delete>
+
+  <delete id="deleteByEntity">
+    update t_est_db_config set delete_flag = 'Y', delete_dt = now(3)
+    <trim prefix="where" prefixOverrides="and">
+      <include refid="queryCondition"/>
+      and delete_flag = 'N'
+    </trim>
+  </delete>
+
+  <select id="queryByEntity" resultMap="EstDbConfigMap">
+    select
+    <include refid="allColumn"/>
+    from t_est_db_config
+    <trim prefix="where" prefixOverrides="and">
+      <include refid="queryCondition"/>
+      and delete_flag = 'N'
+    </trim>
+  </select>
+
+  <select id="queryById" resultMap="EstDbConfigMap">
+    select
+    <include refid="allColumn"/>
+    from t_est_db_config
+    <trim prefix="where" prefixOverrides="and">
+      id = #{id,jdbcType=BIGINT}
+      and delete_flag = 'N'
+    </trim>
+  </select>
+
+  <select id="queryByIdList" resultMap="EstDbConfigMap">
+    select
+    <include refid="allColumn"/>
+    from t_est_db_config
+    <trim prefix="where" prefixOverrides="and">
+      id in
+      <foreach collection="idList" open="(" close=")" item="id" separator=",">
+        #{id,jdbcType=BIGINT}
+      </foreach>
+      and delete_flag = 'N'
+    </trim>
+  </select>
+
+  <select id="countByEntity" resultType="java.lang.Long">
+    select count(*) from t_est_db_config
+    <trim prefix="where" prefixOverrides="and">
+      <include refid="queryCondition"/>
+      and delete_flag = 'N'
+    </trim>
+  </select>
+</mapper>

@@ -36,6 +36,9 @@
     <hikari.version>3.4.5</hikari.version>
     <druid.version>1.2.8</druid.version>
     <spring-boot.version>2.6.5</spring-boot.version>
+    <mybatis.version>3.5.16</mybatis.version>
+    <mybatis-spring.version>2.0.7</mybatis-spring.version>
+    <mybatis-spring-boot-starter.version>2.2.1</mybatis-spring-boot-starter.version>
     <javax.servlet.api.version>4.0.1</javax.servlet.api.version>
     <jakarta.servlet.api.version>6.0.0</jakarta.servlet.api.version>
     <maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>
@@ -177,17 +180,50 @@
         <artifactId>spring-boot-starter-test</artifactId>
         <version>${spring-boot.version}</version>
       </dependency>
-
       <dependency>
         <groupId>cn.addenda</groupId>
         <artifactId>base-component</artifactId>
         <version>${component.version}</version>
       </dependency>
-
+      <dependency>
+        <groupId>org.mybatis</groupId>
+        <artifactId>mybatis</artifactId>
+        <version>${mybatis.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.mybatis</groupId>
+        <artifactId>mybatis-spring</artifactId>
+        <version>${mybatis-spring.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.mybatis.spring.boot</groupId>
+        <artifactId>mybatis-spring-boot-starter</artifactId>
+        <version>${mybatis-spring-boot-starter.version}</version>
+      </dependency>
       <dependency>
         <groupId>com.github.jsqlparser</groupId>
         <artifactId>jsqlparser</artifactId>
         <version>${jsqlparser.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>cn.addenda</groupId>
+        <artifactId>transaction-component</artifactId>
+        <version>${component.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>cn.addenda</groupId>
+        <artifactId>mybatis-component</artifactId>
+        <version>${component.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>cn.addenda</groupId>
+        <artifactId>mybatis-basemodel-core</artifactId>
+        <version>${component.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>cn.addenda</groupId>
+        <artifactId>mybatis-basemodel-spring</artifactId>
+        <version>${component.version}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
