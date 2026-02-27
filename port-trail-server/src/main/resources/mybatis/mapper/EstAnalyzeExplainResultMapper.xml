@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.addenda.porttrail.server.mapper.EstAnalyzeExplainResultMapper">
+  <resultMap type="cn.addenda.porttrail.server.entity.EstAnalyzeExplainResult" id="EstAnalyzeExplainResultMap">
+    <id property="id" column="id" jdbcType="BIGINT"/>
+  </resultMap>
+
+  <sql id="allColumn">
+    `id`, `source`, `outer_id`, `sql_type`,
+    `explain_id`, `explain_select_type`, `explain_table`, `explain_partitions`, `explain_type`, `explain_possible_keys`, `explain_key`, `explain_key_len`, `explain_ref`, `explain_rows`, `explain_filtered`, `explain_extra`
+  </sql>
+
+  <sql id="setCondition">
+    <if test="source != null">
+      `source` = #{source,jdbcType=VARCHAR},
+    </if>
+    <if test="outerId != null">
+      `outer_id` = #{outerId,jdbcType=BIGINT},
+    </if>
+    <if test="sqlType != null">
+      `sql_type` = #{sqlType,jdbcType=VARCHAR},
+    </if>
+    <if test="explainId != null">
+      `explain_id` = #{explainId,jdbcType=BIGINT},
+    </if>
+    <if test="explainSelectType != null">
+      `explain_select_type` = #{explainSelectType,jdbcType=VARCHAR},
+    </if>
+    <if test="explainTable != null">
+      `explain_table` = #{explainTable,jdbcType=VARCHAR},
+    </if>
+    <if test="explainPartitions != null">
+      `explain_partitions` = #{explainPartitions,jdbcType=VARCHAR},
+    </if>
+    <if test="explainType != null">
+      `explain_type` = #{explainType,jdbcType=VARCHAR},
+    </if>
+    <if test="explainPossibleKeys != null">
+      `explain_possible_keys` = #{explainPossibleKeys,jdbcType=VARCHAR},
+    </if>
+    <if test="explainKey != null">
+      `explain_key` = #{explainKey,jdbcType=VARCHAR},
+    </if>
+    <if test="explainKeyLen != null">
+      `explain_key_len` = #{explainKeyLen,jdbcType=INTEGER},
+    </if>
+    <if test="explainRef != null">
+      `explain_ref` = #{explainRef,jdbcType=VARCHAR},
+    </if>
+    <if test="explainRows != null">
+      `explain_rows` = #{explainRows,jdbcType=INTEGER},
+    </if>
+    <if test="explainFiltered != null">
+      `explain_filtered` = #{explainFiltered,jdbcType=INTEGER},
+    </if>
+    <if test="explainExtra != null">
+      `explain_extra` = #{explainExtra,jdbcType=VARCHAR},
+    </if>
+  </sql>
+
+  <sql id="queryCondition">
+    <if test="id != null">
+      and `id` = #{id,jdbcType=BIGINT}
+    </if>
+    <if test="source != null">
+      and `source` = #{source,jdbcType=VARCHAR}
+    </if>
+    <if test="outerId != null">
+      and `outer_id` = #{outerId,jdbcType=BIGINT}
+    </if>
+    <if test="sqlType != null">
+      and `sql_type` = #{sqlType,jdbcType=VARCHAR}
+    </if>
+    <if test="explainId != null">
+      and `explain_id` = #{explainId,jdbcType=BIGINT}
+    </if>
+    <if test="explainSelectType != null">
+      and `explain_select_type` = #{explainSelectType,jdbcType=VARCHAR}
+    </if>
+    <if test="explainTable != null">
+      and `explain_table` = #{explainTable,jdbcType=VARCHAR}
+    </if>
+    <if test="explainPartitions != null">
+      and `explain_partitions` = #{explainPartitions,jdbcType=VARCHAR}
+    </if>
+    <if test="explainType != null">
+      and `explain_type` = #{explainType,jdbcType=VARCHAR}
+    </if>
+    <if test="explainPossibleKeys != null">
+      and `explain_possible_keys` = #{explainPossibleKeys,jdbcType=VARCHAR}
+    </if>
+    <if test="explainKey != null">
+      and `explain_key` = #{explainKey,jdbcType=VARCHAR}
+    </if>
+    <if test="explainKeyLen != null">
+      and `explain_key_len` = #{explainKeyLen,jdbcType=INTEGER}
+    </if>
+    <if test="explainRef != null">
+      and `explain_ref` = #{explainRef,jdbcType=VARCHAR}
+    </if>
+    <if test="explainRows != null">
+      and `explain_rows` = #{explainRows,jdbcType=INTEGER}
+    </if>
+    <if test="explainFiltered != null">
+      and `explain_filtered` = #{explainFiltered,jdbcType=INTEGER}
+    </if>
+    <if test="explainExtra != null">
+      and `explain_extra` = #{explainExtra,jdbcType=VARCHAR}
+    </if>
+  </sql>
+
+  <insert id="insert" keyProperty="id" useGeneratedKeys="true">
+    insert into t_est_analyze_explain_result
+    <trim prefix="set" suffixOverrides=",">
+      id = #{id,jdbcType=BIGINT},
+      <include refid="setCondition"/>
+    </trim>
+  </insert>
+
+  <update id="updateById">
+    update t_est_analyze_explain_result
+    <trim prefix="set" suffixOverrides=",">
+      <include refid="setCondition"/>
+    </trim>
+    where id = #{id,jdbcType=BIGINT}
+    and delete_flag = 'N'
+  </update>
+
+  <delete id="deleteById">
+    update t_est_analyze_explain_result
+    set delete_flag = 'Y',
+        delete_dt   = now(3)
+    where id = #{id,jdbcType=BIGINT}
+      and delete_flag = 'N'
+  </delete>
+
+  <delete id="deleteByEntity">
+    update t_est_analyze_explain_result set delete_flag = 'Y', delete_dt = now(3)
+    <trim prefix="where" prefixOverrides="and">
+      <include refid="queryCondition"/>
+      and delete_flag = 'N'
+    </trim>
+  </delete>
+
+  <select id="queryByEntity" resultMap="EstAnalyzeExplainResultMap">
+    select
+    <include refid="allColumn"/>
+    from t_est_analyze_explain_result
+    <trim prefix="where" prefixOverrides="and">
+      <include refid="queryCondition"/>
+      and delete_flag = 'N'
+    </trim>
+  </select>
+
+  <select id="queryById" resultMap="EstAnalyzeExplainResultMap">
+    select
+    <include refid="allColumn"/>
+    from t_est_analyze_explain_result
+    <trim prefix="where" prefixOverrides="and">
+      id = #{id,jdbcType=BIGINT}
+      and delete_flag = 'N'
+    </trim>
+  </select>
+
+  <select id="queryByIdList" resultMap="EstAnalyzeExplainResultMap">
+    select
+    <include refid="allColumn"/>
+    from t_est_analyze_explain_result
+    <trim prefix="where" prefixOverrides="and">
+      id in
+      <foreach collection="idList" open="(" close=")" item="id" separator=",">
+        #{id,jdbcType=BIGINT}
+      </foreach>
+      and delete_flag = 'N'
+    </trim>
+  </select>
+
+  <select id="countByEntity" resultType="java.lang.Long">
+    select count(*) from t_est_analyze_explain_result
+    <trim prefix="where" prefixOverrides="and">
+      <include refid="queryCondition"/>
+      and delete_flag = 'N'
+    </trim>
+  </select>
+</mapper>

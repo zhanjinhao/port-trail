@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.addenda.porttrail.server.mapper.EstAnalyzeTableNameResultMapper">
+  <resultMap type="cn.addenda.porttrail.server.entity.EstAnalyzeTableNameResult" id="EstAnalyzeTableNameResultMap">
+    <id property="id" column="id" jdbcType="BIGINT"/>
+  </resultMap>
+
+  <sql id="allColumn">
+    `id`, `source`, `sql_type`, `outer_id`, `table_names`, `table_count`
+  </sql>
+
+  <sql id="setCondition">
+    <if test="source != null">
+      `source` = #{source,jdbcType=VARCHAR},
+    </if>
+    <if test="sqlType != null">
+      `sql_type` = #{sqlType,jdbcType=VARCHAR},
+    </if>
+    <if test="outerId != null">
+      `outer_id` = #{outerId,jdbcType=BIGINT},
+    </if>
+    <if test="tableNames != null">
+      `table_names` = #{tableNames,jdbcType=VARCHAR},
+    </if>
+    <if test="tableCount != null">
+      `table_count` = #{tableCount,jdbcType=INTEGER},
+    </if>
+  </sql>
+
+  <sql id="queryCondition">
+    <if test="id != null">
+      and `id` = #{id,jdbcType=BIGINT}
+    </if>
+    <if test="source != null">
+      and `source` = #{source,jdbcType=VARCHAR}
+    </if>
+    <if test="sqlType != null">
+      and `sql_type` = #{sqlType,jdbcType=VARCHAR}
+    </if>
+    <if test="outerId != null">
+      and `outer_id` = #{outerId,jdbcType=BIGINT}
+    </if>
+    <if test="tableNames != null">
+      and `table_names` = #{tableNames,jdbcType=VARCHAR}
+    </if>
+    <if test="tableCount != null">
+      and `table_count` = #{tableCount,jdbcType=INTEGER}
+    </if>
+  </sql>
+
+  <insert id="insert" keyProperty="id" useGeneratedKeys="true">
+    insert into t_est_analyze_table_name_result
+    <trim prefix="set" suffixOverrides=",">
+      id = #{id,jdbcType=BIGINT},
+      <include refid="setCondition"/>
+    </trim>
+  </insert>
+
+  <update id="updateById">
+    update t_est_analyze_table_name_result
+    <trim prefix="set" suffixOverrides=",">
+      <include refid="setCondition"/>
+    </trim>
+    where id = #{id,jdbcType=BIGINT}
+    and delete_flag = 'N'
+  </update>
+
+  <delete id="deleteById">
+    update t_est_analyze_table_name_result
+    set delete_flag = 'Y',
+        delete_dt   = now(3)
+    where id = #{id,jdbcType=BIGINT}
+      and delete_flag = 'N'
+  </delete>
+
+  <delete id="deleteByEntity">
+    update t_est_analyze_table_name_result
+    set delete_flag = 'Y', delete_dt = now(3)
+    <trim prefix="where" prefixOverrides="and">
+      <include refid="queryCondition"/>
+      and delete_flag = 'N'
+    </trim>
+  </delete>
+
+  <select id="queryByEntity" resultMap="EstAnalyzeTableNameResultMap">
+    select
+    <include refid="allColumn"/>
+    from t_est_analyze_table_name_result
+    <trim prefix="where" prefixOverrides="and">
+      <include refid="queryCondition"/>
+      and delete_flag = 'N'
+    </trim>
+  </select>
+
+  <select id="queryById" resultMap="EstAnalyzeTableNameResultMap">
+    select
+    <include refid="allColumn"/>
+    from t_est_analyze_table_name_result
+    <trim prefix="where" prefixOverrides="and">
+      id = #{id,jdbcType=BIGINT}
+      and delete_flag = 'N'
+    </trim>
+  </select>
+
+  <select id="queryByIdList" resultMap="EstAnalyzeTableNameResultMap">
+    select
+    <include refid="allColumn"/>
+    from t_est_analyze_table_name_result
+    <trim prefix="where" prefixOverrides="and">
+      id in
+      <foreach collection="idList" open="(" close=")" item="id" separator=",">
+        #{id,jdbcType=BIGINT}
+      </foreach>
+      and delete_flag = 'N'
+    </trim>
+  </select>
+
+  <select id="countByEntity" resultType="java.lang.Long">
+    select count(*) from t_est_analyze_table_name_result
+    <trim prefix="where" prefixOverrides="and">
+      <include refid="queryCondition"/>
+      and delete_flag = 'N'
+    </trim>
+  </select>
+</mapper>

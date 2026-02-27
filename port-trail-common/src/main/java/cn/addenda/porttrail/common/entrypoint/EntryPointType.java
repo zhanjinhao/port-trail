@@ -1,0 +1,45 @@
+package cn.addenda.porttrail.common.entrypoint;
+
+import lombok.Getter;
+
+@Getter
+public enum EntryPointType {
+
+  SERVER_TOMCAT("SERVER_TOMCAT"),
+  SERVER_JETTY("SERVER_JETTY"),
+
+  SERVLET_JAVAX("SERVLET_JAVAX"),
+  SERVLET_JAKARTA("SERVLET_JAKARTA"),
+
+  TASK("TASK"),
+  JOB_XXL_JOB_HANDLER("JOB_XXL_JOB_HANDLER"),
+  JOB_XXL_METHOD_JOB("JOB_XXL_METHOD_JOB"),
+  JOB_XXL_GLUE_JOB("JOB_XXL_GLUE_JOB"),
+  JOB_XXL_SCRIPT_JOB("JOB_XXL_SCRIPT_JOB"),
+
+  WEB_SPRINGMVC("WEB_SPRINGMVC"),
+  WEB_RESTEASY("WEB_RESTEASY"),
+
+  TX_TRANSACTIONAL("TX_TRANSACTIONAL"),
+  TX_TRANSACTION_HELPER("TX_TRANSACTION_HELPER"),
+  TX_TRANSACTION_TEMPLATE("TX_TRANSACTION_TEMPLATE"),
+
+  ORM_MYBATIS("ORM_MYBATIS"),
+
+  REMOTE_JDBC("REMOTE_JDBC"),
+  REMOTE_REDIS("REMOTE_REDIS"),
+  REMOTE_HTTPCLIENT("REMOTE_HTTPCLIENT");
+
+  private final String type;
+
+  EntryPointType(String type) {
+    this.type = type;
+  }
+
+  public boolean ifTx() {
+    return this == TX_TRANSACTIONAL
+            || this == TX_TRANSACTION_HELPER
+            || this == TX_TRANSACTION_TEMPLATE;
+  }
+
+}
