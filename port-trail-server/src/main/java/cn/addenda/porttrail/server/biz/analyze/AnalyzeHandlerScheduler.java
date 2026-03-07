@@ -4,6 +4,8 @@ import cn.addenda.component.transaction.PlatformTransactionHelper;
 import cn.addenda.porttrail.server.bo.analyze.param.AnalyzePreparedStatementExecutionParam;
 import cn.addenda.porttrail.server.bo.analyze.param.AnalyzeStatementExecutionParam;
 import cn.addenda.porttrail.server.bo.analyze.result.AnalyzeResult;
+import cn.addenda.porttrail.server.manager.EstPreparedStatementExecutionManager;
+import cn.addenda.porttrail.server.manager.EstStatementExecutionManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -19,6 +21,12 @@ public class AnalyzeHandlerScheduler {
 
   @Autowired
   private PlatformTransactionHelper platformTransactionHelper;
+
+  @Autowired
+  private EstStatementExecutionManager estStatementExecutionManager;
+
+  @Autowired
+  private EstPreparedStatementExecutionManager estPreparedStatementExecutionManager;
 
   public void handle(AnalyzePreparedStatementExecutionParam analyzeParam) {
 
@@ -36,8 +44,8 @@ public class AnalyzeHandlerScheduler {
           }
         }
       }
+      estPreparedStatementExecutionManager.markStatementExecutionAnalyzed(analyzeParam.getEstPreparedStatementExecutionBo().getId());
     });
-
   }
 
   public void handle(AnalyzeStatementExecutionParam analyzeParam) {
@@ -56,6 +64,7 @@ public class AnalyzeHandlerScheduler {
           }
         }
       }
+      estStatementExecutionManager.markStatementExecutionAnalyzed(analyzeParam.getEstStatementExecutionBo().getId());
     });
 
   }

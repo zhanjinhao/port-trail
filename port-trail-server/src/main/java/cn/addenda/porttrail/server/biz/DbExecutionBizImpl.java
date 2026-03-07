@@ -9,9 +9,6 @@ import cn.addenda.porttrail.common.pojo.db.dto.*;
 import cn.addenda.porttrail.common.util.CompressUtils;
 import cn.addenda.porttrail.common.util.DateUtils;
 import cn.addenda.porttrail.common.util.JdkSerializationUtils;
-import cn.addenda.porttrail.server.biz.analyze.AnalyzeHandlerScheduler;
-import cn.addenda.porttrail.server.bo.analyze.param.AnalyzePreparedStatementExecutionParam;
-import cn.addenda.porttrail.server.bo.analyze.param.AnalyzeStatementExecutionParam;
 import cn.addenda.porttrail.server.bo.est.*;
 import cn.addenda.porttrail.server.curd.*;
 import cn.addenda.porttrail.server.entity.*;
@@ -51,9 +48,6 @@ public class DbExecutionBizImpl implements DbExecutionBiz {
 
   @Autowired
   private EstStatementSqlCurder estStatementSqlCurder;
-
-  @Autowired
-  private AnalyzeHandlerScheduler analyzeHandlerScheduler;
 
   /**
    * 数据库配置数据是要落库的。
@@ -114,8 +108,8 @@ public class DbExecutionBizImpl implements DbExecutionBiz {
   }
 
   @Override
-  public void handlePreparedStatementExecution(PreparedStatementExecutionDto preparedStatementExecutionDto) {
-    EstPreparedStatementExecutionBo estPreparedStatementExecutionBo = transactionHelperNew.doTransaction(() -> {
+  public EstPreparedStatementExecutionBo handlePreparedStatementExecution(PreparedStatementExecutionDto preparedStatementExecutionDto) {
+    return transactionHelperNew.doTransaction(() -> {
       EntryPointSnapshot entryPointSnapshot = preparedStatementExecutionDto.getEntryPointSnapshot();
       EstEntryPointSnapshot estEntryPointSnapshot = EstEntryPointSnapshot.ofParam();
       estEntryPointSnapshot.setThreadName(entryPointSnapshot.getThreadName());
@@ -190,16 +184,11 @@ public class DbExecutionBizImpl implements DbExecutionBiz {
 
       return result;
     });
-
-    AnalyzePreparedStatementExecutionParam analyzePreparedStatementExecutionParam = new AnalyzePreparedStatementExecutionParam();
-    analyzePreparedStatementExecutionParam.setEstPreparedStatementExecutionBo(estPreparedStatementExecutionBo);
-    analyzePreparedStatementExecutionParam.setPreparedStatementExecutionDto(preparedStatementExecutionDto);
-    analyzeHandlerScheduler.handle(analyzePreparedStatementExecutionParam);
   }
 
   @Override
-  public void handleStatementExecution(StatementExecutionDto statementExecutionDto) {
-    EstStatementExecutionBo estStatementExecutionBo = transactionHelperNew.doTransaction(() -> {
+  public EstStatementExecutionBo handleStatementExecution(StatementExecutionDto statementExecutionDto) {
+    return transactionHelperNew.doTransaction(() -> {
       EntryPointSnapshot entryPointSnapshot = statementExecutionDto.getEntryPointSnapshot();
       EstEntryPointSnapshot estEntryPointSnapshot = EstEntryPointSnapshot.ofParam();
       estEntryPointSnapshot.setThreadName(entryPointSnapshot.getThreadName());
@@ -263,10 +252,6 @@ public class DbExecutionBizImpl implements DbExecutionBiz {
       return result;
     });
 
-    AnalyzeStatementExecutionParam analyzeStatementExecutionParam = new AnalyzeStatementExecutionParam();
-    analyzeStatementExecutionParam.setEstStatementExecutionBo(estStatementExecutionBo);
-    analyzeStatementExecutionParam.setStatementExecutionDto(statementExecutionDto);
-    analyzeHandlerScheduler.handle(analyzeStatementExecutionParam);
   }
 
 }
