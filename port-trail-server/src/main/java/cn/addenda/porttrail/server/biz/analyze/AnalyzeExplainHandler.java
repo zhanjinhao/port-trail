@@ -38,14 +38,14 @@ public class AnalyzeExplainHandler extends AbstractDataSourceAnalyzeHandler<Anal
   @Autowired
   private EstAnalyzeExplainResultCurder estAnalyzeExplainResultCurder;
 
-      @Override
-      public String handlerName() {
-        return "AnalyzeExplainHandler";
-      }
+  @Override
+  public String handlerName() {
+    return "AnalyzeExplainHandler";
+  }
 
-      @Override
-      public AnalyzeExplainResult handle(AnalyzePreparedStatementExecutionParam analyzeParam) {
-        try {
+  @Override
+  public AnalyzeExplainResult handle(AnalyzePreparedStatementExecutionParam analyzeParam) {
+    try {
       return doPreparedHandle(analyzeParam);
     } catch (SQLException e) {
       // todo
@@ -58,40 +58,46 @@ public class AnalyzeExplainHandler extends AbstractDataSourceAnalyzeHandler<Anal
     String parameterizedSql = estPreparedStatementExecutionBo.getParameterizedSql();
 
     EstDbConfig estDbConfig = queryByConnectionPortTrailId(estPreparedStatementExecutionBo.getConnectionPortTrailId());
-    Connection connection = getConnection(estDbConfig);
-
-    AnalyzeExplainResult analyzeExplainResult = new AnalyzeExplainResult();
-    analyzeExplainResult.setSource(AnalyzeResult.SOURCE_PREPARED_STATEMENT_PARAMETER);
-    String sqlType = SqlUtils.getSqlType(parameterizedSql);
-
-    List<EstPreparedStatementParameterBo> estPreparedStatementParameterBoList =
-            estPreparedStatementExecutionBo.getEstPreparedStatementParameterBoList();
-    for (EstPreparedStatementParameterBo estPreparedStatementParameterBo : estPreparedStatementParameterBoList) {
-      PreparedStatement preparedStatement = connection.prepareStatement("explain " + parameterizedSql);
-      byte[] parameterBytes = estPreparedStatementParameterBo.getParameterBytes();
-      PreparedStatementParameterDto preparedStatementParameterDto =
-              (PreparedStatementParameterDto) JdkSerializationUtils.deserialize(CompressUtils.decompress(parameterBytes));
-
-      PreparedStatementParameter preparedStatementParameter = new PreparedStatementParameter(preparedStatementParameterDto);
-      int capacity = preparedStatementParameter.getCapacity();
-      List<Tuple> parameterList = preparedStatementParameter.getParameterList();
-      List<String> setMethodList = preparedStatementParameter.getSetMethodList();
-      for (int i = 0; i < capacity; i++) {
-        Tuple tuple = parameterList.get(i);
-        String setMethod = setMethodList.get(i);
-        set(preparedStatement, i, tuple, setMethod);
-      }
-
-      AnalyzeExplainResult.AnalyzeExplainSqlResult analyzeExplainSqlResult = analyzeExplainResult.new AnalyzeExplainSqlResult();
-      analyzeExplainResult.getAnalyzeExplainSqlResultList().add(analyzeExplainSqlResult);
-
-      analyzeExplainSqlResult.setOuterId(estPreparedStatementParameterBo.getId());
-      analyzeExplainSqlResult.setSqlType(sqlType);
-
-      addAnalyzeExplainSingleResult(preparedStatement, analyzeExplainSqlResult);
+    if (estDbConfig == null) {
+      return null;
     }
 
-    return analyzeExplainResult;
+    try (Connection connection = getConnection(estDbConfig)) {
+      AnalyzeExplainResult analyzeExplainResult = new AnalyzeExplainResult();
+      analyzeExplainResult.setSource(AnalyzeResult.SOURCE_PREPARED_STATEMENT_PARAMETER);
+      String sqlType = SqlUtils.getSqlType(parameterizedSql);
+      if (SqlUtils.SQL_TYPE_INSERT.equals(sqlType)) {
+        return null;
+      }
+
+      List<EstPreparedStatementParameterBo> estPreparedStatementParameterBoList =
+              estPreparedStatementExecutionBo.getEstPreparedStatementParameterBoList();
+      for (EstPreparedStatementParameterBo estPreparedStatementParameterBo : estPreparedStatementParameterBoList) {
+        PreparedStatement preparedStatement = connection.prepareStatement("explain " + parameterizedSql);
+        byte[] parameterBytes = estPreparedStatementParameterBo.getParameterBytes();
+        PreparedStatementParameterDto preparedStatementParameterDto =
+                (PreparedStatementParameterDto) JdkSerializationUtils.deserialize(CompressUtils.decompress(parameterBytes));
+
+        PreparedStatementParameter preparedStatementParameter = new PreparedStatementParameter(preparedStatementParameterDto);
+        int capacity = preparedStatementParameter.getCapacity();
+        List<Tuple> parameterList = preparedStatementParameter.getParameterList();
+        List<String> setMethodList = preparedStatementParameter.getSetMethodList();
+        for (int i = 0; i < capacity; i++) {
+          Tuple tuple = parameterList.get(i);
+          String setMethod = setMethodList.get(i);
+          set(preparedStatement, i, tuple, setMethod);
+        }
+
+        AnalyzeExplainResult.AnalyzeExplainSqlResult analyzeExplainSqlResult = analyzeExplainResult.new AnalyzeExplainSqlResult();
+        analyzeExplainResult.getAnalyzeExplainSqlResultList().add(analyzeExplainSqlResult);
+
+        analyzeExplainSqlResult.setOuterId(estPreparedStatementParameterBo.getId());
+        analyzeExplainSqlResult.setSqlType(sqlType);
+
+        addAnalyzeExplainSingleResult(preparedStatement, analyzeExplainSqlResult);
+      }
+      return analyzeExplainResult;
+    }
   }
 
   private EstDbConfig queryByConnectionPortTrailId(String connectionPortTrailId) {
@@ -367,7 +373,7 @@ public class AnalyzeExplainHandler extends AbstractDataSourceAnalyzeHandler<Anal
       }
     }
 
-    // todo 后续可以增加一个开关，是不是包含ALL的才能洛克
+    // todo 后续可以增加一个开关，是不是包含ALL的才能落库
     Map<Long, List<EstAnalyzeExplainResult>> estAnalyzeExplainResultGroup =
             estAnalyzeExplainResultList.stream().collect(Collectors.groupingBy(EstAnalyzeExplainResult::getOuterId));
     estAnalyzeExplainResultGroup.entrySet().removeIf(
