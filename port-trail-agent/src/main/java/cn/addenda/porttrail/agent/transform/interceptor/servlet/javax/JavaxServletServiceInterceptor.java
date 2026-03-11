@@ -16,9 +16,12 @@ import cn.addenda.porttrail.infrastructure.log.PortTrailLogger;
 import cn.addenda.porttrail.infrastructure.writer.ServletWriter;
 import net.bytebuddy.implementation.bind.annotation.*;
 
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.Part;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Method;
 import java.net.URLDecoder;
@@ -119,7 +122,7 @@ public class JavaxServletServiceInterceptor extends AbstractDeduplicationEntryPo
           if (MediaType.ifRequestTextContentType(requestContentType)) {
             servletRequestBo.setBody(extractTextRequestBody(requestWrapper, executionId));
           } else if (MediaType.ifRequestMultipartFormContentType(requestContentType)) {
-            servletRequestBo.setBody(extractMultipartFormRequestBody(requestWrapper.getParts(), requestWrapper));
+            servletRequestBo.setBody(extractMultipartFormRequestBody(getParts(requestWrapper), requestWrapper));
           } else if (MediaType.ifRequestBinaryContentType(requestContentType)) {
             servletRequestBo.setBody(ServletRequestBo.BODY_BYTE_ARRAY);
           }
@@ -151,6 +154,24 @@ public class JavaxServletServiceInterceptor extends AbstractDeduplicationEntryPo
       return call;
     });
 
+  }
+
+  public static final String MULTIPART_CONFIG_ELEMENT = "org.eclipse.jetty.multipartConfig";
+  public static final String MULTIPARTS = "org.eclipse.jetty.multiParts";
+
+  private static final Collection<Part> unsupportedParts = new HashSet<>();
+
+  private Collection<Part> getParts(JavaxContentCachingRequestWrapper requestWrapper)
+          throws ServletException, IOException {
+    ServletRequest request = requestWrapper.getRequest();
+    if (!Objects.equals("org.eclipse.jetty.server.Request", request.getClass().getName())) {
+      if (request.getAttribute(MULTIPART_CONFIG_ELEMENT) == null && request.getAttribute(MULTIPARTS) == null) {
+        // todo resteasy框架在未配置MultipartConfigElement的情况下，也能读取form表单，但是此时Request的getParts()方法是会报异常的
+        // todo 暂时不知道怎么处理这种场景
+        return unsupportedParts;
+      }
+    }
+    return requestWrapper.getParts();
   }
 
   private ServletRequestBo assembleServletRequestBo(HttpServletRequest request, String executionId) {
@@ -198,6 +219,17 @@ public class JavaxServletServiceInterceptor extends AbstractDeduplicationEntryPo
 
   private ServletRequestFormDataList extractMultipartFormRequestBody(Collection<Part> parts, HttpServletRequest request) {
     ServletRequestFormDataList servletRequestFormDataList = new ServletRequestFormDataList();
+    if (parts == unsupportedParts) {
+      ServletRequestFormData servletRequestFormData = new ServletRequestFormData();
+      servletRequestFormData.setContentType(null);
+      servletRequestFormData.setName("unsupportedParts");
+      servletRequestFormData.setSize(0L);
+      servletRequestFormData.setHeaderMap(new HashMap<>());
+      servletRequestFormData.setSubmittedFileName(null);
+      servletRequestFormData.setValues(null);
+      servletRequestFormDataList.add(servletRequestFormData);
+      return servletRequestFormDataList;
+    }
     for (Part part : parts) {
       ServletRequestFormData servletRequestFormData = new ServletRequestFormData();
       servletRequestFormDataList.add(servletRequestFormData);
