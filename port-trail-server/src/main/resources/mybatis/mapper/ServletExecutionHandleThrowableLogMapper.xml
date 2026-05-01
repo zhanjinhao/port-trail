@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.addenda.porttrail.server.mapper.ServletExecutionHandleThrowableLogMapper">
+  <resultMap type="cn.addenda.porttrail.server.entity.ServletExecutionHandleThrowableLog"
+             id="ServletExecutionHandleThrowableLogMap">
+    <id property="id" column="id" jdbcType="BIGINT"/>
+  </resultMap>
+
+  <sql id="allColumn">
+    `id`
+    , `system_code`, `service_name`, `image_name`, `env`, `instance_id`, `execution_id`, `handle_type`, `bytes`, `bo_json`, `throwable_stack`
+  </sql>
+
+  <sql id="setCondition">
+    <if test="systemCode != null">
+      `system_code` = #{systemCode,jdbcType=VARCHAR},
+    </if>
+    <if test="serviceName != null">
+      `service_name` = #{serviceName,jdbcType=VARCHAR},
+    </if>
+    <if test="imageName != null">
+      `image_name` = #{imageName,jdbcType=VARCHAR},
+    </if>
+    <if test="env != null">
+      `env` = #{env,jdbcType=VARCHAR},
+    </if>
+    <if test="instanceId != null">
+      `instance_id` = #{instanceId,jdbcType=VARCHAR},
+    </if>
+    <if test="executionId != null">
+      `execution_id` = #{executionId,jdbcType=VARCHAR},
+    </if>
+    <if test="handleType != null">
+      `handle_type` = #{handleType,jdbcType=VARCHAR},
+    </if>
+    <if test="bytes != null">
+      `bytes` = #{bytes},
+    </if>
+    <if test="boJson != null">
+      `bo_json` = #{boJson,jdbcType=VARCHAR},
+    </if>
+    <if test="throwableStack != null">
+      `throwable_stack` = #{throwableStack,jdbcType=VARCHAR},
+    </if>
+  </sql>
+
+  <sql id="queryCondition">
+    <if test="id != null">
+      and `id` = #{id,jdbcType=BIGINT}
+    </if>
+    <if test="systemCode != null">
+      and `system_code` = #{systemCode,jdbcType=VARCHAR}
+    </if>
+    <if test="serviceName != null">
+      and `service_name` = #{serviceName,jdbcType=VARCHAR}
+    </if>
+    <if test="imageName != null">
+      and `image_name` = #{imageName,jdbcType=VARCHAR}
+    </if>
+    <if test="env != null">
+      and `env` = #{env,jdbcType=VARCHAR}
+    </if>
+    <if test="instanceId != null">
+      and `instance_id` = #{instanceId,jdbcType=VARCHAR}
+    </if>
+    <if test="executionId != null">
+      and `execution_id` = #{executionId,jdbcType=VARCHAR}
+    </if>
+    <if test="handleType != null">
+      and `handle_type` = #{handleType,jdbcType=VARCHAR}
+    </if>
+    <if test="bytes != null">
+      and `bytes` = #{bytes}
+    </if>
+    <if test="boJson != null">
+      and `bo_json` = #{boJson,jdbcType=VARCHAR}
+    </if>
+    <if test="throwableStack != null">
+      and `throwable_stack` = #{throwableStack,jdbcType=VARCHAR}
+    </if>
+  </sql>
+
+  <insert id="insert" keyProperty="id" useGeneratedKeys="true">
+    insert into t_servlet_execution_handle_throwable_log
+    <trim prefix="set" suffixOverrides=",">
+      id = #{id,jdbcType=BIGINT},
+      <include refid="setCondition"/>
+    </trim>
+  </insert>
+
+  <update id="updateById">
+    update t_servlet_execution_handle_throwable_log
+    <trim prefix="set" suffixOverrides=",">
+      <include refid="setCondition"/>
+    </trim>
+    where id = #{id,jdbcType=BIGINT}
+    and delete_flag = 'N'
+  </update>
+
+  <delete id="deleteById">
+    update t_servlet_execution_handle_throwable_log
+    set delete_flag = 'Y',
+        delete_dt   = now(3)
+    where id = #{id,jdbcType=BIGINT}
+      and delete_flag = 'N'
+  </delete>
+
+  <delete id="deleteByEntity">
+    update t_servlet_execution_handle_throwable_log set delete_flag = 'Y', delete_dt = now(3)
+    <trim prefix="where" prefixOverrides="and">
+      <include refid="queryCondition"/>
+      and delete_flag = 'N'
+    </trim>
+  </delete>
+
+  <select id="queryByEntity" resultMap="ServletExecutionHandleThrowableLogMap">
+    select
+    <include refid="allColumn"/>
+    from t_servlet_execution_handle_throwable_log
+    <trim prefix="where" prefixOverrides="and">
+      <include refid="queryCondition"/>
+      and delete_flag = 'N'
+    </trim>
+  </select>
+
+  <select id="queryById" resultMap="ServletExecutionHandleThrowableLogMap">
+    select
+    <include refid="allColumn"/>
+    from t_servlet_execution_handle_throwable_log
+    <trim prefix="where" prefixOverrides="and">
+      id = #{id,jdbcType=BIGINT}
+      and delete_flag = 'N'
+    </trim>
+  </select>
+
+  <select id="queryByIdList" resultMap="ServletExecutionHandleThrowableLogMap">
+    select
+    <include refid="allColumn"/>
+    from t_servlet_execution_handle_throwable_log
+    <trim prefix="where" prefixOverrides="and">
+      id in
+      <foreach collection="idList" open="(" close=")" item="id" separator=",">
+        #{id,jdbcType=BIGINT}
+      </foreach>
+      and delete_flag = 'N'
+    </trim>
+  </select>
+
+  <select id="countByEntity" resultType="java.lang.Long">
+    select count(*) from t_servlet_execution_handle_throwable_log
+    <trim prefix="where" prefixOverrides="and">
+      <include refid="queryCondition"/>
+      and delete_flag = 'N'
+    </trim>
+  </select>
+</mapper>
+
+
