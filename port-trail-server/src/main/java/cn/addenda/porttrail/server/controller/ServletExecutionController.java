@@ -1,6 +1,5 @@
 package cn.addenda.porttrail.server.controller;
 
-import cn.addenda.component.base.jackson.util.JacksonUtils;
 import cn.addenda.porttrail.common.pojo.servlet.bo.ServletRequestBo;
 import cn.addenda.porttrail.common.pojo.servlet.bo.ServletResponseBo;
 import cn.addenda.porttrail.common.pojo.servlet.dto.ServletRequestDto;
@@ -9,6 +8,7 @@ import cn.addenda.porttrail.common.util.CompressUtils;
 import cn.addenda.porttrail.common.util.JdkSerializationUtils;
 import cn.addenda.porttrail.server.biz.ServletExecutionBiz;
 import cn.addenda.porttrail.server.bo.servlet.ServletExecutionRequestBo;
+import cn.addenda.porttrail.server.bo.servlet.ServletExecutionResponseBo;
 import cn.addenda.porttrail.server.entity.PortTrailDeserializeThrowableLog;
 import cn.addenda.porttrail.server.entity.ServletExecutionHandleThrowableLog;
 import cn.addenda.porttrail.server.manager.PortTrailDeserializeThrowableLogManager;
@@ -58,12 +58,28 @@ public class ServletExecutionController {
 
   @PostMapping(value = "receiveServletResponse", consumes = "application/octet-stream")
   public void receiveServletResponse(@RequestBody byte[] bytes) {
-    // 处理接收到的字节数组
-    bytes = CompressUtils.decompress(bytes);
-    // 可以通过 JacksonUtils 或其他方式反序列化
-    ServletResponseDto servletResponseDto = (ServletResponseDto) JdkSerializationUtils.deserialize(bytes);
-    ServletResponseBo servletResponseBo = new ServletResponseBo(servletResponseDto);
-    System.out.println(JacksonUtils.toStr(servletResponseBo) + " of " + JacksonUtils.toStr(servletResponseDto.getServiceRuntimeInfo()));
+    ServletResponseDto servletResponseDto;
+    ServletResponseBo servletResponseBo;
+
+    try {
+      // 处理接收到的字节数组
+      bytes = CompressUtils.decompress(bytes);
+      // 可以通过 JacksonUtils 或其他方式反序列化
+      servletResponseDto = (ServletResponseDto) JdkSerializationUtils.deserialize(bytes);
+      servletResponseBo = new ServletResponseBo(servletResponseDto);
+    } catch (Throwable throwable) {
+      portTrailDeserializeThrowableLogManager.insert(bytes, PortTrailDeserializeThrowableLog.DESERIALIZE_TYPE_SERVLET_RESPONSE, throwable);
+      return;
+    }
+
+    ServletExecutionResponseBo servletExecutionResponseBo;
+    try {
+      servletExecutionResponseBo = servletExecutionBiz.handleServletResponse(servletResponseDto);
+    } catch (Throwable throwable) {
+      servletExecutionHandleThrowableLogManager.insert(bytes, ServletExecutionHandleThrowableLog.HANDLE_TYPE_SERVLET_RESPONSE,
+              servletResponseBo, servletResponseDto.getServiceRuntimeInfo(), throwable);
+      return;
+    }
   }
 
 }

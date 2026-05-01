@@ -7,11 +7,15 @@ import cn.addenda.porttrail.common.constant.MediaType;
 import cn.addenda.porttrail.common.pojo.ServiceRuntimeInfo;
 import cn.addenda.porttrail.common.pojo.servlet.bo.ServletRequestBo;
 import cn.addenda.porttrail.common.pojo.servlet.dto.ServletRequestDto;
+import cn.addenda.porttrail.common.pojo.servlet.dto.ServletResponseDto;
 import cn.addenda.porttrail.common.util.CompressUtils;
 import cn.addenda.porttrail.common.util.JdkSerializationUtils;
 import cn.addenda.porttrail.server.bo.servlet.ServletExecutionRequestBo;
+import cn.addenda.porttrail.server.bo.servlet.ServletExecutionResponseBo;
 import cn.addenda.porttrail.server.curd.ServletExecutionRequestCurder;
+import cn.addenda.porttrail.server.curd.ServletExecutionResponseCurder;
 import cn.addenda.porttrail.server.entity.ServletExecutionRequest;
+import cn.addenda.porttrail.server.entity.ServletExecutionResponse;
 import cn.addenda.porttrail.server.util.CurlUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,11 +31,12 @@ public class ServletExecutionBizImpl implements ServletExecutionBiz {
   @Autowired
   private ServletExecutionRequestCurder servletExecutionRequestCurder;
 
+  @Autowired
+  private ServletExecutionResponseCurder servletExecutionResponseCurder;
+
   @Override
   public ServletExecutionRequestBo handleServletRequest(ServletRequestDto servletRequestDto) {
     ServiceRuntimeInfo serviceRuntimeInfo = servletRequestDto.getServiceRuntimeInfo();
-
-    ServletRequestBo servletRequestBo = new ServletRequestBo(servletRequestDto);
 
     ServletExecutionRequest param = ServletExecutionRequest.ofParam();
     param.setSystemCode(serviceRuntimeInfo.getSystemCode());
@@ -39,21 +44,22 @@ public class ServletExecutionBizImpl implements ServletExecutionBiz {
     param.setImageName(serviceRuntimeInfo.getImageName());
     param.setEnv(serviceRuntimeInfo.getEnv());
     param.setInstanceId(serviceRuntimeInfo.getInstanceId());
-    param.setExecutionId(servletRequestBo.getExecutionId());
-    param.setVersion(servletRequestBo.getVersion());
-    param.setScheme(servletRequestBo.getScheme());
-    param.setMethod(servletRequestBo.getMethod());
-    param.setUri(servletRequestBo.getUri());
-    param.setQueryString(servletRequestBo.getQueryString());
-    param.setContentType(servletRequestBo.getContentType());
-    param.setCharsetEncoding(servletRequestBo.getCharsetEncoding());
-    param.setDateTime(DateUtils.timestampToLocalDateTime(servletRequestBo.getDatetime()));
-    param.setAllContentLength(servletRequestBo.getAllContentLength());
-    param.setContentLength(servletRequestBo.getContentLength());
-    param.setLocale(JacksonUtils.toStr(servletRequestBo.getLocale()));
-    param.setHeaders(JacksonUtils.toStr(servletRequestBo.getHeaderMap()));
-    param.setBody(CompressUtils.compress(JdkSerializationUtils.serialize(servletRequestBo.getBody())));
-    if (MediaType.ifRequestTextContentType(servletRequestBo.getContentType())) {
+    param.setExecutionId(servletRequestDto.getExecutionId());
+    param.setVersion(servletRequestDto.getVersion());
+    param.setScheme(servletRequestDto.getScheme());
+    param.setMethod(servletRequestDto.getMethod());
+    param.setUri(servletRequestDto.getUri());
+    param.setQueryString(servletRequestDto.getQueryString());
+    param.setContentType(servletRequestDto.getContentType());
+    param.setCharsetEncoding(servletRequestDto.getCharsetEncoding());
+    param.setDateTime(DateUtils.timestampToLocalDateTime(servletRequestDto.getDatetime()));
+    param.setAllContentLength(servletRequestDto.getAllContentLength());
+    param.setContentLength(servletRequestDto.getContentLength());
+    param.setLocale(JacksonUtils.toStr(servletRequestDto.getLocale()));
+    param.setHeaders(JacksonUtils.toStr(servletRequestDto.getHeaderMap()));
+    param.setBody(CompressUtils.compress(JdkSerializationUtils.serialize(servletRequestDto.getBody())));
+    if (MediaType.ifRequestTextContentType(servletRequestDto.getContentType())) {
+      ServletRequestBo servletRequestBo = new ServletRequestBo(servletRequestDto);
       param.setBodyText((String) servletRequestBo.getBody());
       param.setCurl(CurlUtils.toCurl(servletRequestBo));
     }
@@ -63,6 +69,36 @@ public class ServletExecutionBizImpl implements ServletExecutionBiz {
     });
 
     return new ServletExecutionRequestBo(param);
+  }
+
+  @Override
+  public ServletExecutionResponseBo handleServletResponse(ServletResponseDto servletResponseDto) {
+    ServiceRuntimeInfo serviceRuntimeInfo = servletResponseDto.getServiceRuntimeInfo();
+
+    ServletExecutionResponse param = ServletExecutionResponse.ofParam();
+    param.setSystemCode(serviceRuntimeInfo.getSystemCode());
+    param.setServiceName(serviceRuntimeInfo.getServiceName());
+    param.setImageName(serviceRuntimeInfo.getImageName());
+    param.setEnv(serviceRuntimeInfo.getEnv());
+    param.setInstanceId(serviceRuntimeInfo.getInstanceId());
+    param.setExecutionId(servletResponseDto.getExecutionId());
+    param.setContentType(servletResponseDto.getContentType());
+    param.setCharsetEncoding(servletResponseDto.getCharsetEncoding());
+    param.setDateTime(DateUtils.timestampToLocalDateTime(servletResponseDto.getDatetime()));
+    param.setContentLength(servletResponseDto.getContentLength());
+    param.setLocale(JacksonUtils.toStr(servletResponseDto.getLocale()));
+    param.setStatus(servletResponseDto.getStatus());
+    param.setHeaders(JacksonUtils.toStr(servletResponseDto.getHeaderMap()));
+    param.setBody(CompressUtils.compress(JdkSerializationUtils.serialize(servletResponseDto.getBody())));
+    if (MediaType.ifRequestTextContentType(servletResponseDto.getContentType())) {
+      param.setBodyText((String) JdkSerializationUtils.deserialize(servletResponseDto.getBody()));
+    }
+
+    transactionHelperNew.doTransaction(() -> {
+      servletExecutionResponseCurder.insert(param);
+    });
+
+    return new ServletExecutionResponseBo(param);
   }
 
 }

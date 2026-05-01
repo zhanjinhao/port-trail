@@ -18,6 +18,7 @@ import lombok.ToString;
 public class ServletExecutionHandleThrowableLog extends SimpleBaseModel implements Serializable {
 
   public static final String HANDLE_TYPE_SERVLET_REQUEST = "SERVLET_REQUEST";
+  public static final String HANDLE_TYPE_SERVLET_RESPONSE = "SERVLET_RESPONSE";
 
   private static final long serialVersionUID = -99917216965182332L;
   /**
