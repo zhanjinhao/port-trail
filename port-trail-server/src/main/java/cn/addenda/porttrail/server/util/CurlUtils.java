@@ -1,10 +1,13 @@
 package cn.addenda.porttrail.server.util;
 
+import cn.addenda.component.base.util.UrlUtils;
 import cn.addenda.porttrail.common.constant.MediaType;
+import cn.addenda.porttrail.common.pojo.servlet.bo.AbstractServletExecution;
 import cn.addenda.porttrail.common.pojo.servlet.bo.ServletRequestBo;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -17,6 +20,7 @@ public class CurlUtils {
   private static final String CURL_TEMPLATE = "curl -X %s '%s'";
   private static final String HEADER_TEMPLATE = " -H '%s: %s'";
   private static final String DATA_TEMPLATE = " -d '%s'";
+  private static final String DATA_URLENCODE_TEMPLATE = " --data-urlencode '%s'";
   private static final String FORM_TEMPLATE = " -F '%s=%s'";
   private static final String FILE_FORM_TEMPLATE = " -F '%s=@%s;type=%s'";
 
@@ -146,6 +150,24 @@ public class CurlUtils {
       // 文本类型（JSON、XML、表单等）
       String bodyStr = (String) body;
       if (!bodyStr.isEmpty()) {
+//        if (MediaType.ifRequestFormUrlencodedContentType(requestBo.getContentType())) {
+//          Arrays.stream(bodyStr.split("&")).forEach(
+//                  param -> {
+//                    int equalIndex = param.indexOf('=');
+//                     如果使用--data-urlencode，需要将value转义
+//                    if (equalIndex > 0) {
+//                      String key = param.substring(0, equalIndex);
+//                      String value = param.substring(equalIndex + 1);
+//                      String enc = (requestBo.getCharsetEncoding() == null || requestBo.getCharsetEncoding().isEmpty()) ? AbstractServletExecution.DEFAULT_CHARSET : requestBo.getCharsetEncoding();
+//                      curl.append(String.format(DATA_URLENCODE_TEMPLATE, key + "=" + UrlUtils.decode(value, enc))).append("\n");
+//                    } else {
+//                      curl.append(String.format(DATA_URLENCODE_TEMPLATE, param)).append("\n");
+//                    }
+//                  });
+//        } else {
+//          curl.append(String.format(DATA_TEMPLATE, escapeData(bodyStr))).append("\n");
+//        }
+
         curl.append(String.format(DATA_TEMPLATE, escapeData(bodyStr))).append("\n");
       }
     }
