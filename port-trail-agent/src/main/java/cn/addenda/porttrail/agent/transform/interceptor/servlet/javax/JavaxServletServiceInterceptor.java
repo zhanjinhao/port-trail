@@ -120,7 +120,25 @@ public class JavaxServletServiceInterceptor extends AbstractDeduplicationEntryPo
           servletRequestBo.setBody(null);
         } else {
           if (MediaType.ifRequestTextContentType(requestContentType)) {
-            servletRequestBo.setBody(extractTextRequestBody(requestWrapper, executionId));
+            String body = extractTextRequestBody(requestWrapper, executionId);
+            if (MediaType.ifRequestFormUrlencodedContentType(requestContentType)) {
+              /**
+               * 当contentType是{@link MediaType#APPLICATION_FORM_URLENCODED_VALUE}时。Body里的数据格式是：f1=123
+               * queryString的数据格式是：nodeType=3。
+               * 此时extract出来的body是nodeType=3&f1=123。
+               *
+               * 更极端的案例，body里的数据是nodeType=4&f1=123，queryString的数据是nodeType=3。
+               * 此时extract出来的body是nodeType=3&nodeType=4&f1=123。
+               *
+               * 在StringMVC中，使用'@RequestParam('nodeType') String nodeType'得到的数据是3,4；
+               * 在StringMVC中，使用'@RequestParam('nodeType') Integer nodeType'得到的数据是3（优先取queryString）
+               *
+               * 我们这里需要从body中移除queryString。
+               */
+              String queryString = servletRequestBo.getQueryString();
+              body = removeQueryStringFromBody(body, queryString, executionId);
+            }
+            servletRequestBo.setBody(body);
           } else if (MediaType.ifRequestMultipartFormContentType(requestContentType)) {
             servletRequestBo.setBody(extractMultipartFormRequestBody(getParts(requestWrapper), requestWrapper));
           } else if (MediaType.ifRequestBinaryContentType(requestContentType)) {
@@ -215,6 +233,153 @@ public class JavaxServletServiceInterceptor extends AbstractDeduplicationEntryPo
       }
     }
     return ServletRequestBo.BODY_EMPTY;
+  }
+
+  /**
+   * 从form-urlencoded的body中移除与queryString完全匹配的参数对（key和value都相同）
+   * <p>
+   * 处理逻辑：
+   * - queryString: nodeType=3
+   * - body: nodeType=3&nodeType=4&f1=123
+   * - 结果: nodeType=4&f1=123 （只移除key=value完全匹配的nodeType=3）
+   * <p>
+   * queryString中的每个参数对只会从body中移除第一个完全匹配（key和value都相同）的参数对
+   *
+   * @param body        原始请求体，格式如: nodeType=3&nodeType=4&f1=123
+   * @param queryString 查询字符串，格式如: nodeType=3
+   * @return 移除重复参数后的body，如: nodeType=4&f1=123
+   */
+  private String removeQueryStringFromBody(String body, String queryString, String executionId) {
+    if (body == null || body.isEmpty() || ServletRequestBo.BODY_EMPTY.equals(body)
+            || ServletRequestBo.BODY_EXCEED_LENGTH.equals(body)) {
+      return body;
+    }
+
+    if (queryString == null || queryString.isEmpty()) {
+      return body;
+    }
+
+    try {
+      // 解析queryString中的所有参数对（key-value）
+      List<String[]> queryParams = parseParameters(queryString);
+
+      if (queryParams.isEmpty()) {
+        return body;
+      }
+
+      // 解析body中的所有参数对
+      List<String[]> bodyParams = parseParameters(body);
+
+      // 标记需要移除的body参数索引
+      Set<Integer> indicesToRemove = new HashSet<>();
+
+      // 对于queryString中的每个参数对，找到body中第一个完全匹配（key和value都相同）的参数并标记移除
+      for (String[] queryParam : queryParams) {
+        for (int i = 0; i < bodyParams.size(); i++) {
+          // 如果该位置已经被标记移除，跳过
+          if (indicesToRemove.contains(i)) {
+            continue;
+          }
+
+          String[] bodyParam = bodyParams.get(i);
+          // 检查key和value是否都相同
+          if (isParameterMatch(queryParam, bodyParam)) {
+            indicesToRemove.add(i);
+            break; // 只移除第一个完全匹配的
+          }
+        }
+      }
+
+      // 收集未被标记移除的参数
+      List<String> filteredParams = new ArrayList<>();
+      for (int i = 0; i < bodyParams.size(); i++) {
+        if (!indicesToRemove.contains(i)) {
+          String[] param = bodyParams.get(i);
+          if (param.length > 1) {
+            filteredParams.add(param[0] + "=" + param[1]);
+          } else {
+            filteredParams.add(param[0]);
+          }
+        }
+      }
+
+      // 重新组装body
+      if (filteredParams.isEmpty()) {
+        return ServletRequestBo.BODY_EMPTY;
+      }
+
+      return String.join("&", filteredParams);
+    } catch (Exception e) {
+      // 如果解析失败，返回原始body
+      log.warn("Failed to remove queryString[{}] from body[{}], executionId: {}.",
+              queryString, body, executionId, e);
+      return body;
+    }
+  }
+
+  /**
+   * 检查两个参数对是否完全匹配（key和value都相同）
+   *
+   * @param queryParam 查询参数 [name, value] 或 [name]
+   * @param bodyParam  body参数 [name, value] 或 [name]
+   * @return 是否完全匹配
+   */
+  private boolean isParameterMatch(String[] queryParam, String[] bodyParam) {
+    if (queryParam == null || bodyParam == null) {
+      return false;
+    }
+
+    // 两者都必须有name
+    if (queryParam.length == 0 || bodyParam.length == 0) {
+      return false;
+    }
+
+    // 比较name
+    if (!Objects.equals(queryParam[0], bodyParam[0])) {
+      return false;
+    }
+
+    // 如果一个有value，一个没有value，则不匹配
+    if (queryParam.length != bodyParam.length) {
+      return false;
+    }
+
+    // 如果都有value，比较value
+    if (queryParam.length == 2) {
+      return Objects.equals(queryParam[1], bodyParam[1]);
+    }
+
+    // 都没有value，name相同就匹配
+    return true;
+  }
+
+  /**
+   * 解析URL编码字符串中的参数对列表
+   *
+   * @param body 查询字符串，如: nodeType=3&f1=123&nodeType=5
+   * @return 参数对列表，如: [[nodeType, 3], [f1, 123], [nodeType, 5]]
+   */
+  private List<String[]> parseParameters(String body) {
+    List<String[]> params = new ArrayList<>();
+    if (body == null || body.isEmpty()) {
+      return params;
+    }
+
+    String[] pairs = body.split("&");
+    for (String pair : pairs) {
+      if (pair.isEmpty()) {
+        continue;
+      }
+      int equalIndex = pair.indexOf('=');
+      if (equalIndex > 0) {
+        String paramName = pair.substring(0, equalIndex);
+        String paramValue = pair.substring(equalIndex + 1);
+        params.add(new String[]{paramName, paramValue});
+      } else if (equalIndex == -1) {
+        params.add(new String[]{pair});
+      }
+    }
+    return params;
   }
 
   private ServletRequestFormDataList extractMultipartFormRequestBody(Collection<Part> parts, HttpServletRequest request) {

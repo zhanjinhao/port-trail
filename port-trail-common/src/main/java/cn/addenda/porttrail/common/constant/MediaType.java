@@ -34,11 +34,18 @@ public class MediaType {
       return false;
     }
     return StringUtils.startsWithIgnoreCase(contentType, MediaType.APPLICATION_JSON_VALUE)
-            || StringUtils.startsWithIgnoreCase(contentType, MediaType.APPLICATION_FORM_URLENCODED_VALUE)
             || StringUtils.startsWithIgnoreCase(contentType, MediaType.APPLICATION_XML_VALUE)
             || StringUtils.startsWithIgnoreCase(contentType, MediaType.TEXT_HTML_VALUE)
             || StringUtils.startsWithIgnoreCase(contentType, MediaType.TEXT_XML_VALUE)
-            || StringUtils.startsWithIgnoreCase(contentType, MediaType.TEXT_PLAIN_VALUE);
+            || StringUtils.startsWithIgnoreCase(contentType, MediaType.TEXT_PLAIN_VALUE)
+            || ifRequestFormUrlencodedContentType(contentType);
+  }
+
+  public static boolean ifRequestFormUrlencodedContentType(String contentType) {
+    if (contentType == null) {
+      return false;
+    }
+    return StringUtils.startsWithIgnoreCase(contentType, MediaType.APPLICATION_FORM_URLENCODED_VALUE);
   }
 
   public static boolean ifRequestMultipartFormContentType(String contentType) {
