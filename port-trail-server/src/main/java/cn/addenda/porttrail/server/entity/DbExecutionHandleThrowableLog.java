@@ -7,7 +7,7 @@ import lombok.Setter;
 import lombok.ToString;
 
 /**
- * handle阶段异常时记录的日志(PortTrailHandleThrowableLog)实体类
+ * handle阶段异常时记录的日志(DbExecutionHandleThrowableLog)实体类
  *
  * @author makejava
  * @since 2026-03-06 22:44:42
@@ -15,7 +15,7 @@ import lombok.ToString;
 @Setter
 @Getter
 @ToString
-public class PortTrailHandleThrowableLog extends SimpleBaseModel implements Serializable {
+public class DbExecutionHandleThrowableLog extends SimpleBaseModel implements Serializable {
 
   public static final String HANDLE_TYPE_STATEMENT_EXECUTION = "STATEMENT_EXECUTION";
   public static final String HANDLE_TYPE_PREPARED_STATEMENT_EXECUTION = "PREPARED_STATEMENT_EXECUTION";
@@ -74,8 +74,8 @@ public class PortTrailHandleThrowableLog extends SimpleBaseModel implements Seri
    */
   private String throwableStack;
 
-  public static PortTrailHandleThrowableLog ofParam() {
-    return new PortTrailHandleThrowableLog();
+  public static DbExecutionHandleThrowableLog ofParam() {
+    return new DbExecutionHandleThrowableLog();
   }
 
 }

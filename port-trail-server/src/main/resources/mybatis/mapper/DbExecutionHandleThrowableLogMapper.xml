@@ -1,14 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="cn.addenda.porttrail.server.mapper.PortTrailAnalyzeThrowableLogMapper">
-  <resultMap type="cn.addenda.porttrail.server.entity.PortTrailAnalyzeThrowableLog"
-             id="PortTrailAnalyzeThrowableLogMap">
+<mapper namespace="cn.addenda.porttrail.server.mapper.DbExecutionHandleThrowableLogMapper">
+  <resultMap type="cn.addenda.porttrail.server.entity.DbExecutionHandleThrowableLog" id="DbExecutionHandleThrowableLogMap">
     <id property="id" column="id" jdbcType="BIGINT"/>
   </resultMap>
 
   <sql id="allColumn">
     `id`
-    , `system_code`, `service_name`, `image_name`, `env`, `instance_id`, `data_source_port_trail_id`, `connection_port_trail_id`, `statement_port_trail_id`, `outer_id`, `analyze_type`, `bytes`, `bo_json`, `throwable_stack`
+    , `system_code`, `service_name`, `image_name`, `env`, `instance_id`, `data_source_port_trail_id`, `connection_port_trail_id`, `statement_port_trail_id`, `handle_type`, `bytes`, `bo_json`, `throwable_stack`
   </sql>
 
   <sql id="setCondition">
@@ -36,11 +35,8 @@
     <if test="statementPortTrailId != null">
       `statement_port_trail_id` = #{statementPortTrailId,jdbcType=VARCHAR},
     </if>
-    <if test="outerId != null">
-      `outer_id` = #{outerId,jdbcType=BIGINT},
-    </if>
-    <if test="analyzeType != null">
-      `analyze_type` = #{analyzeType,jdbcType=VARCHAR},
+    <if test="handleType != null">
+      `handle_type` = #{handleType,jdbcType=VARCHAR},
     </if>
     <if test="bytes != null">
       `bytes` = #{bytes},
@@ -81,11 +77,8 @@
     <if test="statementPortTrailId != null">
       and `statement_port_trail_id` = #{statementPortTrailId,jdbcType=VARCHAR}
     </if>
-    <if test="outerId != null">
-      and `outer_id` = #{outerId,jdbcType=BIGINT}
-    </if>
-    <if test="analyzeType != null">
-      and `analyze_type` = #{analyzeType,jdbcType=VARCHAR}
+    <if test="handleType != null">
+      and `handle_type` = #{handleType,jdbcType=VARCHAR}
     </if>
     <if test="bytes != null">
       and `bytes` = #{bytes}
@@ -99,7 +92,7 @@
   </sql>
 
   <insert id="insert" keyProperty="id" useGeneratedKeys="true">
-    insert into t_port_trail_analyze_throwable_log
+    insert into t_db_execution_handle_throwable_log
     <trim prefix="set" suffixOverrides=",">
       id = #{id,jdbcType=BIGINT},
       <include refid="setCondition"/>
@@ -107,7 +100,7 @@
   </insert>
 
   <update id="updateById">
-    update t_port_trail_analyze_throwable_log
+    update t_db_execution_handle_throwable_log
     <trim prefix="set" suffixOverrides=",">
       <include refid="setCondition"/>
     </trim>
@@ -116,7 +109,7 @@
   </update>
 
   <delete id="deleteById">
-    update t_port_trail_analyze_throwable_log
+    update t_db_execution_handle_throwable_log
     set delete_flag = 'Y',
         delete_dt   = now(3)
     where id = #{id,jdbcType=BIGINT}
@@ -124,37 +117,37 @@
   </delete>
 
   <delete id="deleteByEntity">
-    update t_port_trail_analyze_throwable_log set delete_flag = 'Y', delete_dt = now(3)
+    update t_db_execution_handle_throwable_log set delete_flag = 'Y', delete_dt = now(3)
     <trim prefix="where" prefixOverrides="and">
       <include refid="queryCondition"/>
       and delete_flag = 'N'
     </trim>
   </delete>
 
-  <select id="queryByEntity" resultMap="PortTrailAnalyzeThrowableLogMap">
+  <select id="queryByEntity" resultMap="DbExecutionHandleThrowableLogMap">
     select
     <include refid="allColumn"/>
-    from t_port_trail_analyze_throwable_log
+    from t_db_execution_handle_throwable_log
     <trim prefix="where" prefixOverrides="and">
       <include refid="queryCondition"/>
       and delete_flag = 'N'
     </trim>
   </select>
 
-  <select id="queryById" resultMap="PortTrailAnalyzeThrowableLogMap">
+  <select id="queryById" resultMap="DbExecutionHandleThrowableLogMap">
     select
     <include refid="allColumn"/>
-    from t_port_trail_analyze_throwable_log
+    from t_db_execution_handle_throwable_log
     <trim prefix="where" prefixOverrides="and">
       id = #{id,jdbcType=BIGINT}
       and delete_flag = 'N'
     </trim>
   </select>
 
-  <select id="queryByIdList" resultMap="PortTrailAnalyzeThrowableLogMap">
+  <select id="queryByIdList" resultMap="DbExecutionHandleThrowableLogMap">
     select
     <include refid="allColumn"/>
-    from t_port_trail_analyze_throwable_log
+    from t_db_execution_handle_throwable_log
     <trim prefix="where" prefixOverrides="and">
       id in
       <foreach collection="idList" open="(" close=")" item="id" separator=",">
@@ -165,7 +158,7 @@
   </select>
 
   <select id="countByEntity" resultType="java.lang.Long">
-    select count(*) from t_port_trail_analyze_throwable_log
+    select count(*) from t_db_execution_handle_throwable_log
     <trim prefix="where" prefixOverrides="and">
       <include refid="queryCondition"/>
       and delete_flag = 'N'
