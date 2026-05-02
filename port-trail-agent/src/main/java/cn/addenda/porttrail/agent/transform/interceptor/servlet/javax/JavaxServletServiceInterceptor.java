@@ -169,6 +169,9 @@ public class JavaxServletServiceInterceptor extends AbstractDeduplicationEntryPo
       }
       servletWriter.writeServletResponse(servletResponseBo);
 
+      responseWrapper.clearContent();
+      responseWrapper.flushBuffer();
+
       return call;
     });
 
