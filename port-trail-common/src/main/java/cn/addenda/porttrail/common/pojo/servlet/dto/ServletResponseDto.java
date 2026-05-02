@@ -19,6 +19,8 @@ import java.util.Optional;
 @ToString
 public class ServletResponseDto extends AbstractServletDto {
 
+  public static final byte[] UNKNOWN_FILENAME = new byte[]{-21};
+
   // response.getContentType()：优先于headerMap
   private String contentType;
 
@@ -38,9 +40,24 @@ public class ServletResponseDto extends AbstractServletDto {
   private Map<String, List<String>> headerMap;
 
   /**
-   * {@link MediaType#ifResponseTextContentType(String)} : {@link String}
-   * {@link MediaType#ifResponseBinaryContentType(String)} : {@link String} filename
-   * 其他：{@link AbstractServletDto#UNSUPPORTED_CONTENT_TYPE}
+   * <pre>
+   * contentType为null：
+   *      {@link String}
+   *      or {@link AbstractServletDto#UNSUPPORTED_CONTENT_TYPE}
+   *      or {@link AbstractServletDto#UNSUPPORTED_CHARSET_ENCODING}
+   *      or {@link AbstractServletDto#BODY_EMPTY}
+   *      or {@link AbstractServletDto#BODY_EXCEED_LENGTH}
+   * {@link MediaType#ifResponseTextContentType(String)}：
+   *      {@link String}
+   *      or {@link AbstractServletDto#UNSUPPORTED_CHARSET_ENCODING}
+   *      or {@link AbstractServletDto#BODY_EMPTY}
+   *      or {@link AbstractServletDto#BODY_EXCEED_LENGTH}
+   * {@link MediaType#ifResponseBinaryContentType(String)}：
+   *      {@link String} filename
+   *      or {@link ServletResponseBo#UNKNOWN_FILENAME}
+   * 其他：
+   *      {@link AbstractServletDto#UNSUPPORTED_CONTENT_TYPE}
+   * </pre>
    */
   private byte[] body;
 
@@ -63,6 +80,14 @@ public class ServletResponseDto extends AbstractServletDto {
     Object bodyOfBo = servletResponseBo.getBody();
     if (Objects.equals(AbstractServletExecution.UNSUPPORTED_CONTENT_TYPE, bodyOfBo)) {
       this.setBody(UNSUPPORTED_CONTENT_TYPE);
+    } else if (Objects.equals(AbstractServletExecution.UNSUPPORTED_CHARSET_ENCODING, bodyOfBo)) {
+      this.setBody(UNSUPPORTED_CHARSET_ENCODING);
+    } else if (Objects.equals(AbstractServletExecution.BODY_EMPTY, bodyOfBo)) {
+      this.setBody(BODY_EMPTY);
+    } else if (Objects.equals(AbstractServletExecution.BODY_EXCEED_LENGTH, bodyOfBo)) {
+      this.setBody(BODY_EXCEED_LENGTH);
+    } else if (Objects.equals(ServletResponseBo.UNKNOWN_FILENAME, bodyOfBo)) {
+      this.setBody(UNKNOWN_FILENAME);
     } else if (bodyOfBo instanceof Serializable) {
       this.setBody(JdkSerializationUtils.serialize(bodyOfBo));
     } else {

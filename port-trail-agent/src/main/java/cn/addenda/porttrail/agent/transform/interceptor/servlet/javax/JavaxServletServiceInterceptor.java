@@ -10,6 +10,7 @@ import cn.addenda.porttrail.agent.writer.servlet.AgentServletWriter;
 import cn.addenda.porttrail.common.constant.MediaType;
 import cn.addenda.porttrail.common.entrypoint.EntryPoint;
 import cn.addenda.porttrail.common.entrypoint.EntryPointType;
+import cn.addenda.porttrail.common.exception.PortTrailException;
 import cn.addenda.porttrail.common.pojo.servlet.bo.*;
 import cn.addenda.porttrail.common.util.UuidUtils;
 import cn.addenda.porttrail.infrastructure.log.PortTrailLogger;
@@ -100,7 +101,9 @@ public class JavaxServletServiceInterceptor extends AbstractDeduplicationEntryPo
 
       String requestContentType = request.getContentType();
       JavaxContentCachingRequestWrapper requestWrapper = null;
-      if (MediaType.ifRequestContentType(requestContentType)) {
+      // requestContentType为null时，虽然规范上不会有body，但也有可能有body
+      if (requestContentType == null
+              || MediaType.ifRequestContentType(requestContentType)) {
         requestWrapper = new JavaxContentCachingRequestWrapper(request);
         targetMethodArgs[0] = requestWrapper;
       }
@@ -117,28 +120,15 @@ public class JavaxServletServiceInterceptor extends AbstractDeduplicationEntryPo
       if (requestWrapper != null) {
         servletRequestBo.setContentLength(requestWrapper.getCachedContent().size());
         if (servletRequestBo.getContentType() == null) {
-          servletRequestBo.setBody(null);
+          // 如果没有content-type，按text处理，如果报错就设置为UNSUPPORTED_CONTENT_TYPE
+          try {
+            servletRequestBo.setBody(extractTextRequestBody(requestWrapper, executionId, requestContentType, servletRequestBo.getQueryString(), true));
+          } catch (Throwable t) {
+            servletRequestBo.setBody(AbstractServletExecution.UNSUPPORTED_CONTENT_TYPE);
+          }
         } else {
           if (MediaType.ifRequestTextContentType(requestContentType)) {
-            String body = extractTextRequestBody(requestWrapper, executionId);
-            if (MediaType.ifRequestFormUrlencodedContentType(requestContentType)) {
-              /**
-               * 当contentType是{@link MediaType#APPLICATION_FORM_URLENCODED_VALUE}时。Body里的数据格式是：f1=123
-               * queryString的数据格式是：nodeType=3。
-               * 此时extract出来的body是nodeType=3&f1=123。
-               *
-               * 更极端的案例，body里的数据是nodeType=4&f1=123，queryString的数据是nodeType=3。
-               * 此时extract出来的body是nodeType=3&nodeType=4&f1=123。
-               *
-               * 在StringMVC中，使用'@RequestParam('nodeType') String nodeType'得到的数据是3,4；
-               * 在StringMVC中，使用'@RequestParam('nodeType') Integer nodeType'得到的数据是3（优先取queryString）
-               *
-               * 我们这里需要从body中移除queryString。
-               */
-              String queryString = servletRequestBo.getQueryString();
-              body = removeQueryStringFromBody(body, queryString, executionId);
-            }
-            servletRequestBo.setBody(body);
+            servletRequestBo.setBody(extractTextRequestBody(requestWrapper, executionId, requestContentType, servletRequestBo.getQueryString(), false));
           } else if (MediaType.ifRequestMultipartFormContentType(requestContentType)) {
             servletRequestBo.setBody(extractMultipartFormRequestBody(getParts(requestWrapper), requestWrapper));
           } else if (MediaType.ifRequestBinaryContentType(requestContentType)) {
@@ -146,7 +136,7 @@ public class JavaxServletServiceInterceptor extends AbstractDeduplicationEntryPo
           }
         }
       } else {
-        servletRequestBo.setContentLength(ServletRequestBo.UNKNOWN_CONTENT_LENGTH);
+        servletRequestBo.setContentLength(AbstractServletExecution.UNKNOWN_CONTENT_LENGTH);
         servletRequestBo.setBody(AbstractServletExecution.UNSUPPORTED_CONTENT_TYPE);
       }
       servletWriter.writeServletRequest(servletRequestBo);
@@ -156,15 +146,23 @@ public class JavaxServletServiceInterceptor extends AbstractDeduplicationEntryPo
       // -------------------
       String responseContentType = response.getContentType();
       ServletResponseBo servletResponseBo = assembleServletResponseBo(response, executionId);
-      if (MediaType.ifResponseContentType(responseContentType)) {
+      if (responseContentType == null) {
+        servletResponseBo.setContentLength(responseWrapper.getContentSize());
+        // 如果没有content-type，按text处理，如果报错就设置为UNSUPPORTED_CONTENT_TYPE
+        try {
+          servletResponseBo.setBody(extractTextResponseBody(responseWrapper, executionId, true));
+        } catch (Throwable t) {
+          servletResponseBo.setBody(AbstractServletExecution.UNSUPPORTED_CONTENT_TYPE);
+        }
+      } else if (MediaType.ifResponseContentType(responseContentType)) {
         servletResponseBo.setContentLength(responseWrapper.getContentSize());
         if (MediaType.ifResponseTextContentType(responseContentType)) {
-          servletResponseBo.setBody(extractTextResponseBody(responseWrapper, executionId));
+          servletResponseBo.setBody(extractTextResponseBody(responseWrapper, executionId, false));
         } else if (MediaType.ifResponseBinaryContentType(responseContentType)) {
-          servletResponseBo.setBody(extractBinaryResponseBody(response, servletRequestBo.getCharsetEncoding()));
+          servletResponseBo.setBody(extractBinaryResponseBody(response, servletResponseBo.getCharsetEncoding()));
         }
       } else {
-        servletResponseBo.setContentLength(ServletResponseBo.UNKNOWN_CONTENT_LENGTH);
+        servletResponseBo.setContentLength(AbstractServletExecution.UNKNOWN_CONTENT_LENGTH);
         servletResponseBo.setBody(AbstractServletExecution.UNSUPPORTED_CONTENT_TYPE);
       }
       servletWriter.writeServletResponse(servletResponseBo);
@@ -225,17 +223,35 @@ public class JavaxServletServiceInterceptor extends AbstractDeduplicationEntryPo
     return servletRequestBo;
   }
 
-  private String extractTextRequestBody(JavaxContentCachingRequestWrapper request, String executionId) {
+  private String extractTextRequestBody(JavaxContentCachingRequestWrapper request, String executionId,
+                                        String contentType, String queryString, boolean ifThrow) {
     // 如果请求体里有body，但是Controller未使用，body为blank
     byte[] contentAsByteArray = request.getContentAsByteArray();
     if (contentAsByteArray.length > 0) {
       if (request.getRequest().getContentLength() > requestMaxBodyLength) {
-        return ServletRequestBo.BODY_EXCEED_LENGTH;
+        return AbstractServletExecution.BODY_EXCEED_LENGTH;
       } else {
-        return convertBytesToString(contentAsByteArray, request.getCharacterEncoding(), executionId);
+        String body = convertBytesToString(contentAsByteArray, request.getCharacterEncoding(), executionId, ifThrow);
+        if (MediaType.ifRequestFormUrlencodedContentType(contentType)) {
+          /**
+           * 当contentType是{@link MediaType#APPLICATION_FORM_URLENCODED_VALUE}时。Body里的数据格式是：f1=123
+           * queryString的数据格式是：nodeType=3。
+           * 此时extract出来的body是nodeType=3&f1=123。
+           *
+           * 更极端的案例，body里的数据是nodeType=4&f1=123，queryString的数据是nodeType=3。
+           * 此时extract出来的body是nodeType=3&nodeType=4&f1=123。
+           *
+           * 在StringMVC中，使用'@RequestParam('nodeType') String nodeType'得到的数据是3,4；
+           * 在StringMVC中，使用'@RequestParam('nodeType') Integer nodeType'得到的数据是3（优先取queryString）
+           *
+           * 我们这里需要从body中移除queryString。
+           */
+          body = removeQueryStringFromBody(body, queryString, executionId);
+        }
+        return body;
       }
     }
-    return ServletRequestBo.BODY_EMPTY;
+    return AbstractServletExecution.BODY_EMPTY;
   }
 
   /**
@@ -253,8 +269,13 @@ public class JavaxServletServiceInterceptor extends AbstractDeduplicationEntryPo
    * @return 移除重复参数后的body，如: nodeType=4&f1=123
    */
   private String removeQueryStringFromBody(String body, String queryString, String executionId) {
-    if (body == null || body.isEmpty() || ServletRequestBo.BODY_EMPTY.equals(body)
-            || ServletRequestBo.BODY_EXCEED_LENGTH.equals(body)) {
+    if (body == null || body.isEmpty()
+            || AbstractServletExecution.UNSUPPORTED_CONTENT_TYPE.equals(body)
+            || AbstractServletExecution.UNSUPPORTED_CHARSET_ENCODING.equals(body)
+            || AbstractServletExecution.BODY_EMPTY.equals(body)
+            || AbstractServletExecution.BODY_EXCEED_LENGTH.equals(body)
+            || ServletRequestBo.BODY_BYTE_ARRAY.equals(body)
+    ) {
       return body;
     }
 
@@ -270,7 +291,7 @@ public class JavaxServletServiceInterceptor extends AbstractDeduplicationEntryPo
         return body;
       }
 
-      // 解析body中的所有参数对
+      // 解析body中的所有参数对（key-value）
       List<String[]> bodyParams = parseParameters(body);
 
       // 标记需要移除的body参数索引
@@ -308,7 +329,7 @@ public class JavaxServletServiceInterceptor extends AbstractDeduplicationEntryPo
 
       // 重新组装body
       if (filteredParams.isEmpty()) {
-        return ServletRequestBo.BODY_EMPTY;
+        return AbstractServletExecution.BODY_EMPTY;
       }
 
       return String.join("&", filteredParams);
@@ -439,29 +460,29 @@ public class JavaxServletServiceInterceptor extends AbstractDeduplicationEntryPo
     return servletResponseBo;
   }
 
-  private String extractTextResponseBody(JavaxContentCachingResponseWrapper response, String executionId) {
+  private String extractTextResponseBody(JavaxContentCachingResponseWrapper response, String executionId, boolean ifThrow) {
     byte[] contentAsByteArray = response.getContentAsByteArray();
     if (contentAsByteArray.length > 0) {
       if (contentAsByteArray.length > responseMaxBodyLength) {
-        return ServletResponseBo.BODY_EXCEED_LENGTH;
+        return AbstractServletExecution.BODY_EXCEED_LENGTH;
       } else {
-        return convertBytesToString(contentAsByteArray, response.getCharacterEncoding(), executionId);
+        return convertBytesToString(contentAsByteArray, response.getCharacterEncoding(), executionId, ifThrow);
       }
     }
-    return ServletResponseBo.BODY_EMPTY;
+    return AbstractServletExecution.BODY_EMPTY;
   }
 
   private String extractBinaryResponseBody(HttpServletResponse response, String charsetEncoding) {
     // 解析 ，获取attachment的filename
     String header = response.getHeader("Content-Disposition");
     if (header == null || header.isEmpty()) {
-      return ServletResponseBo.DOWNLOAD_UNKNOWN_FILENAME;
+      return ServletResponseBo.UNKNOWN_FILENAME;
     } else {
       String lowerInput = header.toLowerCase();
       String target = "filename=";
       int index = lowerInput.indexOf(target);
       if (index == -1) {
-        return ServletResponseBo.DOWNLOAD_UNKNOWN_FILENAME;
+        return ServletResponseBo.UNKNOWN_FILENAME;
       }
       // 使用原字符串截取保持原始大小写
       String result = header.substring(index + target.length());
@@ -476,7 +497,7 @@ public class JavaxServletServiceInterceptor extends AbstractDeduplicationEntryPo
         result = result.substring(1, result.length() - 1);
       }
       if (result.isEmpty()) {
-        return ServletResponseBo.DOWNLOAD_UNKNOWN_FILENAME;
+        return ServletResponseBo.UNKNOWN_FILENAME;
       }
 
       if (charsetEncoding == null) {
@@ -490,10 +511,13 @@ public class JavaxServletServiceInterceptor extends AbstractDeduplicationEntryPo
     }
   }
 
-  private String convertBytesToString(byte[] bytes, String characterEncoding, String executionId) {
+  private String convertBytesToString(byte[] bytes, String characterEncoding, String executionId, boolean ifThrow) {
     try {
       return new String(bytes, (characterEncoding == null || characterEncoding.isEmpty()) ? AbstractServletExecution.DEFAULT_CHARSET : characterEncoding);
     } catch (UnsupportedEncodingException e) {
+      if (ifThrow) {
+        throw new PortTrailException(e);
+      }
       log.error("unsupported response character encoding [{}:{}], executionId: [{}].", characterEncoding, AbstractServletExecution.DEFAULT_CHARSET, executionId);
     }
     return AbstractServletExecution.UNSUPPORTED_CHARSET_ENCODING;

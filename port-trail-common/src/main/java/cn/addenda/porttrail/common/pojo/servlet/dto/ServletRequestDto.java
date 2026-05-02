@@ -10,15 +10,14 @@ import lombok.Setter;
 import lombok.ToString;
 
 import java.io.Serializable;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 
 @Setter
 @Getter
 @ToString
 public class ServletRequestDto extends AbstractServletDto {
+
+  public static final byte[] BODY_BYTE_ARRAY = new byte[]{-11};
 
   // request.getProtocol()
   private String version;
@@ -55,10 +54,25 @@ public class ServletRequestDto extends AbstractServletDto {
   private LocaleDataDto locale;
 
   /**
-   * {@link MediaType#ifRequestTextContentType(String)} : {@link String}
-   * {@link MediaType#ifRequestMultipartFormContentType(String)} : {@link ServletRequestFormDataDto}
-   * {@link MediaType#ifRequestBinaryContentType(String)} : {@link ServletRequestBo#BODY_BYTE_ARRAY }
-   * 其他：{@link AbstractServletDto#UNSUPPORTED_CONTENT_TYPE}
+   * <pre>
+   * requestType为null：
+   *      {@link String}
+   *      or {@link AbstractServletDto#UNSUPPORTED_CONTENT_TYPE}
+   *      or {@link AbstractServletDto#UNSUPPORTED_CHARSET_ENCODING}
+   *      or {@link AbstractServletDto#BODY_EMPTY}
+   *      or {@link AbstractServletDto#BODY_EXCEED_LENGTH}
+   * {@link MediaType#ifRequestTextContentType(String)}：
+   *      {@link String}
+   *      or {@link AbstractServletDto#UNSUPPORTED_CHARSET_ENCODING}
+   *      or {@link AbstractServletDto#BODY_EMPTY}
+   *      or {@link AbstractServletDto#BODY_EXCEED_LENGTH}
+   * {@link MediaType#ifRequestMultipartFormContentType(String)}：
+   *      {@link ServletRequestFormDataDto}
+   * {@link MediaType#ifRequestBinaryContentType(String)}：
+   *      {@link ServletRequestBo#BODY_BYTE_ARRAY}
+   * 其他：
+   *      {@link AbstractServletDto#UNSUPPORTED_CONTENT_TYPE}
+   * </pre>
    */
   private byte[] body;
 
@@ -86,6 +100,14 @@ public class ServletRequestDto extends AbstractServletDto {
     Object bodyOfBo = servletRequestBo.getBody();
     if (Objects.equals(AbstractServletExecution.UNSUPPORTED_CONTENT_TYPE, bodyOfBo)) {
       this.setBody(UNSUPPORTED_CONTENT_TYPE);
+    } else if (Objects.equals(AbstractServletExecution.UNSUPPORTED_CHARSET_ENCODING, bodyOfBo)) {
+      this.setBody(UNSUPPORTED_CHARSET_ENCODING);
+    } else if (Objects.equals(AbstractServletExecution.BODY_EMPTY, bodyOfBo)) {
+      this.setBody(BODY_EMPTY);
+    } else if (Objects.equals(AbstractServletExecution.BODY_EXCEED_LENGTH, bodyOfBo)) {
+      this.setBody(BODY_EXCEED_LENGTH);
+    } else if (Objects.equals(ServletRequestBo.BODY_BYTE_ARRAY, bodyOfBo)) {
+      this.setBody(BODY_BYTE_ARRAY);
     } else if (bodyOfBo instanceof Serializable) {
       if (bodyOfBo instanceof ServletRequestFormDataList) {
         this.setBody(JdkSerializationUtils.serialize(new ServletRequestFormDataDtoList((ServletRequestFormDataList) bodyOfBo)));
@@ -100,5 +122,30 @@ public class ServletRequestDto extends AbstractServletDto {
       this.setBody(null);
     }
   }
+
+//  public String getBodyAsBoString() {
+//    byte[] bodyOfDto = getBody();
+//    if (bodyOfDto == null) {
+//      return null;
+//    } else if (Arrays.equals(UNSUPPORTED_CONTENT_TYPE, bodyOfDto)) {
+//      return AbstractServletExecution.UNSUPPORTED_CONTENT_TYPE;
+//    } else if (Arrays.equals(UNSUPPORTED_CHARSET_ENCODING, bodyOfDto)) {
+//      return AbstractServletExecution.UNSUPPORTED_CHARSET_ENCODING;
+//    } else if (Arrays.equals(BODY_EMPTY, bodyOfDto)) {
+//      return AbstractServletExecution.BODY_EMPTY;
+//    } else if (Arrays.equals(BODY_EXCEED_LENGTH, bodyOfDto)) {
+//      return AbstractServletExecution.BODY_EXCEED_LENGTH;
+//    } else if (Arrays.equals(ServletRequestDto.BODY_BYTE_ARRAY, bodyOfDto)) {
+//      return ServletRequestBo.BODY_BYTE_ARRAY;
+//    } else {
+//      Object obj = JdkSerializationUtils.deserialize(bodyOfDto);
+//      if (obj instanceof String) {
+//        return (String) obj;
+//      } else {
+//        // 走不进来
+//        return null;
+//      }
+//    }
+//  }
 
 }

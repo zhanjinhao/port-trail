@@ -19,10 +19,7 @@ import java.util.Optional;
 @ToString
 public class ServletRequestBo extends AbstractServletExecution {
 
-  public static final String BODY_EMPTY = "BODY_EMPTY";
-  public static final String BODY_EXCEED_LENGTH = "BODY_EXCEED_LENGTH";
-  public static final int UNKNOWN_CONTENT_LENGTH = -2;
-  public static final String BODY_BYTE_ARRAY = "BYTE_ARRAY";
+  public static final String BODY_BYTE_ARRAY = "@BYTE#_$ARRAY%";
 
   // request.getProtocol()
   private String version;
@@ -60,10 +57,25 @@ public class ServletRequestBo extends AbstractServletExecution {
 
 
   /**
-   * {@link MediaType#ifRequestTextContentType(String)} : {@link String}
-   * {@link MediaType#ifRequestMultipartFormContentType(String)} : {@link ServletRequestFormDataList}
-   * {@link MediaType#ifRequestBinaryContentType(String)} : {@link ServletRequestBo#BODY_BYTE_ARRAY }
-   * 其他：{@link AbstractServletExecution#UNSUPPORTED_CONTENT_TYPE}
+   * <pre>
+   * contentType为null：
+   *      {@link String}
+   *      or {@link AbstractServletExecution#UNSUPPORTED_CONTENT_TYPE}
+   *      or {@link AbstractServletExecution#UNSUPPORTED_CHARSET_ENCODING}
+   *      or {@link AbstractServletExecution#BODY_EMPTY}
+   *      or {@link AbstractServletExecution#BODY_EXCEED_LENGTH}
+   * {@link MediaType#ifRequestTextContentType(String)}：
+   *      {@link String}
+   *      or {@link AbstractServletExecution#UNSUPPORTED_CHARSET_ENCODING}
+   *      or {@link AbstractServletExecution#BODY_EMPTY}
+   *      or {@link AbstractServletExecution#BODY_EXCEED_LENGTH}
+   * {@link MediaType#ifRequestMultipartFormContentType(String)}：
+   *      {@link ServletRequestFormDataList}
+   * {@link MediaType#ifRequestBinaryContentType(String)}：
+   *      {@link ServletRequestBo#BODY_BYTE_ARRAY}
+   * 其他：
+   *      {@link AbstractServletExecution#UNSUPPORTED_CONTENT_TYPE}
+   * </pre>
    */
   private Object body;
 
@@ -89,6 +101,14 @@ public class ServletRequestBo extends AbstractServletExecution {
       this.setBody(null);
     } else if (Arrays.equals(AbstractServletDto.UNSUPPORTED_CONTENT_TYPE, bodyOfDto)) {
       this.setBody(UNSUPPORTED_CONTENT_TYPE);
+    } else if (Arrays.equals(AbstractServletDto.UNSUPPORTED_CHARSET_ENCODING, bodyOfDto)) {
+      this.setBody(UNSUPPORTED_CHARSET_ENCODING);
+    } else if (Arrays.equals(AbstractServletDto.BODY_EMPTY, bodyOfDto)) {
+      this.setBody(BODY_EMPTY);
+    } else if (Arrays.equals(AbstractServletDto.BODY_EXCEED_LENGTH, bodyOfDto)) {
+      this.setBody(BODY_EXCEED_LENGTH);
+    } else if (Arrays.equals(ServletRequestDto.BODY_BYTE_ARRAY, bodyOfDto)) {
+      this.setBody(BODY_BYTE_ARRAY);
     } else {
       Object obj = JdkSerializationUtils.deserialize(bodyOfDto);
       if (obj instanceof ServletRequestFormDataDtoList) {
