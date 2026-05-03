@@ -23,6 +23,7 @@ public class CurlUtils {
   private static final String DATA_URLENCODE_TEMPLATE = " --data-urlencode '%s'";
   private static final String FORM_TEMPLATE = " -F '%s=%s'";
   private static final String FILE_FORM_TEMPLATE = " -F '%s=@%s;type=%s'";
+  private static final char LF = '\n';
 
   /**
    * 将ServletRequestBo转换为curl命令
@@ -31,8 +32,8 @@ public class CurlUtils {
    * @return curl命令字符串
    */
   public static String toCurl(ServletRequestBo requestBo) {
-    if (requestBo == null) {
-      return "";
+    if (requestBo == null || !ifSupport(requestBo)) {
+      return null;
     }
 
     StringBuilder curl = new StringBuilder();
@@ -41,14 +42,19 @@ public class CurlUtils {
     String url = buildUrl(requestBo);
 
     // 2. 添加HTTP方法
-    curl.append(String.format(CURL_TEMPLATE, requestBo.getMethod(), url)).append("\n");
+    curl.append(String.format(CURL_TEMPLATE, requestBo.getMethod(), url)).append(LF);
 
     // 3. 添加请求头
     appendHeaders(curl, requestBo);
 
-    // 4. 添加请求体
-    appendBody(curl, requestBo);
+    // 4. 添加请求体（仅当body为String类型时可以添加请求体）
+    if (requestBo.getBody() instanceof String) {
+      appendBody(curl, requestBo);
+    }
 
+    if (curl.charAt(curl.length() - 1) == LF) {
+      curl.deleteCharAt(curl.length() - 1);
+    }
     return curl.toString();
   }
 
@@ -112,13 +118,13 @@ public class CurlUtils {
       List<String> values = entry.getValue();
 
       if ("content-type".equalsIgnoreCase(headerName) && requestBo.getContentType() != null) {
-        curl.append(String.format(HEADER_TEMPLATE, escapeHeader(headerName), escapeHeader(requestBo.getContentType()))).append("\n");
+        curl.append(String.format(HEADER_TEMPLATE, escapeHeader(headerName), escapeHeader(requestBo.getContentType()))).append(LF);
         continue;
       }
 
       if (values != null) {
         for (String value : values) {
-          curl.append(String.format(HEADER_TEMPLATE, escapeHeader(headerName), escapeHeader(value))).append("\n");
+          curl.append(String.format(HEADER_TEMPLATE, escapeHeader(headerName), escapeHeader(value))).append(LF);
         }
       }
     }
@@ -135,14 +141,14 @@ public class CurlUtils {
 
     Object body = requestBo.getBody();
 
-    if (body == null || ServletRequestBo.BODY_EMPTY.equals(body)) {
+    if (body == null || AbstractServletExecution.BODY_EMPTY.equals(body)) {
       return;
     }
 
     // 不支持的内容类型
     if (MediaType.ifRequestTextContentType(requestBo.getContentType())) {
       // 超出长度限制
-      if (ServletRequestBo.BODY_EXCEED_LENGTH.equals(body)) {
+      if (AbstractServletExecution.BODY_EXCEED_LENGTH.equals(body)) {
         curl.append(" # Body exceeded length limit");
         return;
       }
@@ -159,16 +165,16 @@ public class CurlUtils {
 //                      String key = param.substring(0, equalIndex);
 //                      String value = param.substring(equalIndex + 1);
 //                      String enc = (requestBo.getCharsetEncoding() == null || requestBo.getCharsetEncoding().isEmpty()) ? AbstractServletExecution.DEFAULT_CHARSET : requestBo.getCharsetEncoding();
-//                      curl.append(String.format(DATA_URLENCODE_TEMPLATE, key + "=" + UrlUtils.decode(value, enc))).append("\n");
+//                      curl.append(String.format(DATA_URLENCODE_TEMPLATE, key + "=" + UrlUtils.decode(value, enc))).append(LF);
 //                    } else {
-//                      curl.append(String.format(DATA_URLENCODE_TEMPLATE, param)).append("\n");
+//                      curl.append(String.format(DATA_URLENCODE_TEMPLATE, param)).append(LF);
 //                    }
 //                  });
 //        } else {
-//          curl.append(String.format(DATA_TEMPLATE, escapeData(bodyStr))).append("\n");
+//          curl.append(String.format(DATA_TEMPLATE, escapeData(bodyStr))).append(LF);
 //        }
 
-        curl.append(String.format(DATA_TEMPLATE, escapeData(bodyStr))).append("\n");
+        curl.append(String.format(DATA_TEMPLATE, escapeData(bodyStr))).append(LF);
       }
     }
 
@@ -206,6 +212,68 @@ public class CurlUtils {
     }
     // 替换单引号为转义的单引号
     return value.replace("'", "'\\''");
+  }
+
+  /**
+   * <pre>
+   * 请求可以带body、也可以不带body：
+   *    1.如果带body，则body类型是String时可以处理。
+   *    2.如果不带body，直接可以处理。
+   * </pre>
+   */
+  private static boolean ifSupport(ServletRequestBo servletRequestBo) {
+    Object body = servletRequestBo.getBody();
+    if (body == null
+            || AbstractServletExecution.BODY_EMPTY.equals(body)) {
+      return true;
+    }
+    if (AbstractServletExecution.UNSUPPORTED_CONTENT_TYPE.equals(body)
+            || AbstractServletExecution.UNSUPPORTED_CHARSET_ENCODING.equals(body)
+            || AbstractServletExecution.BODY_EXCEED_LENGTH.equals(body)
+            || ServletRequestBo.BODY_BYTE_ARRAY.equals(body)
+    ) {
+      return false;
+    }
+    if (body instanceof String) {
+      return true;
+    }
+    return false;
+  }
+
+  private static boolean ifGET(ServletRequestBo servletRequestBo) {
+    return "GET".equalsIgnoreCase(servletRequestBo.getMethod());
+  }
+
+  private static boolean ifHEAD(ServletRequestBo servletRequestBo) {
+    return "HEAD".equalsIgnoreCase(servletRequestBo.getMethod());
+  }
+
+  private static boolean ifPOST(ServletRequestBo servletRequestBo) {
+    return "POST".equalsIgnoreCase(servletRequestBo.getMethod());
+  }
+
+  private static boolean ifPUT(ServletRequestBo servletRequestBo) {
+    return "PUT".equalsIgnoreCase(servletRequestBo.getMethod());
+  }
+
+  private static boolean ifDELETE(ServletRequestBo servletRequestBo) {
+    return "DELETE".equalsIgnoreCase(servletRequestBo.getMethod());
+  }
+
+  private static boolean ifCONNECT(ServletRequestBo servletRequestBo) {
+    return "CONNECT".equalsIgnoreCase(servletRequestBo.getMethod());
+  }
+
+  private static boolean ifOPTIONS(ServletRequestBo servletRequestBo) {
+    return "OPTIONS".equalsIgnoreCase(servletRequestBo.getMethod());
+  }
+
+  private static boolean ifTRACE(ServletRequestBo servletRequestBo) {
+    return "TRACE".equalsIgnoreCase(servletRequestBo.getMethod());
+  }
+
+  private static boolean ifPATCH(ServletRequestBo servletRequestBo) {
+    return "PATCH".equalsIgnoreCase(servletRequestBo.getMethod());
   }
 
 }

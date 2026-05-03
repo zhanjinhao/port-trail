@@ -3,9 +3,10 @@ package cn.addenda.porttrail.server.biz;
 import cn.addenda.component.base.datetime.DateUtils;
 import cn.addenda.component.base.jackson.util.JacksonUtils;
 import cn.addenda.component.transaction.PlatformTransactionHelper;
-import cn.addenda.porttrail.common.constant.MediaType;
 import cn.addenda.porttrail.common.pojo.ServiceRuntimeInfo;
 import cn.addenda.porttrail.common.pojo.servlet.bo.ServletRequestBo;
+import cn.addenda.porttrail.common.pojo.servlet.bo.ServletRequestFormDataList;
+import cn.addenda.porttrail.common.pojo.servlet.bo.ServletResponseBo;
 import cn.addenda.porttrail.common.pojo.servlet.dto.ServletRequestDto;
 import cn.addenda.porttrail.common.pojo.servlet.dto.ServletResponseDto;
 import cn.addenda.porttrail.common.util.CompressUtils;
@@ -58,11 +59,15 @@ public class ServletExecutionBizImpl implements ServletExecutionBiz {
     param.setLocale(JacksonUtils.toStr(servletRequestDto.getLocale()));
     param.setHeaders(JacksonUtils.toStr(servletRequestDto.getHeaderMap()));
     param.setBody(CompressUtils.compress(JdkSerializationUtils.serialize(servletRequestDto.getBody())));
-    if (MediaType.ifRequestTextContentType(servletRequestDto.getContentType())) {
-      ServletRequestBo servletRequestBo = new ServletRequestBo(servletRequestDto);
+
+    ServletRequestBo servletRequestBo = new ServletRequestBo(servletRequestDto);
+    if (servletRequestBo.getBody() instanceof String) {
       param.setBodyText((String) servletRequestBo.getBody());
-      param.setCurl(CurlUtils.toCurl(servletRequestBo));
     }
+    if (servletRequestBo.getBody() instanceof ServletRequestFormDataList) {
+      param.setBodyText(JacksonUtils.toStr(servletRequestBo.getBody()));
+    }
+    param.setCurl(CurlUtils.toCurl(servletRequestBo));
 
     transactionHelperNew.doTransaction(() -> {
       servletExecutionRequestCurder.insert(param);
@@ -90,8 +95,10 @@ public class ServletExecutionBizImpl implements ServletExecutionBiz {
     param.setStatus(servletResponseDto.getStatus());
     param.setHeaders(JacksonUtils.toStr(servletResponseDto.getHeaderMap()));
     param.setBody(CompressUtils.compress(JdkSerializationUtils.serialize(servletResponseDto.getBody())));
-    if (MediaType.ifRequestTextContentType(servletResponseDto.getContentType())) {
-      param.setBodyText((String) JdkSerializationUtils.deserialize(servletResponseDto.getBody()));
+
+    ServletResponseBo servletResponseBo = new ServletResponseBo(servletResponseDto);
+    if (servletResponseBo.getBody() instanceof String) {
+      param.setBodyText((String) servletResponseBo.getBody());
     }
 
     transactionHelperNew.doTransaction(() -> {
