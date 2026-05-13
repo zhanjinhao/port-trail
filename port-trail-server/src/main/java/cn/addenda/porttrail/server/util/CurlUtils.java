@@ -1,15 +1,12 @@
 package cn.addenda.porttrail.server.util;
 
-import cn.addenda.component.base.util.UrlUtils;
 import cn.addenda.porttrail.common.constant.MediaType;
 import cn.addenda.porttrail.common.pojo.servlet.bo.AbstractServletExecution;
 import cn.addenda.porttrail.common.pojo.servlet.bo.ServletRequestBo;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Servlet请求转curl命令工具类
@@ -44,8 +41,8 @@ public class CurlUtils {
     // 2. 添加HTTP方法
     curl.append(String.format(CURL_TEMPLATE, requestBo.getMethod(), url)).append(LF);
 
-    // 3. 添加请求头
-    appendHeaders(curl, requestBo);
+    // 3. 添加请求头。 todo excludedHeaderList
+    appendHeaders(curl, requestBo, new ArrayList<>());
 
     // 4. 添加请求体（仅当body为String类型时可以添加请求体）
     if (requestBo.getBody() instanceof String) {
@@ -78,7 +75,12 @@ public class CurlUtils {
 
     // 查询参数
     if (requestBo.getQueryString() != null && !requestBo.getQueryString().isEmpty()) {
-      url.append("?").append(requestBo.getQueryString());
+      String queryString = requestBo.getQueryString();
+      // 移除开头的所有 & 符号
+      while (queryString.startsWith("&")) {
+        queryString = queryString.substring(1);
+      }
+      url.append("?").append(queryString);
     }
 
     return url.toString();
@@ -107,14 +109,30 @@ public class CurlUtils {
   /**
    * 添加请求头
    */
-  private static void appendHeaders(StringBuilder curl, ServletRequestBo requestBo) {
+  private static void appendHeaders(StringBuilder curl, ServletRequestBo requestBo, List<String> excludedHeaderList) {
     Map<String, List<String>> headerMap = requestBo.getHeaderMap();
     if (headerMap == null || headerMap.isEmpty()) {
       return;
     }
 
+    boolean ifAddContentLength = false;
     for (Map.Entry<String, List<String>> entry : headerMap.entrySet()) {
       String headerName = entry.getKey();
+      if (headerName == null) {
+        continue;
+      }
+
+      boolean ifExcluded = false;
+      for (String excludedHeader : excludedHeaderList) {
+        if (headerName.equalsIgnoreCase(excludedHeader)) {
+          ifExcluded = true;
+          break;
+        }
+      }
+      if (ifExcluded) {
+        continue;
+      }
+
       List<String> values = entry.getValue();
 
       if ("content-type".equalsIgnoreCase(headerName) && requestBo.getContentType() != null) {
@@ -124,11 +142,25 @@ public class CurlUtils {
 
       if (values != null) {
         for (String value : values) {
+          // 假如headerName是content-length，如果header的值和requestBo的contentLength不一致，则跳过。
+          // header的值是原始请求里客户端向服务端发送的请求头的数据；requestBo的contentLength是服务端实际解析过的数据长度。
+          if ("content-length".equalsIgnoreCase(headerName)) {
+            if (!Objects.equals(String.valueOf(requestBo.getContentLength()), value)) {
+              continue;
+            } else {
+              ifAddContentLength = true;
+            }
+          }
           curl.append(String.format(HEADER_TEMPLATE, escapeHeader(headerName), escapeHeader(value))).append(LF);
         }
       }
     }
 
+    // 如果在遍历header时没有添加content-length头，但是requestBo的contentLength不为0，添加content-length头。
+    // 如果在遍历header时没有添加content-length头，但是请求是POST、PUT、PATCH、DELETE，添加content-length头。
+    if (!ifAddContentLength && (requestBo.getContentLength() > 0 || ifPOST(requestBo) || ifPUT(requestBo) || ifPATCH(requestBo) || ifDELETE(requestBo))) {
+      curl.append(String.format(HEADER_TEMPLATE, "content-length", requestBo.getContentLength())).append(LF);
+    }
   }
 
   /**
