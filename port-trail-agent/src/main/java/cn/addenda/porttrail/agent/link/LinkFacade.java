@@ -345,6 +345,7 @@ public class LinkFacade {
 
   private static <T> T applyWithLinkClassLoader(Function<ClassLoader, T> function) {
     LinkClassLoader linkClassLoader = LinkClassLoader.getInstance();
+    // todo 这里要不要设置线程上下文变量
 //    ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
 //    Thread.currentThread().setContextClassLoader(extClassLoader);
 //    try {

@@ -4,9 +4,13 @@ import cn.addenda.porttrail.facade.LogFacade;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.core.Logger;
 import org.apache.logging.log4j.core.LoggerContext;
+import org.apache.logging.log4j.core.impl.Log4jContextFactory;
+import org.apache.logging.log4j.core.selector.ClassLoaderContextSelector;
 
 import java.io.File;
 import java.util.Properties;
+
+import static org.apache.logging.slf4j.Log4jLogger.FQCN;
 
 public class PortTrailLinkLogFacadeImpl implements LogFacade {
 
@@ -14,12 +18,15 @@ public class PortTrailLinkLogFacadeImpl implements LogFacade {
   private final String fqcn;
   private final Logger logger;
 
+  private static final Log4jContextFactory factory = new Log4jContextFactory(new ClassLoaderContextSelector());
+
   public PortTrailLinkLogFacadeImpl(String name, String fqcn) {
     this.name = name;
     this.fqcn = fqcn;
     Properties logProperties = LogConfigAware.getLogProperties();
     String absolutePath = logProperties.getProperty("log4j2.conf.absolutePath");
-    this.logger = LoggerContext.getContext(null, false, new File(absolutePath).toURI()).getLogger(name);
+    LoggerContext context = factory.getContext(FQCN, null, null, false, new File(absolutePath).toURI(), null);
+    this.logger = context.getLogger(name);
   }
 
   public PortTrailLinkLogFacadeImpl(String name) {
