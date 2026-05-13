@@ -183,7 +183,7 @@ public class JavaxServletServiceInterceptor extends AbstractDeduplicationEntryPo
   private Collection<Part> getParts(JavaxContentCachingRequestWrapper requestWrapper)
           throws ServletException, IOException {
     ServletRequest request = requestWrapper.getRequest();
-    if (!Objects.equals("org.eclipse.jetty.server.Request", request.getClass().getName())) {
+    if (Objects.equals("org.eclipse.jetty.server.Request", request.getClass().getName())) {
       if (request.getAttribute(MULTIPART_CONFIG_ELEMENT) == null && request.getAttribute(MULTIPARTS) == null) {
         // todo resteasy框架在未配置MultipartConfigElement的情况下，也能读取form表单，但是此时Request的getParts()方法是会报异常的
         // todo 暂时不知道怎么处理这种场景
