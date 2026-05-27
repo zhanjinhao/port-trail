@@ -2,7 +2,6 @@ package cn.addenda.porttrail.agent.transform.interceptor.driver.mysql;
 
 import cn.addenda.porttrail.agent.log.AgentPortTrailLoggerFactory;
 import cn.addenda.porttrail.agent.transform.interceptor.Interceptor;
-import cn.addenda.porttrail.agent.transform.interceptor.datasource.hikari.HikariConcurrentBagBorrowInterceptor;
 import cn.addenda.porttrail.agent.writer.db.AgentDbWriter;
 import cn.addenda.porttrail.common.pojo.db.bo.DbConfigBo;
 import cn.addenda.porttrail.infrastructure.entrypoint.EntryPointStackContext;
@@ -23,7 +22,7 @@ public class MySQLDriverConnectInterceptor implements Interceptor {
   private final PortTrailLogger portTrailConnectionPortTrailLogger;
 
   private static final PortTrailLogger log =
-          AgentPortTrailLoggerFactory.getInstance().getPortTrailLogger(HikariConcurrentBagBorrowInterceptor.class);
+          AgentPortTrailLoggerFactory.getInstance().getPortTrailLogger(MySQLDriverConnectInterceptor.class);
 
   public MySQLDriverConnectInterceptor() {
     this.dbWriter = AgentDbWriter.getInstance();
