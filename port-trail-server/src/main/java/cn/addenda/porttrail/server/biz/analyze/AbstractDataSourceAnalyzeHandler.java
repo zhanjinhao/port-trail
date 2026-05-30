@@ -37,6 +37,7 @@ public abstract class AbstractDataSourceAnalyzeHandler<T extends AnalyzeResult>
               hikariDataSource.setPoolName(s.toString());
               hikariDataSource.setAutoCommit(false);
               hikariDataSource.setTransactionIsolation(IsolationLevel.TRANSACTION_READ_COMMITTED.name());
+              // todo 这里要考虑连接不上的场景
               hikariDataSource.setDriverClassName(s.getDriverName());
               hikariDataSource.setJdbcUrl(s.getJdbcUrl());
               hikariDataSource.setUsername(s.getUser());
