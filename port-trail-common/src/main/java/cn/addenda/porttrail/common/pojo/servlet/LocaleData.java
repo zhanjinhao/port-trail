@@ -1,6 +1,5 @@
-package cn.addenda.porttrail.common.pojo.servlet.bo;
+package cn.addenda.porttrail.common.pojo.servlet;
 
-import cn.addenda.porttrail.common.pojo.servlet.dto.LocaleDataDto;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;

@@ -1,6 +1,7 @@
 package cn.addenda.porttrail.common.pojo.servlet.bo;
 
 import cn.addenda.porttrail.common.constant.MediaType;
+import cn.addenda.porttrail.common.pojo.servlet.LocaleData;
 import cn.addenda.porttrail.common.pojo.servlet.dto.AbstractServletDto;
 import cn.addenda.porttrail.common.pojo.servlet.dto.ServletResponseDto;
 import cn.addenda.porttrail.common.util.JdkSerializationUtils;

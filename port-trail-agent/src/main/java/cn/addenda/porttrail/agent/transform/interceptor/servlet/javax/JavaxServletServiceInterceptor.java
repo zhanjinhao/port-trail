@@ -11,6 +11,9 @@ import cn.addenda.porttrail.common.constant.MediaType;
 import cn.addenda.porttrail.common.entrypoint.EntryPoint;
 import cn.addenda.porttrail.common.entrypoint.EntryPointType;
 import cn.addenda.porttrail.common.exception.PortTrailException;
+import cn.addenda.porttrail.common.pojo.servlet.LocaleData;
+import cn.addenda.porttrail.common.pojo.servlet.FormData;
+import cn.addenda.porttrail.common.pojo.servlet.FormDataList;
 import cn.addenda.porttrail.common.pojo.servlet.bo.*;
 import cn.addenda.porttrail.common.util.UuidUtils;
 import cn.addenda.porttrail.infrastructure.log.PortTrailLogger;
@@ -406,37 +409,37 @@ public class JavaxServletServiceInterceptor extends AbstractDeduplicationEntryPo
     return params;
   }
 
-  private ServletRequestFormDataList extractMultipartFormRequestBody(Collection<Part> parts, HttpServletRequest request) {
-    ServletRequestFormDataList servletRequestFormDataList = new ServletRequestFormDataList();
+  private FormDataList extractMultipartFormRequestBody(Collection<Part> parts, HttpServletRequest request) {
+    FormDataList formDataList = new FormDataList();
     if (parts == unsupportedParts) {
-      ServletRequestFormData servletRequestFormData = new ServletRequestFormData();
-      servletRequestFormData.setContentType(null);
-      servletRequestFormData.setName("unsupportedParts");
-      servletRequestFormData.setSize(0L);
-      servletRequestFormData.setHeaderMap(new HashMap<>());
-      servletRequestFormData.setSubmittedFileName(null);
-      servletRequestFormData.setValues(null);
-      servletRequestFormDataList.add(servletRequestFormData);
-      return servletRequestFormDataList;
+      FormData formData = new FormData();
+      formData.setContentType(null);
+      formData.setName("unsupportedParts");
+      formData.setSize(0L);
+      formData.setHeaderMap(new HashMap<>());
+      formData.setSubmittedFileName(null);
+      formData.setValues(null);
+      formDataList.add(formData);
+      return formDataList;
     }
     for (Part part : parts) {
-      ServletRequestFormData servletRequestFormData = new ServletRequestFormData();
-      servletRequestFormDataList.add(servletRequestFormData);
-      servletRequestFormData.setContentType(part.getContentType());
-      servletRequestFormData.setName(part.getName());
-      servletRequestFormData.setSize(part.getSize());
+      FormData formData = new FormData();
+      formDataList.add(formData);
+      formData.setContentType(part.getContentType());
+      formData.setName(part.getName());
+      formData.setSize(part.getSize());
       Map<String, List<String>> headerMap = new HashMap<>();
       Collection<String> headerNames = part.getHeaderNames();
       for (String headerName : headerNames) {
         headerMap.put(headerName, new ArrayList<>(part.getHeaders(headerName)));
       }
-      servletRequestFormData.setHeaderMap(headerMap);
-      servletRequestFormData.setSubmittedFileName(part.getSubmittedFileName());
-      if (servletRequestFormData.getSubmittedFileName() == null) {
-        servletRequestFormData.setValues(request.getParameterValues(part.getName()));
+      formData.setHeaderMap(headerMap);
+      formData.setSubmittedFileName(part.getSubmittedFileName());
+      if (formData.getSubmittedFileName() == null) {
+        formData.setValues(request.getParameterValues(part.getName()));
       }
     }
-    return servletRequestFormDataList;
+    return formDataList;
   }
 
   private ServletResponseBo assembleServletResponseBo(HttpServletResponse response, String executionId) {

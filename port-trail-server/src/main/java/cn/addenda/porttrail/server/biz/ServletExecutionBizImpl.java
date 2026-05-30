@@ -5,7 +5,7 @@ import cn.addenda.component.base.jackson.util.JacksonUtils;
 import cn.addenda.component.transaction.PlatformTransactionHelper;
 import cn.addenda.porttrail.common.pojo.ServiceRuntimeInfo;
 import cn.addenda.porttrail.common.pojo.servlet.bo.ServletRequestBo;
-import cn.addenda.porttrail.common.pojo.servlet.bo.ServletRequestFormDataList;
+import cn.addenda.porttrail.common.pojo.servlet.FormDataList;
 import cn.addenda.porttrail.common.pojo.servlet.bo.ServletResponseBo;
 import cn.addenda.porttrail.common.pojo.servlet.dto.ServletRequestDto;
 import cn.addenda.porttrail.common.pojo.servlet.dto.ServletResponseDto;
@@ -64,7 +64,7 @@ public class ServletExecutionBizImpl implements ServletExecutionBiz {
     if (servletRequestBo.getBody() instanceof String) {
       param.setBodyText((String) servletRequestBo.getBody());
     }
-    if (servletRequestBo.getBody() instanceof ServletRequestFormDataList) {
+    if (servletRequestBo.getBody() instanceof FormDataList) {
       param.setBodyText(JacksonUtils.toStr(servletRequestBo.getBody()));
     }
     param.setCurl(CurlUtils.toCurl(servletRequestBo));

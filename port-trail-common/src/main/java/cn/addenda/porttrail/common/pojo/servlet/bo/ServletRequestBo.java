@@ -1,9 +1,11 @@
 package cn.addenda.porttrail.common.pojo.servlet.bo;
 
 import cn.addenda.porttrail.common.constant.MediaType;
+import cn.addenda.porttrail.common.pojo.servlet.LocaleData;
+import cn.addenda.porttrail.common.pojo.servlet.FormDataList;
 import cn.addenda.porttrail.common.pojo.servlet.dto.AbstractServletDto;
 import cn.addenda.porttrail.common.pojo.servlet.dto.ServletRequestDto;
-import cn.addenda.porttrail.common.pojo.servlet.dto.ServletRequestFormDataDtoList;
+import cn.addenda.porttrail.common.pojo.servlet.FormDataDtoList;
 import cn.addenda.porttrail.common.util.JdkSerializationUtils;
 import lombok.Getter;
 import lombok.Setter;
@@ -70,7 +72,7 @@ public class ServletRequestBo extends AbstractServletExecution {
    *      or {@link AbstractServletExecution#BODY_EMPTY}
    *      or {@link AbstractServletExecution#BODY_EXCEED_LENGTH}
    * {@link MediaType#ifRequestMultipartFormContentType(String)}：
-   *      {@link ServletRequestFormDataList}
+   *      {@link FormDataList}
    * {@link MediaType#ifRequestBinaryContentType(String)}：
    *      {@link ServletRequestBo#BODY_BYTE_ARRAY}
    * 其他：
@@ -111,8 +113,8 @@ public class ServletRequestBo extends AbstractServletExecution {
       this.setBody(BODY_BYTE_ARRAY);
     } else {
       Object obj = JdkSerializationUtils.deserialize(bodyOfDto);
-      if (obj instanceof ServletRequestFormDataDtoList) {
-        this.setBody(new ServletRequestFormDataList((ServletRequestFormDataDtoList) obj));
+      if (obj instanceof FormDataDtoList) {
+        this.setBody(new FormDataList((FormDataDtoList) obj));
       } else if (obj instanceof String) {
         this.setBody(obj);
       } else {
