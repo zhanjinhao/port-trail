@@ -5,7 +5,7 @@ import cn.addenda.component.base.jackson.util.JacksonUtils;
 import cn.addenda.component.transaction.PlatformTransactionHelper;
 import cn.addenda.porttrail.common.pojo.ServiceRuntimeInfo;
 import cn.addenda.porttrail.common.pojo.servlet.bo.ServletRequestBo;
-import cn.addenda.porttrail.common.pojo.servlet.FormDataList;
+import cn.addenda.porttrail.common.pojo.FormDataList;
 import cn.addenda.porttrail.common.pojo.servlet.bo.ServletResponseBo;
 import cn.addenda.porttrail.common.pojo.servlet.dto.ServletRequestDto;
 import cn.addenda.porttrail.common.pojo.servlet.dto.ServletResponseDto;

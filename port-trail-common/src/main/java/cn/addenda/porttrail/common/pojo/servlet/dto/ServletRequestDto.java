@@ -1,12 +1,12 @@
 package cn.addenda.porttrail.common.pojo.servlet.dto;
 
 import cn.addenda.porttrail.common.constant.MediaType;
-import cn.addenda.porttrail.common.pojo.servlet.LocaleDataDto;
-import cn.addenda.porttrail.common.pojo.servlet.FormDataDto;
-import cn.addenda.porttrail.common.pojo.servlet.FormDataDtoList;
+import cn.addenda.porttrail.common.pojo.LocaleDataDto;
+import cn.addenda.porttrail.common.pojo.FormDataDto;
+import cn.addenda.porttrail.common.pojo.FormDataDtoList;
 import cn.addenda.porttrail.common.pojo.servlet.bo.AbstractServletExecution;
 import cn.addenda.porttrail.common.pojo.servlet.bo.ServletRequestBo;
-import cn.addenda.porttrail.common.pojo.servlet.FormDataList;
+import cn.addenda.porttrail.common.pojo.FormDataList;
 import cn.addenda.porttrail.common.util.JdkSerializationUtils;
 import lombok.Getter;
 import lombok.Setter;

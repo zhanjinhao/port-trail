@@ -1,4 +1,4 @@
-package cn.addenda.porttrail.common.pojo.servlet;
+package cn.addenda.porttrail.common.pojo;
 
 import java.util.ArrayList;
 
