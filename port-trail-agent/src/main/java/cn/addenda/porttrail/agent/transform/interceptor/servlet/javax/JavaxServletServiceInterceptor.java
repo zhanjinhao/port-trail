@@ -234,6 +234,10 @@ public class JavaxServletServiceInterceptor extends AbstractDeduplicationEntryPo
       if (request.getRequest().getContentLength() > requestMaxBodyLength) {
         return AbstractServletExecution.BODY_EXCEED_LENGTH;
       } else {
+        // 如果请求体配置了压缩，server(tomcat,jetty...)收到的原始字节是压缩后的字节
+        // springboot的执行链路是：filter -> servlet -> interceptor。
+        // 对于springboot来说，一般是在filter里进行解压。
+        // 所以这里获取到的是解压后的字节。
         String body = convertBytesToString(contentAsByteArray, request.getCharacterEncoding(), executionId, ifThrow);
         if (MediaType.ifRequestFormUrlencodedContentType(contentType)) {
           /**
