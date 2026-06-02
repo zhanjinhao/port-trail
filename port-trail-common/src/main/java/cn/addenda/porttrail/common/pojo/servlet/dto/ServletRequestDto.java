@@ -94,7 +94,7 @@ public class ServletRequestDto extends AbstractServletDto {
     this.setCharsetEncoding(servletRequestBo.getCharsetEncoding());
     this.setHeaderMap(servletRequestBo.getHeaderMap());
     this.setDatetime(servletRequestBo.getDatetime());
-    this.setAllContentLength(servletRequestBo.getContentLength());
+    this.setAllContentLength(servletRequestBo.getAllContentLength());
     this.setContentLength(servletRequestBo.getContentLength());
     this.setLocale(
             Optional.ofNullable(servletRequestBo.getLocale())
