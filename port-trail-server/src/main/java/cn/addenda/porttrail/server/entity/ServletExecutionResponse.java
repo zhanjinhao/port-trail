@@ -3,6 +3,10 @@ package cn.addenda.porttrail.server.entity;
 import java.time.LocalDateTime;
 import java.io.Serializable;
 
+import cn.addenda.component.base.jackson.deserializer.LocalDateTimeTsDeSerializer;
+import cn.addenda.component.base.jackson.serializer.LocalDateTimeTsSerializer;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -57,6 +61,8 @@ public class ServletExecutionResponse extends SimpleBaseModel implements Seriali
   /**
    * 响应时间
    */
+  @JsonDeserialize(using = LocalDateTimeTsDeSerializer.class)
+  @JsonSerialize(using = LocalDateTimeTsSerializer.class)
   private LocalDateTime dateTime;
   /**
    * 整个响应体的大小
