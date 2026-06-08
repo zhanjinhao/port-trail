@@ -35,7 +35,7 @@
       `handle_type` = #{handleType,jdbcType=VARCHAR},
     </if>
     <if test="bytes != null">
-      `bytes` = #{bytes,jdbcType=XXX},
+      `bytes` = #{bytes},
     </if>
     <if test="boJson != null">
       `bo_json` = #{boJson,jdbcType=VARCHAR},
@@ -71,7 +71,7 @@
       and `handle_type` = #{handleType,jdbcType=VARCHAR}
     </if>
     <if test="bytes != null">
-      and `bytes` = #{bytes,jdbcType=XXX}
+      and `bytes` = #{bytes}
     </if>
     <if test="boJson != null">
       and `bo_json` = #{boJson,jdbcType=VARCHAR}
