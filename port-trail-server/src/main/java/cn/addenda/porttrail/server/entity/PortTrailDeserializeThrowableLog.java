@@ -21,6 +21,8 @@ public class PortTrailDeserializeThrowableLog extends SimpleBaseModel implements
   public static final String DESERIALIZE_TYPE_PREPARED_STATEMENT_EXECUTION = "PREPARED_STATEMENT_EXECUTION";
   public static final String DESERIALIZE_TYPE_SERVLET_REQUEST = "SERVLET_REQUEST";
   public static final String DESERIALIZE_TYPE_SERVLET_RESPONSE = "SERVLET_RESPONSE";
+  public static final String DESERIALIZE_TYPE_HTTP_CLIENT_REQUEST = "HTTP_CLIENT_REQUEST";
+  public static final String DESERIALIZE_TYPE_HTTP_CLIENT_RESPONSE = "HTTP_CLIENT_RESPONSE";
 
   private static final long serialVersionUID = 539331745922513630L;
   /**
