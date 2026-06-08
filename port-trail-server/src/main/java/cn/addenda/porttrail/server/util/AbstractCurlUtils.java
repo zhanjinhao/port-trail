@@ -9,7 +9,7 @@ import java.util.Map;
 /**
  * Servlet请求转curl命令工具类
  */
-@NoArgsConstructor(access = AccessLevel.PRIVATE)
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class AbstractCurlUtils {
 
   protected static final String CURL_TEMPLATE = "curl -X %s '%s'";
