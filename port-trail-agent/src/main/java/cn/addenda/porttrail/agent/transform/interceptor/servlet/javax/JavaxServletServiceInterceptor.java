@@ -525,7 +525,7 @@ public class JavaxServletServiceInterceptor extends AbstractDeduplicationEntryPo
       if (ifThrow) {
         throw new PortTrailException(e);
       }
-      log.error("unsupported response character encoding [{}:{}], executionId: [{}].", characterEncoding, AbstractServletExecution.DEFAULT_CHARSET, executionId);
+      log.error("unsupported character encoding [{}:{}], executionId: [{}].", characterEncoding, AbstractServletExecution.DEFAULT_CHARSET, executionId);
     }
     return AbstractServletExecution.UNSUPPORTED_CHARSET_ENCODING;
   }

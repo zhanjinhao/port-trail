@@ -17,7 +17,7 @@ import cn.addenda.porttrail.server.curd.ServletExecutionRequestCurder;
 import cn.addenda.porttrail.server.curd.ServletExecutionResponseCurder;
 import cn.addenda.porttrail.server.entity.ServletExecutionRequest;
 import cn.addenda.porttrail.server.entity.ServletExecutionResponse;
-import cn.addenda.porttrail.server.util.CurlUtils;
+import cn.addenda.porttrail.server.util.ServletCurlUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -67,7 +67,7 @@ public class ServletExecutionBizImpl implements ServletExecutionBiz {
     if (servletRequestBo.getBody() instanceof FormDataList) {
       param.setBodyText(JacksonUtils.toStr(servletRequestBo.getBody()));
     }
-    param.setCurl(CurlUtils.toCurl(servletRequestBo));
+    param.setCurl(ServletCurlUtils.toCurl(servletRequestBo));
 
     transactionHelperNew.doTransaction(() -> {
       servletExecutionRequestCurder.insert(param);

@@ -12,15 +12,7 @@ import java.util.*;
  * Servlet请求转curl命令工具类
  */
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
-public class CurlUtils {
-
-  private static final String CURL_TEMPLATE = "curl -X %s '%s'";
-  private static final String HEADER_TEMPLATE = " -H '%s: %s'";
-  private static final String DATA_TEMPLATE = " -d '%s'";
-  private static final String DATA_URLENCODE_TEMPLATE = " --data-urlencode '%s'";
-  private static final String FORM_TEMPLATE = " -F '%s=%s'";
-  private static final String FILE_FORM_TEMPLATE = " -F '%s=@%s;type=%s'";
-  private static final char LF = '\n';
+public class ServletCurlUtils extends AbstractCurlUtils {
 
   /**
    * 将ServletRequestBo转换为curl命令
@@ -87,26 +79,6 @@ public class CurlUtils {
   }
 
   /**
-   * 从请求头中获取Host
-   */
-  private static String getHostFromHeaders(Map<String, List<String>> headerMap) {
-    if (headerMap == null) {
-      return null;
-    }
-
-    // 尝试不同的Host头名称
-    for (String key : headerMap.keySet()) {
-      if ("host".equalsIgnoreCase(key)) {
-        List<String> values = headerMap.get(key);
-        if (values != null && !values.isEmpty()) {
-          return values.get(0);
-        }
-      }
-    }
-    return null;
-  }
-
-  /**
    * 添加请求头
    */
   private static void appendHeaders(StringBuilder curl, ServletRequestBo requestBo, List<String> excludedHeaderList) {
@@ -158,7 +130,8 @@ public class CurlUtils {
 
     // 如果在遍历header时没有添加content-length头，但是requestBo的contentLength不为0，添加content-length头。
     // 如果在遍历header时没有添加content-length头，但是请求是POST、PUT、PATCH、DELETE，添加content-length头。
-    if (!ifAddContentLength && (requestBo.getContentLength() > 0 || ifPOST(requestBo) || ifPUT(requestBo) || ifPATCH(requestBo) || ifDELETE(requestBo))) {
+    String method = requestBo.getMethod();
+    if (!ifAddContentLength && (requestBo.getContentLength() > 0 || ifPOST(method) || ifPUT(method) || ifPATCH(method) || ifDELETE(method))) {
       curl.append(String.format(HEADER_TEMPLATE, "content-length", requestBo.getContentLength())).append(LF);
     }
   }
@@ -212,40 +185,6 @@ public class CurlUtils {
 
   }
 
-
-  /**
-   * 转义Header值中的特殊字符
-   */
-  private static String escapeHeader(String value) {
-    if (value == null) {
-      return "";
-    }
-    // 替换单引号为转义的单引号
-    return value.replace("'", "'\\''");
-  }
-
-  /**
-   * 转义data值中的特殊字符
-   */
-  private static String escapeData(String value) {
-    if (value == null) {
-      return "";
-    }
-    // 替换单引号为转义的单引号
-    return value.replace("'", "'\\''");
-  }
-
-  /**
-   * 转义表单值中的特殊字符
-   */
-  private static String escapeForm(String value) {
-    if (value == null) {
-      return "";
-    }
-    // 替换单引号为转义的单引号
-    return value.replace("'", "'\\''");
-  }
-
   /**
    * <pre>
    * 请求可以带body、也可以不带body：
@@ -253,8 +192,8 @@ public class CurlUtils {
    *    2.如果不带body，直接可以处理。
    * </pre>
    */
-  private static boolean ifSupport(ServletRequestBo servletRequestBo) {
-    Object body = servletRequestBo.getBody();
+  private static boolean ifSupport(ServletRequestBo requestBo) {
+    Object body = requestBo.getBody();
     if (body == null
             || AbstractServletExecution.BODY_EMPTY.equals(body)) {
       return true;
@@ -270,42 +209,6 @@ public class CurlUtils {
       return true;
     }
     return false;
-  }
-
-  private static boolean ifGET(ServletRequestBo servletRequestBo) {
-    return "GET".equalsIgnoreCase(servletRequestBo.getMethod());
-  }
-
-  private static boolean ifHEAD(ServletRequestBo servletRequestBo) {
-    return "HEAD".equalsIgnoreCase(servletRequestBo.getMethod());
-  }
-
-  private static boolean ifPOST(ServletRequestBo servletRequestBo) {
-    return "POST".equalsIgnoreCase(servletRequestBo.getMethod());
-  }
-
-  private static boolean ifPUT(ServletRequestBo servletRequestBo) {
-    return "PUT".equalsIgnoreCase(servletRequestBo.getMethod());
-  }
-
-  private static boolean ifDELETE(ServletRequestBo servletRequestBo) {
-    return "DELETE".equalsIgnoreCase(servletRequestBo.getMethod());
-  }
-
-  private static boolean ifCONNECT(ServletRequestBo servletRequestBo) {
-    return "CONNECT".equalsIgnoreCase(servletRequestBo.getMethod());
-  }
-
-  private static boolean ifOPTIONS(ServletRequestBo servletRequestBo) {
-    return "OPTIONS".equalsIgnoreCase(servletRequestBo.getMethod());
-  }
-
-  private static boolean ifTRACE(ServletRequestBo servletRequestBo) {
-    return "TRACE".equalsIgnoreCase(servletRequestBo.getMethod());
-  }
-
-  private static boolean ifPATCH(ServletRequestBo servletRequestBo) {
-    return "PATCH".equalsIgnoreCase(servletRequestBo.getMethod());
   }
 
 }
