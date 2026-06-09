@@ -42,6 +42,8 @@ public class LinkFacade {
   static String sendDbConfigUrl;
   static String sendServletRequestUrl;
   static String sendServletResponseUrl;
+  static String sendHttpClientRequestUrl;
+  static String sendHttpClientResponseUrl;
 
   private static void initHttpFacade() {
     httpFacadeImpl = AgentPackage.getAgentProperties().getProperty("httpFacade.impl");
@@ -66,6 +68,8 @@ public class LinkFacade {
     sendDbConfigUrl = AgentPackage.getAgentProperties().getProperty("sendDbConfig.url");
     sendServletRequestUrl = AgentPackage.getAgentProperties().getProperty("sendServletRequest.url");
     sendServletResponseUrl = AgentPackage.getAgentProperties().getProperty("sendServletResponse.url");
+    sendHttpClientRequestUrl = AgentPackage.getAgentProperties().getProperty("sendHttpClientRequest.url");
+    sendHttpClientResponseUrl = AgentPackage.getAgentProperties().getProperty("sendHttpClientResponse.url");
   }
 
   public static void sendStatementExecution(byte[] bytes) {
@@ -86,6 +90,14 @@ public class LinkFacade {
 
   public static void sendServletResponse(byte[] bytes) {
     httpFacade.sendRequest(sendServletResponseUrl, CompressUtils.compress(bytes));
+  }
+
+  public static void sendHttpClientRequest(byte[] bytes) {
+    httpFacade.sendRequest(sendHttpClientRequestUrl, CompressUtils.compress(bytes));
+  }
+
+  public static void sendHttpClientResponse(byte[] bytes) {
+    httpFacade.sendRequest(sendHttpClientResponseUrl, CompressUtils.compress(bytes));
   }
 
   // ------------------------
