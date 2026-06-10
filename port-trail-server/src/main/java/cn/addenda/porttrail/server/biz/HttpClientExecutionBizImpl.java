@@ -87,6 +87,7 @@ public class HttpClientExecutionBizImpl implements HttpClientExecutionBiz {
     param.setEnv(serviceRuntimeInfo.getEnv());
     param.setInstanceId(serviceRuntimeInfo.getInstanceId());
     param.setExecutionId(httpClientResponseDto.getExecutionId());
+    param.setClientName(httpClientResponseDto.getClientName());
     param.setContentType(httpClientResponseDto.getContentType());
     param.setCharsetEncoding(httpClientResponseDto.getCharsetEncoding());
     param.setDateTime(DateUtils.timestampToLocalDateTime(httpClientResponseDto.getDatetime()));
