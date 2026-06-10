@@ -25,7 +25,7 @@ public class HttpClientResponseBo extends AbstractHttpClientExecution {
     super(executionId, clientName);
   }
 
-  // response.getContentType()：优先于headerMap
+  // HttpMessage.getFirstHeader("Content-Type")
   private String contentType;
 
   private int contentLength;
@@ -34,13 +34,13 @@ public class HttpClientResponseBo extends AbstractHttpClientExecution {
 
   private LocaleData locale;
 
-  // response.getCharacterEncoding()：优先于headerMap
+  // HttpMessage.getFirstHeader("Content-Type")
   private String charsetEncoding;
 
-  // response.getStatus()
+  // HttpResponse.getStatusLine().getStatusCode()
   private int status;
 
-  // response.getHeaderNames() && response.getHeaders(headerName)
+  // HttpMessage.getAllHeaders()
   private Map<String, List<String>> headerMap;
 
   /**
