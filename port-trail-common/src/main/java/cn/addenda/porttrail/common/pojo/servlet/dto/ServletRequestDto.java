@@ -58,7 +58,7 @@ public class ServletRequestDto extends AbstractServletDto {
 
   /**
    * <pre>
-   * requestType为null：
+   * contentType为null：
    *      {@link String}
    *      or {@link AbstractServletDto#UNSUPPORTED_CONTENT_TYPE}
    *      or {@link AbstractServletDto#UNSUPPORTED_CHARSET_ENCODING}
