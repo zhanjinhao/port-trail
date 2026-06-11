@@ -55,7 +55,7 @@ public class ServletResponseDto extends AbstractServletDto {
    *      or {@link AbstractServletDto#BODY_EXCEED_LENGTH}
    * {@link MediaType#ifResponseBinaryContentType(String)}：
    *      {@link String} filename
-   *      or {@link ServletResponseBo#UNKNOWN_FILENAME}
+   *      or {@link ServletResponseDto#UNKNOWN_FILENAME}
    * 其他：
    *      {@link AbstractServletDto#UNSUPPORTED_CONTENT_TYPE}
    * </pre>
