@@ -61,19 +61,28 @@ public class HttpClientRequestDto extends AbstractHttpClientDto {
 
   /**
    * <pre>
-   * requestType为null：
+   * !(entity instanceOf {@link org.apache.http.HttpEntityEnclosingRequest})：
+   *      {@link AbstractHttpClientDto#BODY_EMPTY}
+   * entity == null：
+   *      {@link AbstractHttpClientDto#BODY_EMPTY}
+   * {@link org.apache.http.HttpEntity#getContentLength()} == 0：
+   *      {@link AbstractHttpClientDto#BODY_EMPTY}
+   * contentType为null：
    *      {@link String}
    *      or {@link AbstractHttpClientDto#UNSUPPORTED_CONTENT_TYPE}
    *      or {@link AbstractHttpClientDto#UNSUPPORTED_CHARSET_ENCODING}
    *      or {@link AbstractHttpClientDto#BODY_EMPTY}
    *      or {@link AbstractHttpClientDto#BODY_EXCEED_LENGTH}
+   *      or {@link AbstractHttpClientDto#UNSUPPORTED_CONTENT_ENCODING}
    * {@link MediaType#ifRequestTextContentType(String)}：
    *      {@link String}
    *      or {@link AbstractHttpClientDto#UNSUPPORTED_CHARSET_ENCODING}
    *      or {@link AbstractHttpClientDto#BODY_EMPTY}
    *      or {@link AbstractHttpClientDto#BODY_EXCEED_LENGTH}
+   *      or {@link AbstractHttpClientDto#UNSUPPORTED_CONTENT_ENCODING}
    * {@link MediaType#ifRequestMultipartFormContentType(String)}：
    *      {@link FormDataDto}
+   *      or {@link AbstractHttpClientDto#UNSUPPORTED_CONTENT_ENCODING}
    * {@link MediaType#ifRequestBinaryContentType(String)}：
    *      {@link HttpClientRequestBo#BODY_BYTE_ARRAY}
    * 其他：
@@ -112,6 +121,8 @@ public class HttpClientRequestDto extends AbstractHttpClientDto {
       this.setBody(BODY_EMPTY);
     } else if (Objects.equals(AbstractHttpClientExecution.BODY_EXCEED_LENGTH, bodyOfBo)) {
       this.setBody(BODY_EXCEED_LENGTH);
+    } else if (Objects.equals(AbstractHttpClientExecution.UNSUPPORTED_CONTENT_ENCODING, bodyOfBo)) {
+      this.setBody(UNSUPPORTED_CONTENT_ENCODING);
     } else if (Objects.equals(HttpClientRequestBo.BODY_BYTE_ARRAY, bodyOfBo)) {
       this.setBody(BODY_BYTE_ARRAY);
     } else if (bodyOfBo instanceof Serializable) {

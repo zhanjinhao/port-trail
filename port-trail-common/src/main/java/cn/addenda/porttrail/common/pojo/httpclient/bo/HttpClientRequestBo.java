@@ -57,19 +57,28 @@ public class HttpClientRequestBo extends AbstractHttpClientExecution {
 
   /**
    * <pre>
+   * !(entity instanceOf {@link org.apache.http.HttpEntityEnclosingRequest})：
+   *      {@link AbstractHttpClientExecution#BODY_EMPTY}
+   * entity == null：
+   *      {@link AbstractHttpClientExecution#BODY_EMPTY}
+   * {@link org.apache.http.HttpEntity#getContentLength()} == 0：
+   *      {@link AbstractHttpClientExecution#BODY_EMPTY}
    * contentType为null：
    *      {@link String}
    *      or {@link AbstractHttpClientExecution#UNSUPPORTED_CONTENT_TYPE}
    *      or {@link AbstractHttpClientExecution#UNSUPPORTED_CHARSET_ENCODING}
    *      or {@link AbstractHttpClientExecution#BODY_EMPTY}
    *      or {@link AbstractHttpClientExecution#BODY_EXCEED_LENGTH}
+   *      or {@link AbstractHttpClientExecution#UNSUPPORTED_CONTENT_ENCODING}
    * {@link MediaType#ifRequestTextContentType(String)}：
    *      {@link String}
    *      or {@link AbstractHttpClientExecution#UNSUPPORTED_CHARSET_ENCODING}
    *      or {@link AbstractHttpClientExecution#BODY_EMPTY}
    *      or {@link AbstractHttpClientExecution#BODY_EXCEED_LENGTH}
+   *      or {@link AbstractHttpClientExecution#UNSUPPORTED_CONTENT_ENCODING}
    * {@link MediaType#ifRequestMultipartFormContentType(String)}：
    *      {@link FormDataList}
+   *      or {@link AbstractHttpClientExecution#UNSUPPORTED_CONTENT_TYPE}
    * {@link MediaType#ifRequestBinaryContentType(String)}：
    *      {@link HttpClientRequestBo#BODY_BYTE_ARRAY}
    * 其他：
@@ -106,6 +115,8 @@ public class HttpClientRequestBo extends AbstractHttpClientExecution {
       this.setBody(BODY_EMPTY);
     } else if (Arrays.equals(AbstractHttpClientDto.BODY_EXCEED_LENGTH, bodyOfDto)) {
       this.setBody(BODY_EXCEED_LENGTH);
+    } else if (Arrays.equals(AbstractHttpClientDto.UNSUPPORTED_CONTENT_ENCODING, bodyOfDto)) {
+      this.setBody(UNSUPPORTED_CONTENT_ENCODING);
     } else if (Arrays.equals(HttpClientRequestDto.BODY_BYTE_ARRAY, bodyOfDto)) {
       this.setBody(BODY_BYTE_ARRAY);
     } else {

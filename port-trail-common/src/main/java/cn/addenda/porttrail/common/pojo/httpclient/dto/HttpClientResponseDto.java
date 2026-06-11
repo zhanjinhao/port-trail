@@ -42,20 +42,26 @@ public class HttpClientResponseDto extends AbstractHttpClientDto {
 
   /**
    * <pre>
+   * entity == null：
+   *      {@link AbstractHttpClientDto#BODY_EMPTY}
+   * {@link org.apache.http.HttpEntity#getContentLength()} == 0：
+   *      {@link AbstractHttpClientDto#BODY_EMPTY}
    * contentType为null：
    *      {@link String}
    *      or {@link AbstractHttpClientDto#UNSUPPORTED_CONTENT_TYPE}
    *      or {@link AbstractHttpClientDto#UNSUPPORTED_CHARSET_ENCODING}
    *      or {@link AbstractHttpClientDto#BODY_EMPTY}
    *      or {@link AbstractHttpClientDto#BODY_EXCEED_LENGTH}
+   *      or {@link AbstractHttpClientDto#UNSUPPORTED_CONTENT_ENCODING}
    * {@link MediaType#ifResponseTextContentType(String)}：
    *      {@link String}
    *      or {@link AbstractHttpClientDto#UNSUPPORTED_CHARSET_ENCODING}
    *      or {@link AbstractHttpClientDto#BODY_EMPTY}
    *      or {@link AbstractHttpClientDto#BODY_EXCEED_LENGTH}
+   *      or {@link AbstractHttpClientDto#UNSUPPORTED_CONTENT_ENCODING}
    * {@link MediaType#ifResponseBinaryContentType(String)}：
    *      {@link String} filename
-   *      or {@link HttpClientResponseBo#UNKNOWN_FILENAME}
+   *      or {@link HttpClientResponseDto#UNKNOWN_FILENAME}
    * 其他：
    *      {@link AbstractHttpClientDto#UNSUPPORTED_CONTENT_TYPE}
    * </pre>
@@ -87,6 +93,8 @@ public class HttpClientResponseDto extends AbstractHttpClientDto {
       this.setBody(BODY_EMPTY);
     } else if (Objects.equals(AbstractHttpClientExecution.BODY_EXCEED_LENGTH, bodyOfBo)) {
       this.setBody(BODY_EXCEED_LENGTH);
+    } else if (Objects.equals(AbstractHttpClientExecution.UNSUPPORTED_CONTENT_ENCODING, bodyOfBo)) {
+      this.setBody(UNSUPPORTED_CONTENT_ENCODING);
     } else if (Objects.equals(HttpClientResponseBo.UNKNOWN_FILENAME, bodyOfBo)) {
       this.setBody(UNKNOWN_FILENAME);
     } else if (bodyOfBo instanceof Serializable) {

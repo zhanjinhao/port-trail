@@ -45,17 +45,23 @@ public class HttpClientResponseBo extends AbstractHttpClientExecution {
 
   /**
    * <pre>
+   * entity == null：
+   *      {@link AbstractHttpClientExecution#BODY_EMPTY}
+   * {@link org.apache.http.HttpEntity#getContentLength()} == 0：
+   *      {@link AbstractHttpClientExecution#BODY_EMPTY}
    * contentType为null：
    *      {@link String}
    *      or {@link AbstractHttpClientExecution#UNSUPPORTED_CONTENT_TYPE}
    *      or {@link AbstractHttpClientExecution#UNSUPPORTED_CHARSET_ENCODING}
    *      or {@link AbstractHttpClientExecution#BODY_EMPTY}
    *      or {@link AbstractHttpClientExecution#BODY_EXCEED_LENGTH}
+   *      or {@link AbstractHttpClientExecution#UNSUPPORTED_CONTENT_ENCODING}
    * {@link MediaType#ifResponseTextContentType(String)}：
    *      {@link String}
    *      or {@link AbstractHttpClientExecution#UNSUPPORTED_CHARSET_ENCODING}
    *      or {@link AbstractHttpClientExecution#BODY_EMPTY}
    *      or {@link AbstractHttpClientExecution#BODY_EXCEED_LENGTH}
+   *      or {@link AbstractHttpClientExecution#UNSUPPORTED_CONTENT_ENCODING}
    * {@link MediaType#ifResponseBinaryContentType(String)}：
    *      {@link String} filename
    *      or {@link HttpClientResponseBo#UNKNOWN_FILENAME}
@@ -88,6 +94,8 @@ public class HttpClientResponseBo extends AbstractHttpClientExecution {
       this.setBody(BODY_EMPTY);
     } else if (Arrays.equals(AbstractHttpClientDto.BODY_EXCEED_LENGTH, bodyOfDto)) {
       this.setBody(BODY_EXCEED_LENGTH);
+    } else if (Arrays.equals(AbstractHttpClientDto.UNSUPPORTED_CONTENT_ENCODING, bodyOfDto)) {
+      this.setBody(UNSUPPORTED_CONTENT_ENCODING);
     } else if (Arrays.equals(HttpClientResponseDto.UNKNOWN_FILENAME, bodyOfDto)) {
       this.setBody(UNKNOWN_FILENAME);
     } else {

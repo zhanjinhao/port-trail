@@ -14,6 +14,7 @@ public class AbstractHttpClientDto extends AbstractDto {
   public static final byte[] UNSUPPORTED_CHARSET_ENCODING = new byte[]{-2};
   public static final byte[] BODY_EMPTY = new byte[]{-3};
   public static final byte[] BODY_EXCEED_LENGTH = new byte[]{-4};
+  public static final byte[] UNSUPPORTED_CONTENT_ENCODING = new byte[]{-5};
 
   private final String executionId;
 
