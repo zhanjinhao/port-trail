@@ -164,6 +164,12 @@ public class JavaxServletServiceInterceptor extends AbstractDeduplicationEntryPo
         } else if (MediaType.ifResponseBinaryContentType(responseContentType)) {
           servletResponseBo.setBody(extractBinaryResponseBody(response, servletResponseBo.getCharsetEncoding()));
         }
+      } else if (MediaType.ifResponseHttpContentType(responseContentType)) {
+        try {
+          servletResponseBo.setBody(extractTextResponseBody(responseWrapper, executionId, true));
+        } catch (Throwable t) {
+          servletResponseBo.setBody(AbstractServletExecution.UNSUPPORTED_CONTENT_TYPE);
+        }
       } else {
         servletResponseBo.setContentLength(AbstractServletExecution.UNKNOWN_CONTENT_LENGTH);
         servletResponseBo.setBody(AbstractServletExecution.UNSUPPORTED_CONTENT_TYPE);

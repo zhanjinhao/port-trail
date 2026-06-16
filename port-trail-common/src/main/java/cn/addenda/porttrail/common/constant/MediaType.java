@@ -28,6 +28,10 @@ public class MediaType {
   // todo 需要分析 event-stream 的执行流程
   public static final String TEXT_EVENT_STREAM_VALUE = "text/event-stream";
 
+  public static final String TEXT_MESSAGE_HTTP_VALUE = "message/http";
+  public static final String TEXT_APPLICATION_HTTP_VALUE = "application/http";
+  public static final String TEXT_MULTIPART_MIXED_VALUE = "multipart/mixed";
+
   public static final String APPLICATION_OCTET_STREAM_VALUE = "application/octet-stream";
   public static final String APPLICATION_PDF_VALUE = "application/pdf";
   public static final String IMAGE_GIF_VALUE = "image/gif";
@@ -133,6 +137,15 @@ public class MediaType {
             || StringUtils.startsWithIgnoreCase(contentType, MediaType.IMAGE_BMP)
             || StringUtils.startsWithIgnoreCase(contentType, MediaType.IMAGE_TIFF)
             || StringUtils.startsWithIgnoreCase(contentType, MediaType.IMAGE_WEBP);
+  }
+
+  public static boolean ifResponseHttpContentType(String contentType) {
+    if (contentType == null) {
+      return false;
+    }
+    return StringUtils.startsWithIgnoreCase(contentType, MediaType.TEXT_MESSAGE_HTTP_VALUE)
+            || StringUtils.startsWithIgnoreCase(contentType, MediaType.TEXT_APPLICATION_HTTP_VALUE)
+            || StringUtils.startsWithIgnoreCase(contentType, MediaType.TEXT_MULTIPART_MIXED_VALUE);
   }
 
 }
