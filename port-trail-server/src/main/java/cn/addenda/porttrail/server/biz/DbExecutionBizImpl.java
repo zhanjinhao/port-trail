@@ -2,7 +2,6 @@ package cn.addenda.porttrail.server.biz;
 
 import cn.addenda.component.base.jackson.util.JacksonUtils;
 import cn.addenda.component.transaction.PlatformTransactionHelper;
-import cn.addenda.porttrail.common.entrypoint.EntryPointSnapshot;
 import cn.addenda.porttrail.common.pojo.db.bo.PreparedStatementExecutionBo;
 import cn.addenda.porttrail.common.pojo.db.bo.PreparedStatementParameter;
 import cn.addenda.porttrail.common.pojo.db.dto.*;
@@ -32,12 +31,6 @@ public class DbExecutionBizImpl implements DbExecutionBiz {
   private EstDbConfigCurder estDbConfigCurder;
 
   @Autowired
-  private EstEntryPointCurder estEntryPointCurder;
-
-  @Autowired
-  private EstEntryPointSnapshotCurder estEntryPointSnapshotCurder;
-
-  @Autowired
   private EstPreparedStatementExecutionCurder estPreparedStatementExecutionCurder;
 
   @Autowired
@@ -48,6 +41,9 @@ public class DbExecutionBizImpl implements DbExecutionBiz {
 
   @Autowired
   private EstStatementSqlCurder estStatementSqlCurder;
+
+  @Autowired
+  private EstEntryPointSnapshotBiz estEntryPointSnapshotBiz;
 
   /**
    * 数据库配置数据是要落库的。
@@ -73,21 +69,7 @@ public class DbExecutionBizImpl implements DbExecutionBiz {
 
   private void insertDbConfig(DbConfigDto dbConfigDto) {
     transactionHelperNew.doTransaction(() -> {
-      EntryPointSnapshot entryPointSnapshot = dbConfigDto.getEntryPointSnapshot();
-      EstEntryPointSnapshot estEntryPointSnapshot = EstEntryPointSnapshot.ofParam();
-      estEntryPointSnapshot.setThreadName(entryPointSnapshot.getThreadName());
-      estEntryPointSnapshotCurder.insert(estEntryPointSnapshot);
-
-      List<EstEntryPoint> estEntryPointList = entryPointSnapshot.getEntryPointList()
-              .stream().map(entryPoint -> {
-                EstEntryPoint estEntryPoint = EstEntryPoint.ofParam();
-                estEntryPoint.setEntryPointType(entryPoint.getEntryPointType().toString());
-                estEntryPoint.setDetail(entryPoint.getDetail());
-                estEntryPoint.setEntryId(entryPoint.getEntryId());
-                estEntryPoint.setEntryPointSnapshotId(estEntryPointSnapshot.getId());
-                return estEntryPoint;
-              }).collect(Collectors.toList());
-      estEntryPointCurder.batchInsert(estEntryPointList);
+      EstEntryPointSnapshotBo estEntryPointSnapshotBo = estEntryPointSnapshotBiz.insert(dbConfigDto.getEntryPointSnapshot());
 
       EstDbConfig estDbConfig = EstDbConfig.ofParam();
       estDbConfig.setSystemCode(dbConfigDto.getServiceRuntimeInfo().getSystemCode());
@@ -102,7 +84,7 @@ public class DbExecutionBizImpl implements DbExecutionBiz {
       estDbConfig.setUser(dbConfigDto.getUser());
       estDbConfig.setPassword(dbConfigDto.getPassword());
       estDbConfig.setDriverName(dbConfigDto.getDriverName());
-      estDbConfig.setEntryPointSnapshotId(estEntryPointSnapshot.getId());
+      estDbConfig.setEntryPointSnapshotId(estEntryPointSnapshotBo.getId());
       estDbConfigCurder.insert(estDbConfig);
     });
   }
@@ -110,21 +92,7 @@ public class DbExecutionBizImpl implements DbExecutionBiz {
   @Override
   public EstPreparedStatementExecutionBo handlePreparedStatementExecution(PreparedStatementExecutionDto preparedStatementExecutionDto) {
     return transactionHelperNew.doTransaction(() -> {
-      EntryPointSnapshot entryPointSnapshot = preparedStatementExecutionDto.getEntryPointSnapshot();
-      EstEntryPointSnapshot estEntryPointSnapshot = EstEntryPointSnapshot.ofParam();
-      estEntryPointSnapshot.setThreadName(entryPointSnapshot.getThreadName());
-      estEntryPointSnapshotCurder.insert(estEntryPointSnapshot);
-
-      List<EstEntryPoint> estEntryPointList = entryPointSnapshot.getEntryPointList()
-              .stream().map(entryPoint -> {
-                EstEntryPoint estEntryPoint = EstEntryPoint.ofParam();
-                estEntryPoint.setEntryPointType(entryPoint.getEntryPointType().toString());
-                estEntryPoint.setDetail(entryPoint.getDetail());
-                estEntryPoint.setEntryId(entryPoint.getEntryId());
-                estEntryPoint.setEntryPointSnapshotId(estEntryPointSnapshot.getId());
-                return estEntryPoint;
-              }).collect(Collectors.toList());
-      estEntryPointCurder.batchInsert(estEntryPointList);
+      EstEntryPointSnapshotBo estEntryPointSnapshotBo = estEntryPointSnapshotBiz.insert(preparedStatementExecutionDto.getEntryPointSnapshot());
 
       EstPreparedStatementExecution estPreparedStatementExecution = EstPreparedStatementExecution.ofParam();
       estPreparedStatementExecution.setSystemCode(preparedStatementExecutionDto.getServiceRuntimeInfo().getSystemCode());
@@ -141,7 +109,7 @@ public class DbExecutionBizImpl implements DbExecutionBiz {
       estPreparedStatementExecution.setStart(DateUtils.timestampToLocalDateTime(preparedStatementExecutionDto.getStart()));
       estPreparedStatementExecution.setEnd(DateUtils.timestampToLocalDateTime(preparedStatementExecutionDto.getEnd()));
       estPreparedStatementExecution.setCost((int) (preparedStatementExecutionDto.getEnd() - preparedStatementExecutionDto.getStart()));
-      estPreparedStatementExecution.setEntryPointSnapshotId(estEntryPointSnapshot.getId());
+      estPreparedStatementExecution.setEntryPointSnapshotId(estEntryPointSnapshotBo.getId());
       estPreparedStatementExecutionCurder.insert(estPreparedStatementExecution);
 
       PreparedStatementExecutionBo preparedStatementExecutionBo = new PreparedStatementExecutionBo(preparedStatementExecutionDto);
@@ -168,11 +136,6 @@ public class DbExecutionBizImpl implements DbExecutionBiz {
 
       estPreparedStatementParameterCurder.batchInsert(estPreparedStatementParameterList);
 
-      List<EstEntryPointBo> estEntryPointBoList = estEntryPointList.stream()
-              .map(EstEntryPointBo::new)
-              .collect(Collectors.toList());
-      EstEntryPointSnapshotBo estEntryPointSnapshotBo = new EstEntryPointSnapshotBo(estEntryPointSnapshot);
-      estEntryPointSnapshotBo.setEstEntryPointBoList(estEntryPointBoList);
 
       List<EstPreparedStatementParameterBo> estPreparedStatementParameterBoList = estPreparedStatementParameterList.stream()
               .map(EstPreparedStatementParameterBo::new)
@@ -189,21 +152,7 @@ public class DbExecutionBizImpl implements DbExecutionBiz {
   @Override
   public EstStatementExecutionBo handleStatementExecution(StatementExecutionDto statementExecutionDto) {
     return transactionHelperNew.doTransaction(() -> {
-      EntryPointSnapshot entryPointSnapshot = statementExecutionDto.getEntryPointSnapshot();
-      EstEntryPointSnapshot estEntryPointSnapshot = EstEntryPointSnapshot.ofParam();
-      estEntryPointSnapshot.setThreadName(entryPointSnapshot.getThreadName());
-      estEntryPointSnapshotCurder.insert(estEntryPointSnapshot);
-
-      List<EstEntryPoint> estEntryPointList = entryPointSnapshot.getEntryPointList()
-              .stream().map(entryPoint -> {
-                EstEntryPoint estEntryPoint = EstEntryPoint.ofParam();
-                estEntryPoint.setEntryPointType(entryPoint.getEntryPointType().toString());
-                estEntryPoint.setDetail(entryPoint.getDetail());
-                estEntryPoint.setEntryId(entryPoint.getEntryId());
-                estEntryPoint.setEntryPointSnapshotId(estEntryPointSnapshot.getId());
-                return estEntryPoint;
-              }).collect(Collectors.toList());
-      estEntryPointCurder.batchInsert(estEntryPointList);
+      EstEntryPointSnapshotBo estEntryPointSnapshotBo = estEntryPointSnapshotBiz.insert(statementExecutionDto.getEntryPointSnapshot());
 
       EstStatementExecution estStatementExecution = EstStatementExecution.ofParam();
       estStatementExecution.setSystemCode(statementExecutionDto.getServiceRuntimeInfo().getSystemCode());
@@ -219,7 +168,7 @@ public class DbExecutionBizImpl implements DbExecutionBiz {
       estStatementExecution.setStart(DateUtils.timestampToLocalDateTime(statementExecutionDto.getStart()));
       estStatementExecution.setEnd(DateUtils.timestampToLocalDateTime(statementExecutionDto.getEnd()));
       estStatementExecution.setCost((int) (statementExecutionDto.getEnd() - statementExecutionDto.getStart()));
-      estStatementExecution.setEntryPointSnapshotId(estEntryPointSnapshot.getId());
+      estStatementExecution.setEntryPointSnapshotId(estEntryPointSnapshotBo.getId());
       estStatementExecutionCurder.insert(estStatementExecution);
 
       List<StatementSqlDto> statementSqlDtoList = statementExecutionDto.getStatementSqlDtoList();
@@ -234,12 +183,6 @@ public class DbExecutionBizImpl implements DbExecutionBiz {
       }
 
       estStatementSqlCurder.batchInsert(estStatementSqlList);
-
-      List<EstEntryPointBo> estEntryPointBoList = estEntryPointList.stream()
-              .map(EstEntryPointBo::new)
-              .collect(Collectors.toList());
-      EstEntryPointSnapshotBo estEntryPointSnapshotBo = new EstEntryPointSnapshotBo(estEntryPointSnapshot);
-      estEntryPointSnapshotBo.setEstEntryPointBoList(estEntryPointBoList);
 
       List<EstStatementSqlBo> estStatementSqlBoList = estStatementSqlList.stream()
               .map(EstStatementSqlBo::new)
