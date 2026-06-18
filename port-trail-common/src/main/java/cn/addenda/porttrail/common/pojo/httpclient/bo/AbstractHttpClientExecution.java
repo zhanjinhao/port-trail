@@ -1,5 +1,7 @@
 package cn.addenda.porttrail.common.pojo.httpclient.bo;
 
+import cn.addenda.porttrail.common.entrypoint.EntryPointSnapshot;
+
 import java.nio.charset.StandardCharsets;
 
 public abstract class AbstractHttpClientExecution implements HttpClientExecution {
@@ -16,6 +18,8 @@ public abstract class AbstractHttpClientExecution implements HttpClientExecution
 
   private final String clientName;
 
+  private EntryPointSnapshot entryPointSnapshot;
+
   protected AbstractHttpClientExecution(String executionId, String clientName) {
     this.executionId = executionId;
     this.clientName = clientName;
@@ -29,6 +33,16 @@ public abstract class AbstractHttpClientExecution implements HttpClientExecution
   @Override
   public String getClientName() {
     return clientName;
+  }
+
+  @Override
+  public void setEntryPointSnapshot(EntryPointSnapshot entryPointSnapshot) {
+    this.entryPointSnapshot = entryPointSnapshot;
+  }
+
+  @Override
+  public EntryPointSnapshot getEntryPointSnapshot() {
+    return entryPointSnapshot;
   }
 
 }

@@ -73,6 +73,7 @@ public class HttpClientResponseBo extends AbstractHttpClientExecution {
 
   public HttpClientResponseBo(HttpClientResponseDto httpClientResponseDto) {
     super(httpClientResponseDto.getExecutionId(), httpClientResponseDto.getClientName());
+    this.setEntryPointSnapshot(httpClientResponseDto.getEntryPointSnapshot());
     this.setContentType(httpClientResponseDto.getContentType());
     this.setCharsetEncoding(httpClientResponseDto.getCharsetEncoding());
     this.setContentLength(httpClientResponseDto.getContentLength());

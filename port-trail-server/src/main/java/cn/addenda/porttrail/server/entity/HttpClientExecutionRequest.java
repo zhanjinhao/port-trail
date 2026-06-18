@@ -112,6 +112,10 @@ public class HttpClientExecutionRequest extends SimpleBaseModel implements Seria
    * 请求的curl
    */
   private String curl;
+  /**
+   * t_est_entry_point_snapshot的ID
+   */
+  private Long entryPointSnapshotId;
 
   public static HttpClientExecutionRequest ofParam() {
     return new HttpClientExecutionRequest();

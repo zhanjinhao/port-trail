@@ -97,6 +97,7 @@ public class HttpClientRequestDto extends AbstractHttpClientDto {
 
   public HttpClientRequestDto(HttpClientRequestBo httpClientRequestBo) {
     super(httpClientRequestBo.getExecutionId(), httpClientRequestBo.getClientName());
+    this.setEntryPointSnapshot(httpClientRequestBo.getEntryPointSnapshot());
     this.setVersion(httpClientRequestBo.getVersion());
     this.setScheme(httpClientRequestBo.getScheme());
     this.setMethod(httpClientRequestBo.getMethod());

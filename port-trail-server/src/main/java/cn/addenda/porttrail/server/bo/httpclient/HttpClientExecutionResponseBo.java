@@ -1,5 +1,6 @@
 package cn.addenda.porttrail.server.bo.httpclient;
 
+import cn.addenda.porttrail.server.bo.est.EstEntryPointSnapshotBo;
 import cn.addenda.porttrail.server.entity.HttpClientExecutionResponse;
 import lombok.Getter;
 import lombok.Setter;
@@ -9,6 +10,8 @@ import lombok.ToString;
 @Getter
 @ToString
 public class HttpClientExecutionResponseBo extends HttpClientExecutionResponse {
+
+  private EstEntryPointSnapshotBo estEntryPointSnapshotBo;
 
   public HttpClientExecutionResponseBo(HttpClientExecutionResponse httpClientExecutionResponse) {
     this.setId(httpClientExecutionResponse.getId());
@@ -27,6 +30,7 @@ public class HttpClientExecutionResponseBo extends HttpClientExecutionResponse {
     this.setHeaders(httpClientExecutionResponse.getHeaders());
     this.setBody(httpClientExecutionResponse.getBody());
     this.setBodyText(httpClientExecutionResponse.getBodyText());
+    this.setEntryPointSnapshotId(httpClientExecutionResponse.getEntryPointSnapshotId());
     this.setCreator(httpClientExecutionResponse.getCreator());
     this.setCreatorName(httpClientExecutionResponse.getCreatorName());
     this.setCreateDt(httpClientExecutionResponse.getCreateDt());

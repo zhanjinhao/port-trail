@@ -92,6 +92,10 @@ public class HttpClientExecutionResponse extends SimpleBaseModel implements Seri
    * 如果响应体是文本，此字段有值
    */
   private String bodyText;
+  /**
+   * t_est_entry_point_snapshot的ID
+   */
+  private Long entryPointSnapshotId;
 
   public static HttpClientExecutionResponse ofParam() {
     return new HttpClientExecutionResponse();

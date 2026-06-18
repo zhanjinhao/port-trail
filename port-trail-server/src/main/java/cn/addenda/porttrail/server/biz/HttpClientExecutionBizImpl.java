@@ -11,6 +11,7 @@ import cn.addenda.porttrail.common.pojo.httpclient.dto.HttpClientRequestDto;
 import cn.addenda.porttrail.common.pojo.httpclient.dto.HttpClientResponseDto;
 import cn.addenda.porttrail.common.util.CompressUtils;
 import cn.addenda.porttrail.common.util.JdkSerializationUtils;
+import cn.addenda.porttrail.server.bo.est.EstEntryPointSnapshotBo;
 import cn.addenda.porttrail.server.bo.httpclient.HttpClientExecutionRequestBo;
 import cn.addenda.porttrail.server.bo.httpclient.HttpClientExecutionResponseBo;
 import cn.addenda.porttrail.server.curd.HttpClientExecutionRequestCurder;
@@ -35,77 +36,92 @@ public class HttpClientExecutionBizImpl implements HttpClientExecutionBiz {
   @Autowired
   private HttpClientExecutionResponseCurder httpClientExecutionResponseCurder;
 
+  @Autowired
+  private EstEntryPointSnapshotBiz estEntryPointSnapshotBiz;
+
   @Override
   public HttpClientExecutionRequestBo handleHttpClientRequest(HttpClientRequestDto httpClientRequestDto) {
-    ServiceRuntimeInfo serviceRuntimeInfo = httpClientRequestDto.getServiceRuntimeInfo();
+    return transactionHelperNew.doTransaction(() -> {
+      EstEntryPointSnapshotBo estEntryPointSnapshotBo = estEntryPointSnapshotBiz.insert(httpClientRequestDto.getEntryPointSnapshot());
 
-    HttpClientExecutionRequest param = HttpClientExecutionRequest.ofParam();
-    param.setSystemCode(serviceRuntimeInfo.getSystemCode());
-    param.setServiceName(serviceRuntimeInfo.getServiceName());
-    param.setImageName(serviceRuntimeInfo.getImageName());
-    param.setEnv(serviceRuntimeInfo.getEnv());
-    param.setInstanceId(serviceRuntimeInfo.getInstanceId());
-    param.setExecutionId(httpClientRequestDto.getExecutionId());
-    param.setClientName(httpClientRequestDto.getClientName());
-    param.setVersion(httpClientRequestDto.getVersion());
-    param.setScheme(httpClientRequestDto.getScheme());
-    param.setMethod(httpClientRequestDto.getMethod());
-    param.setUri(httpClientRequestDto.getUri());
-    param.setQueryString(httpClientRequestDto.getQueryString());
-    param.setContentType(httpClientRequestDto.getContentType());
-    param.setCharsetEncoding(httpClientRequestDto.getCharsetEncoding());
-    param.setDateTime(DateUtils.timestampToLocalDateTime(httpClientRequestDto.getDatetime()));
-    param.setContentLength(httpClientRequestDto.getContentLength());
-    param.setLocale(JacksonUtils.toStr(httpClientRequestDto.getLocale()));
-    param.setHeaders(JacksonUtils.toStr(httpClientRequestDto.getHeaderMap()));
-    param.setBody(CompressUtils.compress(JdkSerializationUtils.serialize(httpClientRequestDto.getBody())));
+      ServiceRuntimeInfo serviceRuntimeInfo = httpClientRequestDto.getServiceRuntimeInfo();
 
-    HttpClientRequestBo httpClientRequestBo = new HttpClientRequestBo(httpClientRequestDto);
-    if (httpClientRequestBo.getBody() instanceof String) {
-      param.setBodyText((String) httpClientRequestBo.getBody());
-    }
-    if (httpClientRequestBo.getBody() instanceof FormDataList) {
-      param.setBodyText(JacksonUtils.toStr(httpClientRequestBo.getBody()));
-    }
-    param.setCurl(HttpClientCurlUtils.toCurl(httpClientRequestBo));
+      HttpClientExecutionRequest param = HttpClientExecutionRequest.ofParam();
+      param.setSystemCode(serviceRuntimeInfo.getSystemCode());
+      param.setServiceName(serviceRuntimeInfo.getServiceName());
+      param.setImageName(serviceRuntimeInfo.getImageName());
+      param.setEnv(serviceRuntimeInfo.getEnv());
+      param.setInstanceId(serviceRuntimeInfo.getInstanceId());
+      param.setExecutionId(httpClientRequestDto.getExecutionId());
+      param.setClientName(httpClientRequestDto.getClientName());
+      param.setVersion(httpClientRequestDto.getVersion());
+      param.setScheme(httpClientRequestDto.getScheme());
+      param.setMethod(httpClientRequestDto.getMethod());
+      param.setUri(httpClientRequestDto.getUri());
+      param.setQueryString(httpClientRequestDto.getQueryString());
+      param.setContentType(httpClientRequestDto.getContentType());
+      param.setCharsetEncoding(httpClientRequestDto.getCharsetEncoding());
+      param.setDateTime(DateUtils.timestampToLocalDateTime(httpClientRequestDto.getDatetime()));
+      param.setContentLength(httpClientRequestDto.getContentLength());
+      param.setLocale(JacksonUtils.toStr(httpClientRequestDto.getLocale()));
+      param.setHeaders(JacksonUtils.toStr(httpClientRequestDto.getHeaderMap()));
+      param.setBody(CompressUtils.compress(JdkSerializationUtils.serialize(httpClientRequestDto.getBody())));
 
-    transactionHelperNew.doTransaction(() -> {
+      HttpClientRequestBo httpClientRequestBo = new HttpClientRequestBo(httpClientRequestDto);
+      if (httpClientRequestBo.getBody() instanceof String) {
+        param.setBodyText((String) httpClientRequestBo.getBody());
+      }
+      if (httpClientRequestBo.getBody() instanceof FormDataList) {
+        param.setBodyText(JacksonUtils.toStr(httpClientRequestBo.getBody()));
+      }
+      param.setCurl(HttpClientCurlUtils.toCurl(httpClientRequestBo));
+
       httpClientExecutionRequestCurder.insert(param);
+
+      HttpClientExecutionRequestBo httpClientExecutionRequestBo = new HttpClientExecutionRequestBo(param);
+      httpClientExecutionRequestBo.setEstEntryPointSnapshotBo(estEntryPointSnapshotBo);
+
+      return httpClientExecutionRequestBo;
     });
 
-    return new HttpClientExecutionRequestBo(param);
   }
 
   @Override
   public HttpClientExecutionResponseBo handleHttpClientResponse(HttpClientResponseDto httpClientResponseDto) {
-    ServiceRuntimeInfo serviceRuntimeInfo = httpClientResponseDto.getServiceRuntimeInfo();
+    return transactionHelperNew.doTransaction(() -> {
+      EstEntryPointSnapshotBo estEntryPointSnapshotBo = estEntryPointSnapshotBiz.insert(httpClientResponseDto.getEntryPointSnapshot());
 
-    HttpClientExecutionResponse param = HttpClientExecutionResponse.ofParam();
-    param.setSystemCode(serviceRuntimeInfo.getSystemCode());
-    param.setServiceName(serviceRuntimeInfo.getServiceName());
-    param.setImageName(serviceRuntimeInfo.getImageName());
-    param.setEnv(serviceRuntimeInfo.getEnv());
-    param.setInstanceId(serviceRuntimeInfo.getInstanceId());
-    param.setExecutionId(httpClientResponseDto.getExecutionId());
-    param.setClientName(httpClientResponseDto.getClientName());
-    param.setContentType(httpClientResponseDto.getContentType());
-    param.setCharsetEncoding(httpClientResponseDto.getCharsetEncoding());
-    param.setDateTime(DateUtils.timestampToLocalDateTime(httpClientResponseDto.getDatetime()));
-    param.setContentLength(httpClientResponseDto.getContentLength());
-    param.setLocale(JacksonUtils.toStr(httpClientResponseDto.getLocale()));
-    param.setStatus(httpClientResponseDto.getStatus());
-    param.setHeaders(JacksonUtils.toStr(httpClientResponseDto.getHeaderMap()));
-    param.setBody(CompressUtils.compress(JdkSerializationUtils.serialize(httpClientResponseDto.getBody())));
+      ServiceRuntimeInfo serviceRuntimeInfo = httpClientResponseDto.getServiceRuntimeInfo();
 
-    HttpClientResponseBo httpClientResponseBo = new HttpClientResponseBo(httpClientResponseDto);
-    if (httpClientResponseBo.getBody() instanceof String) {
-      param.setBodyText((String) httpClientResponseBo.getBody());
-    }
+      HttpClientExecutionResponse param = HttpClientExecutionResponse.ofParam();
+      param.setSystemCode(serviceRuntimeInfo.getSystemCode());
+      param.setServiceName(serviceRuntimeInfo.getServiceName());
+      param.setImageName(serviceRuntimeInfo.getImageName());
+      param.setEnv(serviceRuntimeInfo.getEnv());
+      param.setInstanceId(serviceRuntimeInfo.getInstanceId());
+      param.setExecutionId(httpClientResponseDto.getExecutionId());
+      param.setClientName(httpClientResponseDto.getClientName());
+      param.setContentType(httpClientResponseDto.getContentType());
+      param.setCharsetEncoding(httpClientResponseDto.getCharsetEncoding());
+      param.setDateTime(DateUtils.timestampToLocalDateTime(httpClientResponseDto.getDatetime()));
+      param.setContentLength(httpClientResponseDto.getContentLength());
+      param.setLocale(JacksonUtils.toStr(httpClientResponseDto.getLocale()));
+      param.setStatus(httpClientResponseDto.getStatus());
+      param.setHeaders(JacksonUtils.toStr(httpClientResponseDto.getHeaderMap()));
+      param.setBody(CompressUtils.compress(JdkSerializationUtils.serialize(httpClientResponseDto.getBody())));
 
-    transactionHelperNew.doTransaction(() -> {
+      HttpClientResponseBo httpClientResponseBo = new HttpClientResponseBo(httpClientResponseDto);
+      if (httpClientResponseBo.getBody() instanceof String) {
+        param.setBodyText((String) httpClientResponseBo.getBody());
+      }
+
       httpClientExecutionResponseCurder.insert(param);
+
+      HttpClientExecutionResponseBo httpClientExecutionResponseBo = new HttpClientExecutionResponseBo(param);
+      httpClientExecutionResponseBo.setEstEntryPointSnapshotBo(estEntryPointSnapshotBo);
+
+      return httpClientExecutionResponseBo;
     });
 
-    return new HttpClientExecutionResponseBo(param);
   }
 }

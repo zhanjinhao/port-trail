@@ -1,5 +1,6 @@
 package cn.addenda.porttrail.common.pojo.httpclient.dto;
 
+import cn.addenda.porttrail.common.entrypoint.EntryPointSnapshot;
 import cn.addenda.porttrail.common.pojo.AbstractDto;
 import lombok.Getter;
 import lombok.Setter;
@@ -19,6 +20,8 @@ public class AbstractHttpClientDto extends AbstractDto {
   private final String executionId;
 
   private final String clientName;
+
+  private EntryPointSnapshot entryPointSnapshot;
 
   public AbstractHttpClientDto(String executionId, String clientName) {
     this.executionId = executionId;

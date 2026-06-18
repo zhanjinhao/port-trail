@@ -74,6 +74,7 @@ public class HttpClientResponseDto extends AbstractHttpClientDto {
 
   public HttpClientResponseDto(HttpClientResponseBo httpClientResponseBo) {
     super(httpClientResponseBo.getExecutionId(), httpClientResponseBo.getClientName());
+    this.setEntryPointSnapshot(httpClientResponseBo.getEntryPointSnapshot());
     this.setContentType(httpClientResponseBo.getContentType());
     this.setCharsetEncoding(httpClientResponseBo.getCharsetEncoding());
     this.setContentLength(httpClientResponseBo.getContentLength());

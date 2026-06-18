@@ -89,6 +89,7 @@ public class HttpClientRequestBo extends AbstractHttpClientExecution {
 
   public HttpClientRequestBo(HttpClientRequestDto httpClientRequestDto) {
     super(httpClientRequestDto.getExecutionId(), httpClientRequestDto.getClientName());
+    this.setEntryPointSnapshot(httpClientRequestDto.getEntryPointSnapshot());
     this.setVersion(httpClientRequestDto.getVersion());
     this.setScheme(httpClientRequestDto.getScheme());
     this.setMethod(httpClientRequestDto.getMethod());

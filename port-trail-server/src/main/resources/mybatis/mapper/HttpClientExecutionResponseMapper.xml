@@ -9,7 +9,7 @@
     `id`
     , `system_code`, `service_name`, `image_name`, `env`, `instance_id`, `execution_id`,
     `client_name`, `content_type`, `charset_encoding`, `date_time`, `content_length`, `locale`, `status`,
-    `headers`, `body`, `body_text`
+    `headers`, `body`, `body_text`, `entry_point_snapshot_id`
   </sql>
 
   <sql id="setCondition">
@@ -60,6 +60,9 @@
     </if>
     <if test="bodyText != null">
       `body_text` = #{bodyText,jdbcType=VARCHAR},
+    </if>
+    <if test="entryPointSnapshotId != null">
+      `entry_point_snapshot_id` = #{entryPointSnapshotId,jdbcType=BIGINT},
     </if>
   </sql>
 
@@ -114,6 +117,9 @@
     </if>
     <if test="bodyText != null">
       and `body_text` = #{bodyText,jdbcType=VARCHAR}
+    </if>
+    <if test="entryPointSnapshotId != null">
+      and `entry_point_snapshot_id` = #{entryPointSnapshotId,jdbcType=BIGINT}
     </if>
   </sql>
 
