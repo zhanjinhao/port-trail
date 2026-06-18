@@ -1,6 +1,5 @@
 package cn.addenda.porttrail.common.pojo.db.dto;
 
-import cn.addenda.porttrail.common.entrypoint.EntryPointSnapshot;
 import cn.addenda.porttrail.common.pojo.db.bo.StatementExecutionBo;
 import lombok.Getter;
 import lombok.Setter;
@@ -22,8 +21,6 @@ public class StatementExecutionDto extends AbstractDbDto {
   private Long start;
 
   private Long end;
-
-  private EntryPointSnapshot entryPointSnapshot;
 
   private List<StatementSqlDto> statementSqlDtoList = new ArrayList<>();
 

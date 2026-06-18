@@ -1,5 +1,6 @@
 package cn.addenda.porttrail.common.pojo.db.dto;
 
+import cn.addenda.porttrail.common.entrypoint.EntryPointSnapshot;
 import cn.addenda.porttrail.common.pojo.AbstractDto;
 import lombok.Getter;
 import lombok.Setter;
@@ -15,5 +16,7 @@ public abstract class AbstractDbDto extends AbstractDto {
   private String connectionPortTrailId;
 
   private String statementPortTrailId;
+
+  private EntryPointSnapshot entryPointSnapshot;
 
 }
