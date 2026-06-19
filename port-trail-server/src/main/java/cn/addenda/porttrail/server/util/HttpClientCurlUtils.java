@@ -3,10 +3,10 @@ package cn.addenda.porttrail.server.util;
 import cn.addenda.porttrail.common.constant.MediaType;
 import cn.addenda.porttrail.common.pojo.httpclient.bo.AbstractHttpClientExecution;
 import cn.addenda.porttrail.common.pojo.httpclient.bo.HttpClientRequestBo;
+import cn.addenda.porttrail.common.util.ArrayUtils;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -37,7 +37,8 @@ public class HttpClientCurlUtils extends AbstractCurlUtils {
     curl.append(String.format(CURL_TEMPLATE, requestBo.getMethod(), url)).append(LF);
 
     // 3. 添加请求头。 todo excludedHeaderList
-    appendHeaders(curl, requestBo, new ArrayList<>());
+    List<String> excludedHeaderList = ArrayUtils.asArrayList("Content-Encoding");
+    appendHeaders(curl, requestBo, excludedHeaderList);
 
     // 4. 添加请求体（仅当body为String类型时可以添加请求体）
     if (requestBo.getBody() instanceof String) {

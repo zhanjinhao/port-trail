@@ -7,6 +7,7 @@ import cn.addenda.porttrail.agent.transform.interceptor.datasource.druid.DruidDr
 import cn.addenda.porttrail.agent.transform.interceptor.datasource.hikari.HikariConcurrentBagInterceptorPointDefine;
 import cn.addenda.porttrail.agent.transform.interceptor.driver.mysql.MySQLDriverInterceptorPointDefine;
 import cn.addenda.porttrail.agent.transform.interceptor.driver.oracle.OracleDriverInterceptorPointDefine;
+import cn.addenda.porttrail.agent.transform.interceptor.http.httpclient4.HttpClient4HttpClientBuilderInterceptorPointDefine;
 import cn.addenda.porttrail.agent.transform.interceptor.jdbc.PortTrailStatementInterceptorPointDefine;
 import cn.addenda.porttrail.agent.transform.interceptor.job.xxl.glue.XxlGlueInterceptorPointDefine;
 import cn.addenda.porttrail.agent.transform.interceptor.job.xxl.jobhandler.XxlJobHandlerInterceptorPointDefine;
@@ -188,6 +189,8 @@ public class PortTrailAgent {
     // DB层拦截
     interceptorPointDefineGather.addInterceptorPointDefine(new MySQLDriverInterceptorPointDefine());
     interceptorPointDefineGather.addInterceptorPointDefine(new OracleDriverInterceptorPointDefine());
+    // HTTP层拦截
+    interceptorPointDefineGather.addInterceptorPointDefine(new HttpClient4HttpClientBuilderInterceptorPointDefine());
     return interceptorPointDefineGather;
   }
 

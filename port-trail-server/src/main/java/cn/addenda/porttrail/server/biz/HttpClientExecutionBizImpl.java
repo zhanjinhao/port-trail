@@ -75,6 +75,7 @@ public class HttpClientExecutionBizImpl implements HttpClientExecutionBiz {
         param.setBodyText(JacksonUtils.toStr(httpClientRequestBo.getBody()));
       }
       param.setCurl(HttpClientCurlUtils.toCurl(httpClientRequestBo));
+      param.setEntryPointSnapshotId(estEntryPointSnapshotBo.getId());
 
       httpClientExecutionRequestCurder.insert(param);
 
@@ -114,6 +115,7 @@ public class HttpClientExecutionBizImpl implements HttpClientExecutionBiz {
       if (httpClientResponseBo.getBody() instanceof String) {
         param.setBodyText((String) httpClientResponseBo.getBody());
       }
+      param.setEntryPointSnapshotId(estEntryPointSnapshotBo.getId());
 
       httpClientExecutionResponseCurder.insert(param);
 

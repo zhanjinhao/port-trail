@@ -41,6 +41,7 @@
     <mybatis-spring-boot-starter.version>2.2.1</mybatis-spring-boot-starter.version>
     <javax.servlet.api.version>4.0.1</javax.servlet.api.version>
     <jakarta.servlet.api.version>6.0.0</jakarta.servlet.api.version>
+    <httpclient4.version>4.5.14</httpclient4.version>
     <maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>
     <maven-source-plugin.version>3.0.1</maven-source-plugin.version>
 
@@ -157,6 +158,17 @@
         <groupId>jakarta.servlet</groupId>
         <artifactId>jakarta.servlet-api</artifactId>
         <version>${jakarta.servlet.api.version}</version>
+      </dependency>
+      <!--httpclient-->
+      <dependency>
+        <groupId>org.apache.httpcomponents</groupId>
+        <artifactId>httpclient</artifactId>
+        <version>${httpclient4.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.httpcomponents</groupId>
+        <artifactId>httpmime</artifactId>
+        <version>${httpclient4.version}</version>
       </dependency>
       <!-- spring-boot -->
       <dependency>
