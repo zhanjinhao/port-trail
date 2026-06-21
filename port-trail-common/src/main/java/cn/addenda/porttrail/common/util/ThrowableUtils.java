@@ -1,4 +1,4 @@
-package cn.addenda.porttrail.server.util;
+package cn.addenda.porttrail.common.util;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
