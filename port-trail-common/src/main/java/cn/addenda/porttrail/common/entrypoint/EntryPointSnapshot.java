@@ -31,4 +31,15 @@ public class EntryPointSnapshot implements Serializable {
     return entryPointSnapshot;
   }
 
+  public String formatToString() {
+    StringBuilder sb = new StringBuilder();
+    for (EntryPoint entryPoint : entryPointList) {
+      if (sb.length() > 0) {
+        sb.append("→");
+      }
+      sb.append(entryPoint.getEntryPointType());
+    }
+    return sb.toString();
+  }
+
 }
