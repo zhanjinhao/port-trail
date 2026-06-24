@@ -40,6 +40,7 @@ public class RedisDto extends AbstractRedisDto {
     this.startTime = redisBo.getStartTime();
     this.endTime = redisBo.getEndTime();
     this.cost = redisBo.getCost();
+    setEntryPointSnapshot(redisBo.getEntryPointSnapshot());
   }
 
 }
