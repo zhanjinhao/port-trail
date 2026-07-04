@@ -131,7 +131,12 @@
       <artifactId>httpmime</artifactId>
       <scope>provided</scope>
     </dependency>
-
+    <!-- lettuce -->
+    <dependency>
+      <groupId>io.lettuce</groupId>
+      <artifactId>lettuce-core</artifactId>
+      <scope>provided</scope>
+    </dependency>
     <!--junit-->
     <dependency>
       <groupId>org.junit.jupiter</groupId>

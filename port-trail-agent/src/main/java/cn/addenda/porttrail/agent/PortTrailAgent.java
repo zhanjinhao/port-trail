@@ -14,6 +14,9 @@ import cn.addenda.porttrail.agent.transform.interceptor.job.xxl.jobhandler.XxlJo
 import cn.addenda.porttrail.agent.transform.interceptor.job.xxl.method.XxlMethodInterceptorPointDefine;
 import cn.addenda.porttrail.agent.transform.interceptor.job.xxl.script.XxlScriptInterceptorPointDefine;
 import cn.addenda.porttrail.agent.transform.interceptor.mybatis.MybatisExecutorInterceptorPointDefine;
+import cn.addenda.porttrail.agent.transform.interceptor.redis.lettuce.channelwriter.LettuceChannelWriterInterceptorPointDefine;
+import cn.addenda.porttrail.agent.transform.interceptor.redis.lettuce.command.LettuceCommandInterceptorPointDefine;
+import cn.addenda.porttrail.agent.transform.interceptor.redis.lettuce.peer.LettuceDefaultEndpointInterceptorPointDefine;
 import cn.addenda.porttrail.agent.transform.interceptor.server.jetty.JettyServerInterceptorPointDefine;
 import cn.addenda.porttrail.agent.transform.interceptor.server.tomcat.TomcatAbstractProtocolInterceptorPointDefine;
 import cn.addenda.porttrail.agent.transform.interceptor.servlet.javax.JavaxServletInterceptorPointDefine;
@@ -191,6 +194,10 @@ public class PortTrailAgent {
     interceptorPointDefineGather.addInterceptorPointDefine(new OracleDriverInterceptorPointDefine());
     // HTTP层拦截
     interceptorPointDefineGather.addInterceptorPointDefine(new HttpClient4HttpClientBuilderInterceptorPointDefine());
+    // Redis层拦截
+    interceptorPointDefineGather.addInterceptorPointDefine(new LettuceDefaultEndpointInterceptorPointDefine());
+    interceptorPointDefineGather.addInterceptorPointDefine(new LettuceCommandInterceptorPointDefine());
+    interceptorPointDefineGather.addInterceptorPointDefine(new LettuceChannelWriterInterceptorPointDefine());
     return interceptorPointDefineGather;
   }
 

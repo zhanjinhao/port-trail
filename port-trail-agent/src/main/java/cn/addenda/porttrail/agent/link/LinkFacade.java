@@ -44,6 +44,7 @@ public class LinkFacade {
   static String sendServletResponseUrl;
   static String sendHttpClientRequestUrl;
   static String sendHttpClientResponseUrl;
+  static String sendRedisExecutionUrl;
 
   private static void initHttpFacade() {
     httpFacadeImpl = AgentPackage.getAgentProperties().getProperty("httpFacade.impl");
@@ -70,6 +71,7 @@ public class LinkFacade {
     sendServletResponseUrl = AgentPackage.getAgentProperties().getProperty("sendServletResponse.url");
     sendHttpClientRequestUrl = AgentPackage.getAgentProperties().getProperty("sendHttpClientRequest.url");
     sendHttpClientResponseUrl = AgentPackage.getAgentProperties().getProperty("sendHttpClientResponse.url");
+    sendRedisExecutionUrl = AgentPackage.getAgentProperties().getProperty("sendRedisExecution.url");
   }
 
   public static void sendStatementExecution(byte[] bytes) {
@@ -98,6 +100,10 @@ public class LinkFacade {
 
   public static void sendHttpClientResponse(byte[] bytes) {
     httpFacade.sendRequest(sendHttpClientResponseUrl, CompressUtils.compress(bytes));
+  }
+
+  public static void sendRedisExecution(byte[] bytes) {
+    httpFacade.sendRequest(sendRedisExecutionUrl, CompressUtils.compress(bytes));
   }
 
   // ------------------------
