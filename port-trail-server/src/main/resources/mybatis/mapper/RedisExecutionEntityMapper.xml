@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.addenda.porttrail.server.mapper.RedisExecutionEntityMapper">
+  <resultMap type="cn.addenda.porttrail.server.entity.RedisExecutionEntity" id="RedisExecutionEntityMap">
+    <id property="id" column="id" jdbcType="BIGINT"/>
+  </resultMap>
+
+  <sql id="allColumn">
+    `id`
+    , `system_code`, `service_name`, `image_name`, `env`, `instance_id`, `result_type`, `command`, `command_arg_string`, `peer`, `result`, `result_text`, `error`, `start_time`, `end_time`, `cost`
+  </sql>
+
+  <sql id="setCondition">
+    <if test="systemCode != null">
+      `system_code` = #{systemCode,jdbcType=VARCHAR},
+    </if>
+    <if test="serviceName != null">
+      `service_name` = #{serviceName,jdbcType=VARCHAR},
+    </if>
+    <if test="imageName != null">
+      `image_name` = #{imageName,jdbcType=VARCHAR},
+    </if>
+    <if test="env != null">
+      `env` = #{env,jdbcType=VARCHAR},
+    </if>
+    <if test="instanceId != null">
+      `instance_id` = #{instanceId,jdbcType=VARCHAR},
+    </if>
+    <if test="resultType != null">
+      `result_type` = #{resultType,jdbcType=VARCHAR},
+    </if>
+    <if test="command != null">
+      `command` = #{command,jdbcType=VARCHAR},
+    </if>
+    <if test="commandArgString != null">
+      `command_arg_string` = #{commandArgString,jdbcType=VARCHAR},
+    </if>
+    <if test="peer != null">
+      `peer` = #{peer,jdbcType=VARCHAR},
+    </if>
+    <if test="result != null">
+      `result` = #{result},
+    </if>
+    <if test="resultText != null">
+      `result_text` = #{resultText,jdbcType=VARCHAR},
+    </if>
+    <if test="error != null">
+      `error` = #{error,jdbcType=VARCHAR},
+    </if>
+    <if test="startTime != null">
+      `start_time` = #{startTime,jdbcType=TIMESTAMP},
+    </if>
+    <if test="endTime != null">
+      `end_time` = #{endTime,jdbcType=TIMESTAMP},
+    </if>
+    <if test="cost != null">
+      `cost` = #{cost,jdbcType=INTEGER},
+    </if>
+  </sql>
+
+  <sql id="queryCondition">
+    <if test="id != null">
+      and `id` = #{id,jdbcType=BIGINT}
+    </if>
+    <if test="systemCode != null">
+      and `system_code` = #{systemCode,jdbcType=VARCHAR}
+    </if>
+    <if test="serviceName != null">
+      and `service_name` = #{serviceName,jdbcType=VARCHAR}
+    </if>
+    <if test="imageName != null">
+      and `image_name` = #{imageName,jdbcType=VARCHAR}
+    </if>
+    <if test="env != null">
+      and `env` = #{env,jdbcType=VARCHAR}
+    </if>
+    <if test="instanceId != null">
+      and `instance_id` = #{instanceId,jdbcType=VARCHAR}
+    </if>
+    <if test="resultType != null">
+      and `result_type` = #{resultType,jdbcType=VARCHAR}
+    </if>
+    <if test="command != null">
+      and `command` = #{command,jdbcType=VARCHAR}
+    </if>
+    <if test="commandArgString != null">
+      and `command_arg_string` = #{commandArgString,jdbcType=VARCHAR}
+    </if>
+    <if test="peer != null">
+      and `peer` = #{peer,jdbcType=VARCHAR}
+    </if>
+    <if test="result != null">
+      and `result` = #{result}
+    </if>
+    <if test="resultText != null">
+      and `result_text` = #{resultText,jdbcType=VARCHAR}
+    </if>
+    <if test="error != null">
+      and `error` = #{error,jdbcType=VARCHAR}
+    </if>
+    <if test="startTime != null">
+      and `start_time` = #{startTime,jdbcType=TIMESTAMP}
+    </if>
+    <if test="endTime != null">
+      and `end_time` = #{endTime,jdbcType=TIMESTAMP}
+    </if>
+    <if test="cost != null">
+      and `cost` = #{cost,jdbcType=INTEGER}
+    </if>
+  </sql>
+
+  <insert id="insert" keyProperty="id" useGeneratedKeys="true">
+    insert into t_redis_execution_entity
+    <trim prefix="set" suffixOverrides=",">
+      id = #{id,jdbcType=BIGINT},
+      <include refid="setCondition"/>
+    </trim>
+  </insert>
+
+  <update id="updateById">
+    update t_redis_execution_entity
+    <trim prefix="set" suffixOverrides=",">
+      <include refid="setCondition"/>
+    </trim>
+    where id = #{id,jdbcType=BIGINT}
+    and delete_flag = 'N'
+  </update>
+
+  <delete id="deleteById">
+    update t_redis_execution_entity
+    set delete_flag = 'Y',
+        delete_dt   = now(3)
+    where id = #{id,jdbcType=BIGINT}
+      and delete_flag = 'N'
+  </delete>
+
+  <delete id="deleteByEntity">
+    update t_redis_execution_entity set delete_flag = 'Y', delete_dt = now(3)
+    <trim prefix="where" prefixOverrides="and">
+      <include refid="queryCondition"/>
+      and delete_flag = 'N'
+    </trim>
+  </delete>
+
+  <select id="queryByEntity" resultMap="RedisExecutionEntityMap">
+    select
+    <include refid="allColumn"/>
+    from t_redis_execution_entity
+    <trim prefix="where" prefixOverrides="and">
+      <include refid="queryCondition"/>
+      and delete_flag = 'N'
+    </trim>
+  </select>
+
+  <select id="queryById" resultMap="RedisExecutionEntityMap">
+    select
+    <include refid="allColumn"/>
+    from t_redis_execution_entity
+    <trim prefix="where" prefixOverrides="and">
+      id = #{id,jdbcType=BIGINT}
+      and delete_flag = 'N'
+    </trim>
+  </select>
+
+  <select id="queryByIdList" resultMap="RedisExecutionEntityMap">
+    select
+    <include refid="allColumn"/>
+    from t_redis_execution_entity
+    <trim prefix="where" prefixOverrides="and">
+      id in
+      <foreach collection="idList" open="(" close=")" item="id" separator=",">
+        #{id,jdbcType=BIGINT}
+      </foreach>
+      and delete_flag = 'N'
+    </trim>
+  </select>
+
+  <select id="countByEntity" resultType="java.lang.Long">
+    select count(*) from t_redis_execution_entity
+    <trim prefix="where" prefixOverrides="and">
+      <include refid="queryCondition"/>
+      and delete_flag = 'N'
+    </trim>
+  </select>
+
+</mapper>
+
+
