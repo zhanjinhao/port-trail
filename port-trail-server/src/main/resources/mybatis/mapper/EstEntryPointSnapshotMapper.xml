@@ -6,12 +6,18 @@
   </resultMap>
 
   <sql id="allColumn">
-    `id`, `thread_name`
+    `id`, `thread_name`, `trace_id`, `seq_id`
   </sql>
 
   <sql id="setCondition">
     <if test="threadName != null">
       `thread_name` = #{threadName,jdbcType=VARCHAR},
+    </if>
+    <if test="traceId != null">
+      `trace_id` = #{traceId,jdbcType=VARCHAR},
+    </if>
+    <if test="seqId != null">
+      `seq_id` = #{seqId,jdbcType=BIGINT},
     </if>
   </sql>
 
@@ -21,6 +27,12 @@
     </if>
     <if test="threadName != null">
       and `thread_name` = #{threadName,jdbcType=VARCHAR}
+    </if>
+    <if test="traceId != null">
+      and `trace_id` = #{traceId,jdbcType=VARCHAR}
+    </if>
+    <if test="seqId != null">
+      and `seq_id` = #{seqId,jdbcType=BIGINT}
     </if>
   </sql>
 

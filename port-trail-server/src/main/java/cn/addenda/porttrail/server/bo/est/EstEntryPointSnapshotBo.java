@@ -17,6 +17,8 @@ public class EstEntryPointSnapshotBo extends EstEntryPointSnapshot {
   public EstEntryPointSnapshotBo(EstEntryPointSnapshot estEntryPointSnapshot) {
     this.setId(estEntryPointSnapshot.getId());
     this.setThreadName(estEntryPointSnapshot.getThreadName());
+    this.setTraceId(estEntryPointSnapshot.getTraceId());
+    this.setSeqId(estEntryPointSnapshot.getSeqId());
     this.setCreator(estEntryPointSnapshot.getCreator());
     this.setCreateDt(estEntryPointSnapshot.getCreateDt());
     this.setCreatorName(estEntryPointSnapshot.getCreatorName());

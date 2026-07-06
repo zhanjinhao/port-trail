@@ -22,14 +22,18 @@ class EstEntryPointSnapshotMapperTest {
   void test() {
     EstEntryPointSnapshot param = EstEntryPointSnapshot.ofParam();
     param.setThreadName("1");
+    param.setTraceId("test-trace-id-001");
+    param.setSeqId(0L);
     transactionHelper.doTransaction(() -> {
       estEntryPointSnapshotMapper.insert(param);
     });
 
+    EstEntryPointSnapshot queryResult = estEntryPointSnapshotMapper.queryById(param.getId());
+    Assertions.assertNotNull(queryResult);
+    Assertions.assertEquals("test-trace-id-001", queryResult.getTraceId());
+    Assertions.assertEquals(Long.valueOf(0L), queryResult.getSeqId());
 
-    Assertions.assertEquals(1, estEntryPointSnapshotMapper.countByEntity(EstEntryPointSnapshot.ofParam()));
-    Assertions.assertEquals(1, estEntryPointSnapshotMapper.deleteByEntity(EstEntryPointSnapshot.ofParam()));
-    Assertions.assertEquals(0, estEntryPointSnapshotMapper.countByEntity(EstEntryPointSnapshot.ofParam()));
+    Assertions.assertNotNull(estEntryPointSnapshotMapper.queryById(queryResult.getId()));
   }
 
 

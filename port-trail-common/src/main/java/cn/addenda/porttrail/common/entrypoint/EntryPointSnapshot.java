@@ -19,15 +19,21 @@ public class EntryPointSnapshot implements Serializable {
 
   private List<EntryPoint> entryPointList;
 
+  private String traceId;
+
+  private Long seqId;
+
   private EntryPointSnapshot() {
   }
 
-  public static EntryPointSnapshot of(List<EntryPoint> entryPointList, String threadName) {
+  public static EntryPointSnapshot of(List<EntryPoint> entryPointList, String threadName, String traceId, Long seqId) {
     EntryPointSnapshot entryPointSnapshot = new EntryPointSnapshot();
     if (entryPointList != null) {
       entryPointSnapshot.entryPointList = new ArrayList<>(entryPointList);
     }
     entryPointSnapshot.setThreadName(threadName);
+    entryPointSnapshot.setTraceId(traceId);
+    entryPointSnapshot.setSeqId(seqId);
     return entryPointSnapshot;
   }
 

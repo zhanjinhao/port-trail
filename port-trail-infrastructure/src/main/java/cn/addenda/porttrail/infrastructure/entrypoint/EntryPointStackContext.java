@@ -3,6 +3,7 @@ package cn.addenda.porttrail.infrastructure.entrypoint;
 import cn.addenda.porttrail.common.entrypoint.EntryPoint;
 import cn.addenda.porttrail.common.entrypoint.EntryPointSnapshot;
 import cn.addenda.porttrail.common.exception.PortTrailException;
+import cn.addenda.porttrail.common.util.UuidUtils;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
@@ -40,7 +41,7 @@ public class EntryPointStackContext {
   public static EntryPointSnapshot snapshot() {
     EntryPointStack entryPointStack = tl.get();
     if (entryPointStack == null) {
-      return EntryPointSnapshot.of(Collections.emptyList(), Thread.currentThread().getName());
+      return EntryPointSnapshot.of(Collections.emptyList(), Thread.currentThread().getName(), UuidUtils.generateUuid(), 0L);
     }
     return entryPointStack.snapshot();
   }

@@ -25,6 +25,14 @@ public class EstEntryPointSnapshot extends SimpleBaseModel implements Serializab
    * 线程名
    */
   private String threadName;
+  /**
+   * 链路追踪ID
+   */
+  private String traceId;
+  /**
+   * 快照序号
+   */
+  private Long seqId;
 
   public static EstEntryPointSnapshot ofParam() {
     return new EstEntryPointSnapshot();

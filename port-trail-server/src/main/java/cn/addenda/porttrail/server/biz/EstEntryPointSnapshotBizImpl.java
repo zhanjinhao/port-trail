@@ -31,6 +31,8 @@ public class EstEntryPointSnapshotBizImpl implements EstEntryPointSnapshotBiz {
     return transactionHelperNew.doTransaction(() -> {
       EstEntryPointSnapshot estEntryPointSnapshot = EstEntryPointSnapshot.ofParam();
       estEntryPointSnapshot.setThreadName(entryPointSnapshot.getThreadName());
+      estEntryPointSnapshot.setTraceId(entryPointSnapshot.getTraceId());
+      estEntryPointSnapshot.setSeqId(entryPointSnapshot.getSeqId());
       estEntryPointSnapshotCurder.insert(estEntryPointSnapshot);
 
       List<EstEntryPoint> estEntryPointList = entryPointSnapshot.getEntryPointList()
