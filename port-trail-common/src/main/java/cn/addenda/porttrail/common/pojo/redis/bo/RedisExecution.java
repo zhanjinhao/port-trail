@@ -10,6 +10,8 @@ public interface RedisExecution {
 
   String getResultType();
 
+  String getCommandName();
+
   void setEntryPointSnapshot(EntryPointSnapshot entryPointSnapshot);
 
   EntryPointSnapshot getEntryPointSnapshot();

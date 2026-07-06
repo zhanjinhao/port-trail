@@ -43,7 +43,7 @@ public class RedisExecutionBizImpl implements RedisExecutionBiz {
       param.setEnv(serviceRuntimeInfo.getEnv());
       param.setInstanceId(serviceRuntimeInfo.getInstanceId());
       param.setResultType(redisDto.getResultType());
-      param.setCommand(redisDto.getCommand());
+      param.setCommandName(redisDto.getCommandName());
       param.setCommandArgString(redisDto.getCommandArgString());
       param.setPeer(redisDto.getPeer());
       param.setResult(Optional.ofNullable(redisDto.getResult()).map(a -> CompressUtils.compress(JdkSerializationUtils.serialize(a))).orElse(null));

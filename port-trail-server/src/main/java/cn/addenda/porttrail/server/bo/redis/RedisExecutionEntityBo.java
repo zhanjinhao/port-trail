@@ -21,7 +21,7 @@ public class RedisExecutionEntityBo extends RedisExecutionEntity {
     this.setEnv(redisExecutionEntity.getEnv());
     this.setInstanceId(redisExecutionEntity.getInstanceId());
     this.setResultType(redisExecutionEntity.getResultType());
-    this.setCommand(redisExecutionEntity.getCommand());
+    this.setCommandName(redisExecutionEntity.getCommandName());
     this.setCommandArgString(redisExecutionEntity.getCommandArgString());
     this.setPeer(redisExecutionEntity.getPeer());
     this.setResult(redisExecutionEntity.getResult());

@@ -4,17 +4,17 @@ import cn.addenda.porttrail.common.exception.PortTrailException;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.util.zip.DataFormatException;
-import java.util.zip.Deflater;
-import java.util.zip.Inflater;
+import java.util.zip.*;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class CompressUtils {
 
   public static byte[] compress(byte[] bytes) {
     ByteArrayOutputStream out = new ByteArrayOutputStream();
-    Deflater deflater = new Deflater(8);
+    // todo 可配置
+    Deflater deflater = new Deflater(1);
 
     try {
       deflater.setInput(bytes);
@@ -44,11 +44,35 @@ public class CompressUtils {
         out.write(buffer, 0, count);
       }
     } catch (DataFormatException e) {
-      throw new PortTrailException("解压缩失败", e);
+      throw new PortTrailException("Deflate解压失败", e);
     } finally {
       inflater.end();
     }
 
+    return out.toByteArray();
+  }
+
+  public static byte[] gzipCompress(byte[] bytes) {
+    ByteArrayOutputStream out = new ByteArrayOutputStream();
+    try (GZIPOutputStream gos = new GZIPOutputStream(out)) {
+      gos.write(bytes);
+    } catch (Exception e) {
+      throw new PortTrailException("GZIP压缩失败", e);
+    }
+    return out.toByteArray();
+  }
+
+  public static byte[] gzipDecompress(byte[] bytes) {
+    ByteArrayOutputStream out = new ByteArrayOutputStream();
+    try (GZIPInputStream gis = new GZIPInputStream(new ByteArrayInputStream(bytes))) {
+      byte[] buffer = new byte[2048];
+      int len;
+      while ((len = gis.read(buffer)) != -1) {
+        out.write(buffer, 0, len);
+      }
+    } catch (Exception e) {
+      throw new PortTrailException("GZIP解压失败", e);
+    }
     return out.toByteArray();
   }
 

@@ -7,7 +7,7 @@
 
   <sql id="allColumn">
     `id`
-    , `system_code`, `service_name`, `image_name`, `env`, `instance_id`, `result_type`, `command`, `command_arg_string`, `peer`, `result`, `result_text`, `error`, `start_time`, `end_time`, `cost`
+    , `system_code`, `service_name`, `image_name`, `env`, `instance_id`, `result_type`, `command_name`, `command_arg_string`, `peer`, `result`, `result_text`, `error`, `start_time`, `end_time`, `cost`
   </sql>
 
   <sql id="setCondition">
@@ -29,8 +29,8 @@
     <if test="resultType != null">
       `result_type` = #{resultType,jdbcType=VARCHAR},
     </if>
-    <if test="command != null">
-      `command` = #{command,jdbcType=VARCHAR},
+    <if test="commandName != null">
+      `command_name` = #{commandName,jdbcType=VARCHAR},
     </if>
     <if test="commandArgString != null">
       `command_arg_string` = #{commandArgString,jdbcType=VARCHAR},
@@ -80,8 +80,8 @@
     <if test="resultType != null">
       and `result_type` = #{resultType,jdbcType=VARCHAR}
     </if>
-    <if test="command != null">
-      and `command` = #{command,jdbcType=VARCHAR}
+    <if test="commandName != null">
+      and `command_name` = #{commandName,jdbcType=VARCHAR}
     </if>
     <if test="commandArgString != null">
       and `command_arg_string` = #{commandArgString,jdbcType=VARCHAR}

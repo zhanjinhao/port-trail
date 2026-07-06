@@ -53,7 +53,7 @@ public class RedisExecutionEntity extends SimpleBaseModel implements Serializabl
   /**
    * 命令
    */
-  private String command;
+  private String commandName;
   /**
    * 命令参数
    */

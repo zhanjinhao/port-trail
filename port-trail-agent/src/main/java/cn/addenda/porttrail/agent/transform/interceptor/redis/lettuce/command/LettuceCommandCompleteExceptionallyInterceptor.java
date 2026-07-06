@@ -4,7 +4,7 @@ import cn.addenda.porttrail.agent.log.AgentPortTrailLoggerFactory;
 import cn.addenda.porttrail.agent.transform.interceptor.Interceptor;
 import cn.addenda.porttrail.agent.transform.interceptor.redis.lettuce.LettuceRedisCommandContext;
 import cn.addenda.porttrail.agent.transform.interceptor.redis.lettuce.LettuceRedisCommandContextHolder;
-import cn.addenda.porttrail.agent.transform.interceptor.redis.lettuce.RedisCommandUtils;
+import cn.addenda.porttrail.agent.transform.interceptor.redis.lettuce.LettuceRedisCommandUtils;
 import cn.addenda.porttrail.agent.writer.redis.AgentRedisWriter;
 import cn.addenda.porttrail.common.pojo.redis.bo.RedisBo;
 import cn.addenda.porttrail.common.pojo.redis.bo.RedisExecution;
@@ -43,7 +43,7 @@ public class LettuceCommandCompleteExceptionallyInterceptor implements Intercept
     Object result = zuper.call();
 
     try {
-      LettuceRedisCommandContext context = LettuceRedisCommandContextHolder.remove(RedisCommandUtils.resolveCommand((RedisCommand<?, ?, ?>) targetObj));
+      LettuceRedisCommandContext context = LettuceRedisCommandContextHolder.remove(LettuceRedisCommandUtils.resolveCommand((RedisCommand<?, ?, ?>) targetObj));
       if (context != null) {
         Throwable error = null;
         if (targetMethodArgs.length > 0 && targetMethodArgs[0] instanceof Throwable) {
@@ -54,8 +54,7 @@ public class LettuceCommandCompleteExceptionallyInterceptor implements Intercept
         long endTime = System.currentTimeMillis();
         int cost = (int) (endTime - startTime);
 
-        RedisBo redisBo = new RedisBo(RedisExecution.RESULT_TYPE_ERROR);
-        redisBo.setCommand(context.getCommandName());
+        RedisBo redisBo = new RedisBo(RedisExecution.RESULT_TYPE_ERROR, context.getCommandName());
         redisBo.setCommandArgString(context.getCommandArgString());
         redisBo.setPeer(context.getPeer());
         redisBo.setResult(null);

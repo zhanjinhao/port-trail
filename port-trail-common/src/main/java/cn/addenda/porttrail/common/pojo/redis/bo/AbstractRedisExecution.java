@@ -10,13 +10,21 @@ public abstract class AbstractRedisExecution implements RedisExecution {
 
   private final String resultType;
 
-  protected AbstractRedisExecution(String resultType) {
+  private final String commandName;
+
+  protected AbstractRedisExecution(String resultType, String commandName) {
     this.resultType = resultType;
+    this.commandName = commandName;
   }
 
   @Override
   public String getResultType() {
     return resultType;
+  }
+
+  @Override
+  public String getCommandName() {
+    return commandName;
   }
 
   @Override

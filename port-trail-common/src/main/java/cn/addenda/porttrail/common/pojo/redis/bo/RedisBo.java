@@ -10,8 +10,6 @@ import lombok.ToString;
 @ToString(callSuper = true)
 public class RedisBo extends AbstractRedisExecution {
 
-  private String command;
-
   private String commandArgString;
 
   private String peer;
@@ -26,13 +24,12 @@ public class RedisBo extends AbstractRedisExecution {
 
   private int cost;
 
-  public RedisBo(String resultType) {
-    super(resultType);
+  public RedisBo(String resultType, String commandName) {
+    super(resultType, commandName);
   }
 
   public RedisBo(RedisDto redisDto) {
-    super(redisDto.getResultType());
-    this.command = redisDto.getCommand();
+    super(redisDto.getResultType(), redisDto.getCommandName());
     this.commandArgString = redisDto.getCommandArgString();
     this.peer = redisDto.getPeer();
     this.result = redisDto.getResult();

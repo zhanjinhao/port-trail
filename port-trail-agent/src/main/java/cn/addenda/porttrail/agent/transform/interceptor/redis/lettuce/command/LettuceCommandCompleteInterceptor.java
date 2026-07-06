@@ -5,7 +5,7 @@ import cn.addenda.porttrail.agent.log.AgentPortTrailLoggerFactory;
 import cn.addenda.porttrail.agent.transform.interceptor.Interceptor;
 import cn.addenda.porttrail.agent.transform.interceptor.redis.lettuce.LettuceRedisCommandContext;
 import cn.addenda.porttrail.agent.transform.interceptor.redis.lettuce.LettuceRedisCommandContextHolder;
-import cn.addenda.porttrail.agent.transform.interceptor.redis.lettuce.RedisCommandUtils;
+import cn.addenda.porttrail.agent.transform.interceptor.redis.lettuce.LettuceRedisCommandUtils;
 import cn.addenda.porttrail.agent.writer.redis.AgentRedisWriter;
 import cn.addenda.porttrail.common.pojo.redis.bo.RedisBo;
 import cn.addenda.porttrail.common.pojo.redis.bo.RedisExecution;
@@ -22,8 +22,7 @@ import net.bytebuddy.implementation.bind.annotation.RuntimeType;
 import net.bytebuddy.implementation.bind.annotation.*;
 
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
 
@@ -52,7 +51,7 @@ public class LettuceCommandCompleteInterceptor implements Interceptor {
     Object result = zuper.call();
 
     try {
-      LettuceRedisCommandContext context = LettuceRedisCommandContextHolder.remove(RedisCommandUtils.resolveCommand((RedisCommand<?, ?, ?>) targetObj));
+      LettuceRedisCommandContext context = LettuceRedisCommandContextHolder.remove(LettuceRedisCommandUtils.resolveCommand((RedisCommand<?, ?, ?>) targetObj));
       if (context != null) {
         String commandResult = extractResult(targetObj);
 
@@ -60,8 +59,7 @@ public class LettuceCommandCompleteInterceptor implements Interceptor {
         long endTime = System.currentTimeMillis();
         int cost = (int) (endTime - startTime);
 
-        RedisBo redisBo = new RedisBo(RedisExecution.RESULT_TYPE_SUCCESS);
-        redisBo.setCommand(context.getCommandName());
+        RedisBo redisBo = new RedisBo(RedisExecution.RESULT_TYPE_SUCCESS, context.getCommandName());
         redisBo.setCommandArgString(context.getCommandArgString());
         redisBo.setPeer(context.getPeer());
         redisBo.setResult(commandResult);
@@ -89,19 +87,49 @@ public class LettuceCommandCompleteInterceptor implements Interceptor {
       }
       if (get instanceof ValueScanCursor) {
         ValueScanCursor<?> valueScanCursor = (ValueScanCursor<?>) get;
-        ValueScanCursorResult.of(valueScanCursor.getCursor(), valueScanCursor.getValues(), valueScanCursor.isFinished());
-        return LinkFacade.toStr(valueScanCursor);
+        ValueScanCursorResult valueScanCursorResult = ValueScanCursorResult.of(valueScanCursor.getCursor(), valueScanCursor.getValues(), valueScanCursor.isFinished());
+        return LinkFacade.toStr(valueScanCursorResult);
       }
       if (get instanceof ClaimedMessages) {
         ClaimedMessages<?, ?> claimedMessages = (ClaimedMessages<?, ?>) get;
-        return claimedMessages.getMessages().stream()
-                .map(StreamMessage::toString)
-                .collect(Collectors.joining(",", "[", "]"));
+        return Optional.ofNullable(claimedMessages.getMessages())
+                .map(a -> a.stream().map(StreamMessage::toString)
+                        .collect(Collectors.joining(",", "[", "]")))
+                .orElse(null);
       }
-      return get.toString();
+      return deepConvertToString(get);
     } catch (Exception e) {
       return null;
     }
+  }
+
+  /**
+   * 递归将对象转换为可读字符串，正确处理 byte[]、Collection、Map 中的 byte[] 元素。
+   */
+  @SuppressWarnings("unchecked")
+  private static String deepConvertToString(Object obj) {
+    if (obj == null) {
+      return "null";
+    }
+    if (obj instanceof byte[]) {
+      byte[] bytes = (byte[]) obj;
+      try {
+        return LettuceRedisCommandUtils.bytesToString(bytes);
+      } catch (Exception e) {
+        return obj.toString();
+      }
+    }
+    if (obj instanceof Collection) {
+      return ((Collection<?>) obj).stream()
+              .map(LettuceCommandCompleteInterceptor::deepConvertToString)
+              .collect(Collectors.joining(",", "[", "]"));
+    }
+    if (obj instanceof Map) {
+      return ((Map<?, ?>) obj).entrySet().stream()
+              .map(entry -> deepConvertToString(entry.getKey()) + ":" + deepConvertToString(entry.getValue()))
+              .collect(Collectors.joining(",", "{", "}"));
+    }
+    return obj.toString();
   }
 
   @Setter

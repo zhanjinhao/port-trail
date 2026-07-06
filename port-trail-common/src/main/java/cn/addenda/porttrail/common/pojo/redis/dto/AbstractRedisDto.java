@@ -15,8 +15,11 @@ public class AbstractRedisDto extends AbstractDto {
 
   private final String resultType;
 
-  protected AbstractRedisDto(String resultType) {
+  private String commandName;
+
+  protected AbstractRedisDto(String resultType, String commandName) {
     this.resultType = resultType;
+    this.commandName = commandName;
   }
 
 }

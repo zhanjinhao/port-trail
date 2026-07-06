@@ -125,6 +125,12 @@ public class AgentRedisWriter extends AbstractAgentWriter implements RedisWriter
 
   @Override
   public void writeRedisExecution(RedisExecution redisExecution) {
+    // todo 可配置
+    if ("INFO".equals(redisExecution.getCommandName())
+            || "CLIENT".equals(redisExecution.getCommandName())
+            || "CLUSTER".equals(redisExecution.getCommandName())) {
+      return;
+    }
     offer(redisExecution);
   }
 
