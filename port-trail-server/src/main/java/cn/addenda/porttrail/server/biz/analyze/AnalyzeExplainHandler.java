@@ -73,28 +73,29 @@ public class AnalyzeExplainHandler extends AbstractDataSourceAnalyzeHandler<Anal
       List<PreparedStatementParameterEntityBo> preparedStatementParameterEntityBoList =
               preparedStatementExecutionEntityBo.getPreparedStatementParameterEntityBoList();
       for (PreparedStatementParameterEntityBo preparedStatementParameterEntityBo : preparedStatementParameterEntityBoList) {
-        PreparedStatement preparedStatement = connection.prepareStatement("explain " + parameterizedSql);
-        byte[] parameterBytes = preparedStatementParameterEntityBo.getParameterBytes();
-        PreparedStatementParameterDto preparedStatementParameterDto =
-                (PreparedStatementParameterDto) JdkSerializationUtils.deserialize(CompressUtils.decompress(parameterBytes));
+        try (PreparedStatement preparedStatement = connection.prepareStatement("explain " + parameterizedSql)) {
+          byte[] parameterBytes = preparedStatementParameterEntityBo.getParameterBytes();
+          PreparedStatementParameterDto preparedStatementParameterDto =
+                  (PreparedStatementParameterDto) JdkSerializationUtils.deserialize(CompressUtils.decompress(parameterBytes));
 
-        PreparedStatementParameter preparedStatementParameter = new PreparedStatementParameter(preparedStatementParameterDto);
-        int capacity = preparedStatementParameter.getCapacity();
-        List<Tuple> parameterList = preparedStatementParameter.getParameterList();
-        List<String> setMethodList = preparedStatementParameter.getSetMethodList();
-        for (int i = 0; i < capacity; i++) {
-          Tuple tuple = parameterList.get(i);
-          String setMethod = setMethodList.get(i);
-          set(preparedStatement, i, tuple, setMethod);
+          PreparedStatementParameter preparedStatementParameter = new PreparedStatementParameter(preparedStatementParameterDto);
+          int capacity = preparedStatementParameter.getCapacity();
+          List<Tuple> parameterList = preparedStatementParameter.getParameterList();
+          List<String> setMethodList = preparedStatementParameter.getSetMethodList();
+          for (int i = 0; i < capacity; i++) {
+            Tuple tuple = parameterList.get(i);
+            String setMethod = setMethodList.get(i);
+            set(preparedStatement, i, tuple, setMethod);
+          }
+
+          AnalyzeExplainResult.AnalyzeExplainSqlResult analyzeExplainSqlResult = analyzeExplainResult.new AnalyzeExplainSqlResult();
+          analyzeExplainResult.getAnalyzeExplainSqlResultList().add(analyzeExplainSqlResult);
+
+          analyzeExplainSqlResult.setOuterId(preparedStatementParameterEntityBo.getId());
+          analyzeExplainSqlResult.setSqlType(sqlType);
+
+          addAnalyzeExplainSingleResult(preparedStatement, analyzeExplainSqlResult);
         }
-
-        AnalyzeExplainResult.AnalyzeExplainSqlResult analyzeExplainSqlResult = analyzeExplainResult.new AnalyzeExplainSqlResult();
-        analyzeExplainResult.getAnalyzeExplainSqlResultList().add(analyzeExplainSqlResult);
-
-        analyzeExplainSqlResult.setOuterId(preparedStatementParameterEntityBo.getId());
-        analyzeExplainSqlResult.setSqlType(sqlType);
-
-        addAnalyzeExplainSingleResult(preparedStatement, analyzeExplainSqlResult);
       }
       return analyzeExplainResult;
     }
