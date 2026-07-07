@@ -7,7 +7,7 @@ import com.zaxxer.hikari.util.IsolationLevel;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.DisposableBean;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
@@ -18,7 +18,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 public abstract class AbstractDataSourceAnalyzeHandler<T extends AnalyzeResult>
-        implements AnalyzeHandler<T>, InitializingBean {
+        implements AnalyzeHandler<T>, DisposableBean {
 
   private final Map<DataSourceKey, HikariDataSource> dataSourceMap = new ConcurrentHashMap<>();
 
@@ -103,7 +103,7 @@ public abstract class AbstractDataSourceAnalyzeHandler<T extends AnalyzeResult>
   }
 
   @Override
-  public void afterPropertiesSet() throws Exception {
+  public void destroy() throws Exception {
     Set<Map.Entry<DataSourceKey, HikariDataSource>> entrySet = dataSourceMap.entrySet();
     for (Map.Entry<DataSourceKey, HikariDataSource> entry : entrySet) {
       entry.getValue().close();
