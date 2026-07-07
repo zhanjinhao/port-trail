@@ -33,14 +33,15 @@ public class StackTraceUtils {
         URL url = urls.nextElement();
         URLConnection urlConnection = url.openConnection();
         urlConnection.setUseCaches(false);
-        InputStream inputStream = urlConnection.getInputStream();
-        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-        String line;
-        while ((line = bufferedReader.readLine()) != null) {
-          if (line.isEmpty()) {
-            continue;
+        try (InputStream inputStream = urlConnection.getInputStream();
+             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
+          String line;
+          while ((line = bufferedReader.readLine()) != null) {
+            if (line.isEmpty()) {
+              continue;
+            }
+            lines.add(IdentifierMatherFactory.getIdentifierMatcher(line));
           }
-          lines.add(IdentifierMatherFactory.getIdentifierMatcher(line));
         }
       }
     } catch (Exception e) {
