@@ -133,9 +133,8 @@ public class DbExecutionBizImpl implements DbExecutionBiz {
         preparedStatementParameterEntity.setParameterJson(JacksonUtils.toStr(preparedStatementParameter));
         preparedStatementParameterEntity.setParameterBytes(CompressUtils.compress(JdkSerializationUtils.serialize(preparedStatementParameterDto)));
         preparedStatementParameterEntity.setCapacity(preparedStatementParameter.getCapacity());
-        preparedStatementParameterEntity.setOrderInConnection(preparedStatementParameter.getOrderInConnection());
         preparedStatementParameterEntity.setOrderInStatement(preparedStatementParameter.getOrderInStatement());
-        preparedStatementParameterEntity.setPreparedStatementExecutionId(preparedStatementExecutionEntity.getId());
+        preparedStatementParameterEntity.setOrderInConnection(preparedStatementParameter.getOrderInConnection());
       }
 
       preparedStatementParameterEntityCurder.batchInsert(preparedStatementParameterEntityList);
