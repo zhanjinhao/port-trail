@@ -158,7 +158,7 @@ public class AgentDbWriter extends AbstractAgentWriter implements DbWriter {
       this.dbExecutionQueue = new LinkedBlockingQueue<>(queueSize);
       this.dbExecutionConsumerThread = new Thread(this::run);
       this.dbExecutionConsumerThread.setDaemon(true);
-      this.name = String.format("DbExecutionConsumer-%s)", StringUtils.expandWithSpecifiedChar(String.valueOf(hashIndex), '0', 2));
+      this.name = String.format("DbExecutionConsumer-%s", StringUtils.expandWithSpecifiedChar(String.valueOf(hashIndex), '0', 2));
       this.dbExecutionConsumerThread.setName(String.format("AgentDbWriter-%s-Thread", name));
       this.dbExecutionConsumerThread.start();
       this.ifRunning = true;
@@ -223,21 +223,21 @@ public class AgentDbWriter extends AbstractAgentWriter implements DbWriter {
     @Override
     public void shutdown() {
       this.ifRunning = false;
-      if (dbExecutionConsumerThread == null) {
-        return;
-      }
       dbExecutionConsumerThread.interrupt();
-      if (dbExecutionQueue == null) {
-        return;
-      }
-      DbExecution[] dbExecutions = dbExecutionQueue.toArray(new DbExecution[]{});
-      if (dbExecutions.length > 0) {
-        log.error("[{}]已关闭, 还有[{}]个dbExecution未被执行。", dbExecutionConsumerThread.getName(), dbExecutions.length);
-        for (DbExecution dbExecution : dbExecutions) {
+      List<DbExecution> remaining = new ArrayList<>();
+      dbExecutionQueue.drainTo(remaining);
+      if (!remaining.isEmpty()) {
+        log.info("[{}]已关闭, 还有[{}]个dbExecution未被执行。", dbExecutionConsumerThread.getName(), remaining.size());
+        for (DbExecution dbExecution : remaining) {
           write(dbExecution, false);
         }
+        DbExecution extra;
+        while ((extra = dbExecutionQueue.poll()) != null) {
+          log.info("[{}]已关闭, 兜底处理残留的dbExecution[{}]。", dbExecutionConsumerThread.getName(), LinkFacade.toStr(extra));
+          write(extra, false);
+        }
       } else {
-        log.info("[{}]已关闭, dbExecution都执行完成。", dbExecutionConsumerThread.getName(), dbExecutions.length);
+        log.info("[{}]已关闭, dbExecution都执行完成。", dbExecutionConsumerThread.getName());
       }
     }
 

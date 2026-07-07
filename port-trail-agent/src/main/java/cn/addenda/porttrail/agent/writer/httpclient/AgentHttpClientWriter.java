@@ -153,7 +153,7 @@ public class AgentHttpClientWriter extends AbstractAgentWriter implements HttpCl
       this.httpClientExecutionQueue = new LinkedBlockingQueue<>(queueSize);
       this.httpClientExecutionConsumerThread = new Thread(this::run);
       this.httpClientExecutionConsumerThread.setDaemon(true);
-      this.name = String.format("HttpClientExecutionConsumer-%s)", StringUtils.expandWithSpecifiedChar(String.valueOf(hashIndex), '0', 2));
+      this.name = String.format("HttpClientExecutionConsumer-%s", StringUtils.expandWithSpecifiedChar(String.valueOf(hashIndex), '0', 2));
       this.httpClientExecutionConsumerThread.setName(String.format("AgentHttpClientWriter-%s-Thread", name));
       this.httpClientExecutionConsumerThread.start();
       this.ifRunning = true;
@@ -195,21 +195,21 @@ public class AgentHttpClientWriter extends AbstractAgentWriter implements HttpCl
     @Override
     public void shutdown() {
       this.ifRunning = false;
-      if (httpClientExecutionConsumerThread == null) {
-        return;
-      }
       httpClientExecutionConsumerThread.interrupt();
-      if (httpClientExecutionQueue == null) {
-        return;
-      }
-      HttpClientExecution[] httpClientExecutions = httpClientExecutionQueue.toArray(new HttpClientExecution[]{});
-      if (httpClientExecutions.length > 0) {
-        log.error("[{}]已关闭, 还有[{}]个HttpClientExecution未被执行。", httpClientExecutionConsumerThread.getName(), httpClientExecutions.length);
-        for (HttpClientExecution httpClientExecution : httpClientExecutions) {
+      List<HttpClientExecution> remaining = new ArrayList<>();
+      httpClientExecutionQueue.drainTo(remaining);
+      if (!remaining.isEmpty()) {
+        log.info("[{}]已关闭, 还有[{}]个HttpClientExecution未被执行。", httpClientExecutionConsumerThread.getName(), remaining.size());
+        for (HttpClientExecution httpClientExecution : remaining) {
           write(httpClientExecution);
         }
+        HttpClientExecution extra;
+        while ((extra = httpClientExecutionQueue.poll()) != null) {
+          log.info("[{}]已关闭, 兜底处理残留的HttpClientExecution[{}]。", httpClientExecutionConsumerThread.getName(), LinkFacade.toStr(extra));
+          write(extra);
+        }
       } else {
-        log.info("[{}]已关闭, HttpClientExecution都执行完成。", httpClientExecutionConsumerThread.getName(), httpClientExecutions.length);
+        log.info("[{}]已关闭, HttpClientExecution都执行完成。", httpClientExecutionConsumerThread.getName());
       }
     }
 

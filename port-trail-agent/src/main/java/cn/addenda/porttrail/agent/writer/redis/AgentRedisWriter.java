@@ -145,7 +145,7 @@ public class AgentRedisWriter extends AbstractAgentWriter implements RedisWriter
       this.redisExecutionQueue = new LinkedBlockingQueue<>(queueSize);
       this.redisExecutionConsumerThread = new Thread(this::run);
       this.redisExecutionConsumerThread.setDaemon(true);
-      this.name = String.format("redisExecutionConsumer-%s)", StringUtils.expandWithSpecifiedChar(String.valueOf(hashIndex), '0', 2));
+      this.name = String.format("redisExecutionConsumer-%s", StringUtils.expandWithSpecifiedChar(String.valueOf(hashIndex), '0', 2));
       this.redisExecutionConsumerThread.setName(String.format("AgentRedisWriter-%s-Thread", name));
       this.redisExecutionConsumerThread.start();
       this.ifRunning = true;
@@ -187,21 +187,21 @@ public class AgentRedisWriter extends AbstractAgentWriter implements RedisWriter
     @Override
     public void shutdown() {
       this.ifRunning = false;
-      if (redisExecutionConsumerThread == null) {
-        return;
-      }
       redisExecutionConsumerThread.interrupt();
-      if (redisExecutionQueue == null) {
-        return;
-      }
-      RedisExecution[] redisExecutions = redisExecutionQueue.toArray(new RedisExecution[]{});
-      if (redisExecutions.length > 0) {
-        log.error("[{}]已关闭, 还有[{}]个RedisExecution未被执行.", redisExecutionConsumerThread.getName(), redisExecutions.length);
-        for (RedisExecution redisExecution : redisExecutions) {
+      List<RedisExecution> remaining = new ArrayList<>();
+      redisExecutionQueue.drainTo(remaining);
+      if (!remaining.isEmpty()) {
+        log.info("[{}]已关闭, 还有[{}]个RedisExecution未被执行.", redisExecutionConsumerThread.getName(), remaining.size());
+        for (RedisExecution redisExecution : remaining) {
           write(redisExecution);
         }
+        RedisExecution extra;
+        while ((extra = redisExecutionQueue.poll()) != null) {
+          log.info("[{}]已关闭, 兜底处理残留的RedisExecution[{}].", redisExecutionConsumerThread.getName(), LinkFacade.toStr(extra));
+          write(extra);
+        }
       } else {
-        log.info("[{}]已关闭, RedisExecution都执行完成.", redisExecutionConsumerThread.getName(), redisExecutions.length);
+        log.info("[{}]已关闭, RedisExecution都执行完成.", redisExecutionConsumerThread.getName());
       }
     }
 

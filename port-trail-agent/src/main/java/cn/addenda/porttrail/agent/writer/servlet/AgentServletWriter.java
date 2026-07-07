@@ -153,7 +153,7 @@ public class AgentServletWriter extends AbstractAgentWriter implements ServletWr
       this.servletExecutionQueue = new LinkedBlockingQueue<>(queueSize);
       this.servletExecutionConsumerThread = new Thread(this::run);
       this.servletExecutionConsumerThread.setDaemon(true);
-      this.name = String.format("ServletExecutionConsumer-%s)", StringUtils.expandWithSpecifiedChar(String.valueOf(hashIndex), '0', 2));
+      this.name = String.format("ServletExecutionConsumer-%s", StringUtils.expandWithSpecifiedChar(String.valueOf(hashIndex), '0', 2));
       this.servletExecutionConsumerThread.setName(String.format("AgentServletWriter-%s-Thread", name));
       this.servletExecutionConsumerThread.start();
       this.ifRunning = true;
@@ -195,21 +195,21 @@ public class AgentServletWriter extends AbstractAgentWriter implements ServletWr
     @Override
     public void shutdown() {
       this.ifRunning = false;
-      if (servletExecutionConsumerThread == null) {
-        return;
-      }
       servletExecutionConsumerThread.interrupt();
-      if (servletExecutionQueue == null) {
-        return;
-      }
-      ServletExecution[] servletExecutions = servletExecutionQueue.toArray(new ServletExecution[]{});
-      if (servletExecutions.length > 0) {
-        log.error("[{}]已关闭, 还有[{}]个ServletExecution未被执行。", servletExecutionConsumerThread.getName(), servletExecutions.length);
-        for (ServletExecution servletExecution : servletExecutions) {
+      List<ServletExecution> remaining = new ArrayList<>();
+      servletExecutionQueue.drainTo(remaining);
+      if (!remaining.isEmpty()) {
+        log.info("[{}]已关闭, 还有[{}]个ServletExecution未被执行。", servletExecutionConsumerThread.getName(), remaining.size());
+        for (ServletExecution servletExecution : remaining) {
           write(servletExecution);
         }
+        ServletExecution extra;
+        while ((extra = servletExecutionQueue.poll()) != null) {
+          log.info("[{}]已关闭, 兜底处理残留的ServletExecution[{}]。", servletExecutionConsumerThread.getName(), LinkFacade.toStr(extra));
+          write(extra);
+        }
       } else {
-        log.info("[{}]已关闭, ServletExecution都执行完成。", servletExecutionConsumerThread.getName(), servletExecutions.length);
+        log.info("[{}]已关闭, ServletExecution都执行完成。", servletExecutionConsumerThread.getName());
       }
     }
 
