@@ -1,11 +1,11 @@
 package cn.addenda.porttrail.server.biz.analyze;
 
 import cn.addenda.component.transaction.PlatformTransactionHelper;
-import cn.addenda.porttrail.server.bo.analyze.param.AnalyzePreparedStatementExecutionParam;
-import cn.addenda.porttrail.server.bo.analyze.param.AnalyzeStatementExecutionParam;
-import cn.addenda.porttrail.server.bo.analyze.result.AnalyzeResult;
-import cn.addenda.porttrail.server.manager.EstPreparedStatementExecutionManager;
-import cn.addenda.porttrail.server.manager.EstStatementExecutionManager;
+import cn.addenda.porttrail.server.bo.db.analyze.param.AnalyzePreparedStatementExecutionParam;
+import cn.addenda.porttrail.server.bo.db.analyze.param.AnalyzeStatementExecutionParam;
+import cn.addenda.porttrail.server.bo.db.analyze.result.AnalyzeResult;
+import cn.addenda.porttrail.server.manager.PreparedStatementExecutionEntityManager;
+import cn.addenda.porttrail.server.manager.StatementExecutionEntityManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -23,10 +23,10 @@ public class AnalyzeHandlerScheduler {
   private PlatformTransactionHelper platformTransactionHelper;
 
   @Autowired
-  private EstStatementExecutionManager estStatementExecutionManager;
+  private StatementExecutionEntityManager statementExecutionEntityManager;
 
   @Autowired
-  private EstPreparedStatementExecutionManager estPreparedStatementExecutionManager;
+  private PreparedStatementExecutionEntityManager preparedStatementExecutionEntityManager;
 
   public void handle(AnalyzePreparedStatementExecutionParam analyzeParam) {
 
@@ -44,7 +44,7 @@ public class AnalyzeHandlerScheduler {
           }
         }
       }
-      estPreparedStatementExecutionManager.markStatementExecutionAnalyzed(analyzeParam.getEstPreparedStatementExecutionBo().getId());
+      preparedStatementExecutionEntityManager.markStatementExecutionAnalyzed(analyzeParam.getPreparedStatementExecutionEntityBo().getId());
     });
   }
 
@@ -64,7 +64,7 @@ public class AnalyzeHandlerScheduler {
           }
         }
       }
-      estStatementExecutionManager.markStatementExecutionAnalyzed(analyzeParam.getEstStatementExecutionBo().getId());
+      statementExecutionEntityManager.markStatementExecutionAnalyzed(analyzeParam.getStatementExecutionEntityBo().getId());
     });
 
   }

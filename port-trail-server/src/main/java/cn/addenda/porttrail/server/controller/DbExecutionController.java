@@ -11,10 +11,10 @@ import cn.addenda.porttrail.common.util.CompressUtils;
 import cn.addenda.porttrail.common.util.JdkSerializationUtils;
 import cn.addenda.porttrail.server.biz.DbExecutionBiz;
 import cn.addenda.porttrail.server.biz.analyze.AnalyzeHandlerScheduler;
-import cn.addenda.porttrail.server.bo.analyze.param.AnalyzePreparedStatementExecutionParam;
-import cn.addenda.porttrail.server.bo.analyze.param.AnalyzeStatementExecutionParam;
-import cn.addenda.porttrail.server.bo.est.EstPreparedStatementExecutionBo;
-import cn.addenda.porttrail.server.bo.est.EstStatementExecutionBo;
+import cn.addenda.porttrail.server.bo.db.analyze.param.AnalyzePreparedStatementExecutionParam;
+import cn.addenda.porttrail.server.bo.db.analyze.param.AnalyzeStatementExecutionParam;
+import cn.addenda.porttrail.server.bo.db.PreparedStatementExecutionEntityBo;
+import cn.addenda.porttrail.server.bo.db.StatementExecutionEntityBo;
 import cn.addenda.porttrail.server.entity.DbExecutionAnalyzeThrowableLog;
 import cn.addenda.porttrail.server.entity.PortTrailDeserializeThrowableLog;
 import cn.addenda.porttrail.server.entity.DbExecutionHandleThrowableLog;
@@ -67,9 +67,9 @@ public class DbExecutionController {
       return;
     }
 
-    EstStatementExecutionBo estStatementExecutionBo;
+    StatementExecutionEntityBo statementExecutionEntityBo;
     try {
-      estStatementExecutionBo = dbExecutionBiz.handleStatementExecution(statementExecutionDto);
+      statementExecutionEntityBo = dbExecutionBiz.handleStatementExecution(statementExecutionDto);
     } catch (Throwable throwable) {
       dbExecutionHandleThrowableLogManager.insert(bytes, DbExecutionHandleThrowableLog.HANDLE_TYPE_STATEMENT_EXECUTION,
               statementExecutionBo, statementExecutionDto.getServiceRuntimeInfo(), throwable);
@@ -78,12 +78,12 @@ public class DbExecutionController {
 
     try {
       AnalyzeStatementExecutionParam analyzeStatementExecutionParam = new AnalyzeStatementExecutionParam();
-      analyzeStatementExecutionParam.setEstStatementExecutionBo(estStatementExecutionBo);
+      analyzeStatementExecutionParam.setStatementExecutionEntityBo(statementExecutionEntityBo);
       analyzeStatementExecutionParam.setStatementExecutionDto(statementExecutionDto);
       analyzeHandlerScheduler.handle(analyzeStatementExecutionParam);
     } catch (Throwable throwable) {
       dbExecutionAnalyzeThrowableLogManager.insert(bytes, DbExecutionAnalyzeThrowableLog.ANALYZE_TYPE_STATEMENT_EXECUTION,
-              statementExecutionBo, statementExecutionDto.getServiceRuntimeInfo(), estStatementExecutionBo.getId(), throwable);
+              statementExecutionBo, statementExecutionDto.getServiceRuntimeInfo(), statementExecutionEntityBo.getId(), throwable);
     }
   }
 
@@ -101,9 +101,9 @@ public class DbExecutionController {
       return;
     }
 
-    EstPreparedStatementExecutionBo estPreparedStatementExecutionBo;
+    PreparedStatementExecutionEntityBo preparedStatementExecutionEntityBo;
     try {
-      estPreparedStatementExecutionBo = dbExecutionBiz.handlePreparedStatementExecution(preparedStatementExecutionDto);
+      preparedStatementExecutionEntityBo = dbExecutionBiz.handlePreparedStatementExecution(preparedStatementExecutionDto);
     } catch (Throwable throwable) {
       dbExecutionHandleThrowableLogManager.insert(bytes, DbExecutionHandleThrowableLog.HANDLE_TYPE_PREPARED_STATEMENT_EXECUTION,
               preparedStatementExecutionBo, preparedStatementExecutionDto.getServiceRuntimeInfo(), throwable);
@@ -112,12 +112,12 @@ public class DbExecutionController {
 
     try {
       AnalyzePreparedStatementExecutionParam analyzePreparedStatementExecutionParam = new AnalyzePreparedStatementExecutionParam();
-      analyzePreparedStatementExecutionParam.setEstPreparedStatementExecutionBo(estPreparedStatementExecutionBo);
+      analyzePreparedStatementExecutionParam.setPreparedStatementExecutionEntityBo(preparedStatementExecutionEntityBo);
       analyzePreparedStatementExecutionParam.setPreparedStatementExecutionDto(preparedStatementExecutionDto);
       analyzeHandlerScheduler.handle(analyzePreparedStatementExecutionParam);
     } catch (Throwable throwable) {
       dbExecutionAnalyzeThrowableLogManager.insert(bytes, DbExecutionAnalyzeThrowableLog.ANALYZE_TYPE_PREPARED_STATEMENT_EXECUTION,
-              preparedStatementExecutionBo, preparedStatementExecutionDto.getServiceRuntimeInfo(), estPreparedStatementExecutionBo.getId(), throwable);
+              preparedStatementExecutionBo, preparedStatementExecutionDto.getServiceRuntimeInfo(), preparedStatementExecutionEntityBo.getId(), throwable);
     }
   }
 

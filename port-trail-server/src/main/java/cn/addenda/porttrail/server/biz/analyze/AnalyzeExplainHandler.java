@@ -10,16 +10,16 @@ import cn.addenda.porttrail.common.tuple.Unary;
 import cn.addenda.porttrail.common.util.CompressUtils;
 import cn.addenda.porttrail.common.util.JdkSerializationUtils;
 import cn.addenda.porttrail.common.util.SqlUtils;
-import cn.addenda.porttrail.server.bo.analyze.param.AnalyzePreparedStatementExecutionParam;
-import cn.addenda.porttrail.server.bo.analyze.param.AnalyzeStatementExecutionParam;
-import cn.addenda.porttrail.server.bo.analyze.result.AnalyzeExplainResult;
-import cn.addenda.porttrail.server.bo.analyze.result.AnalyzeResult;
-import cn.addenda.porttrail.server.bo.est.EstPreparedStatementExecutionBo;
-import cn.addenda.porttrail.server.bo.est.EstPreparedStatementParameterBo;
-import cn.addenda.porttrail.server.curd.EstAnalyzeExplainResultCurder;
-import cn.addenda.porttrail.server.curd.EstDbConfigCurder;
-import cn.addenda.porttrail.server.entity.EstAnalyzeExplainResult;
-import cn.addenda.porttrail.server.entity.EstDbConfig;
+import cn.addenda.porttrail.server.bo.db.analyze.param.AnalyzePreparedStatementExecutionParam;
+import cn.addenda.porttrail.server.bo.db.analyze.param.AnalyzeStatementExecutionParam;
+import cn.addenda.porttrail.server.bo.db.analyze.result.AnalyzeExplainResult;
+import cn.addenda.porttrail.server.bo.db.analyze.result.AnalyzeResult;
+import cn.addenda.porttrail.server.bo.db.PreparedStatementExecutionEntityBo;
+import cn.addenda.porttrail.server.bo.db.PreparedStatementParameterEntityBo;
+import cn.addenda.porttrail.server.curd.AnalyzeExplainResultEntityCurder;
+import cn.addenda.porttrail.server.curd.DbConfigEntityCurder;
+import cn.addenda.porttrail.server.entity.DbConfigEntity;
+import cn.addenda.porttrail.server.entity.AnalyzeExplainResultEntity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -33,10 +33,10 @@ import java.util.stream.Collectors;
 public class AnalyzeExplainHandler extends AbstractDataSourceAnalyzeHandler<AnalyzeExplainResult> {
 
   @Autowired
-  private EstDbConfigCurder estDbConfigCurder;
+  private DbConfigEntityCurder dbConfigEntityCurder;
 
   @Autowired
-  private EstAnalyzeExplainResultCurder estAnalyzeExplainResultCurder;
+  private AnalyzeExplainResultEntityCurder analyzeExplainResultEntityCurder;
 
   @Override
   public String handlerName() {
@@ -54,15 +54,15 @@ public class AnalyzeExplainHandler extends AbstractDataSourceAnalyzeHandler<Anal
   }
 
   private AnalyzeExplainResult doPreparedHandle(AnalyzePreparedStatementExecutionParam analyzeParam) throws SQLException {
-    EstPreparedStatementExecutionBo estPreparedStatementExecutionBo = analyzeParam.getEstPreparedStatementExecutionBo();
-    String parameterizedSql = estPreparedStatementExecutionBo.getParameterizedSql();
+    PreparedStatementExecutionEntityBo preparedStatementExecutionEntityBo = analyzeParam.getPreparedStatementExecutionEntityBo();
+    String parameterizedSql = preparedStatementExecutionEntityBo.getParameterizedSql();
 
-    EstDbConfig estDbConfig = queryByConnectionPortTrailId(estPreparedStatementExecutionBo.getConnectionPortTrailId());
-    if (estDbConfig == null) {
+    DbConfigEntity dbConfigEntity = queryByConnectionPortTrailId(preparedStatementExecutionEntityBo.getConnectionPortTrailId());
+    if (dbConfigEntity == null) {
       return null;
     }
 
-    try (Connection connection = getConnection(estDbConfig)) {
+    try (Connection connection = getConnection(dbConfigEntity)) {
       AnalyzeExplainResult analyzeExplainResult = new AnalyzeExplainResult();
       analyzeExplainResult.setSource(AnalyzeResult.SOURCE_PREPARED_STATEMENT_PARAMETER);
       String sqlType = SqlUtils.getSqlType(parameterizedSql);
@@ -70,11 +70,11 @@ public class AnalyzeExplainHandler extends AbstractDataSourceAnalyzeHandler<Anal
         return null;
       }
 
-      List<EstPreparedStatementParameterBo> estPreparedStatementParameterBoList =
-              estPreparedStatementExecutionBo.getEstPreparedStatementParameterBoList();
-      for (EstPreparedStatementParameterBo estPreparedStatementParameterBo : estPreparedStatementParameterBoList) {
+      List<PreparedStatementParameterEntityBo> preparedStatementParameterEntityBoList =
+              preparedStatementExecutionEntityBo.getPreparedStatementParameterEntityBoList();
+      for (PreparedStatementParameterEntityBo preparedStatementParameterEntityBo : preparedStatementParameterEntityBoList) {
         PreparedStatement preparedStatement = connection.prepareStatement("explain " + parameterizedSql);
-        byte[] parameterBytes = estPreparedStatementParameterBo.getParameterBytes();
+        byte[] parameterBytes = preparedStatementParameterEntityBo.getParameterBytes();
         PreparedStatementParameterDto preparedStatementParameterDto =
                 (PreparedStatementParameterDto) JdkSerializationUtils.deserialize(CompressUtils.decompress(parameterBytes));
 
@@ -91,7 +91,7 @@ public class AnalyzeExplainHandler extends AbstractDataSourceAnalyzeHandler<Anal
         AnalyzeExplainResult.AnalyzeExplainSqlResult analyzeExplainSqlResult = analyzeExplainResult.new AnalyzeExplainSqlResult();
         analyzeExplainResult.getAnalyzeExplainSqlResultList().add(analyzeExplainSqlResult);
 
-        analyzeExplainSqlResult.setOuterId(estPreparedStatementParameterBo.getId());
+        analyzeExplainSqlResult.setOuterId(preparedStatementParameterEntityBo.getId());
         analyzeExplainSqlResult.setSqlType(sqlType);
 
         addAnalyzeExplainSingleResult(preparedStatement, analyzeExplainSqlResult);
@@ -100,11 +100,11 @@ public class AnalyzeExplainHandler extends AbstractDataSourceAnalyzeHandler<Anal
     }
   }
 
-  private EstDbConfig queryByConnectionPortTrailId(String connectionPortTrailId) {
-    EstDbConfig param = EstDbConfig.ofParam();
+  private DbConfigEntity queryByConnectionPortTrailId(String connectionPortTrailId) {
+    DbConfigEntity param = DbConfigEntity.ofParam();
     param.setConnectionPortTrailId(connectionPortTrailId);
-    List<EstDbConfig> estDbConfigList = estDbConfigCurder.queryByEntity(param);
-    return IterableUtils.oneOrNull(estDbConfigList);
+    List<DbConfigEntity> dbConfigEntityList = dbConfigEntityCurder.queryByEntity(param);
+    return IterableUtils.oneOrNull(dbConfigEntityList);
   }
 
   private void addAnalyzeExplainSingleResult(
@@ -347,51 +347,51 @@ public class AnalyzeExplainHandler extends AbstractDataSourceAnalyzeHandler<Anal
 
   @Override
   public void consume(AnalyzeResult analyzeResult) {
-    List<EstAnalyzeExplainResult> estAnalyzeExplainResultList = new ArrayList<>();
+    List<AnalyzeExplainResultEntity> analyzeExplainResultEntityList = new ArrayList<>();
     AnalyzeExplainResult analyzeExplainResult = (AnalyzeExplainResult) analyzeResult;
     for (AnalyzeExplainResult.AnalyzeExplainSqlResult analyzeExplainSqlResult :
             analyzeExplainResult.getAnalyzeExplainSqlResultList()) {
       for (AnalyzeExplainResult.AnalyzeExplainSqlResult.AnalyzeExplainSingleResult analyzeExplainSingleResult :
               analyzeExplainSqlResult.getAnalyzeExplainSingleResultList()) {
-        EstAnalyzeExplainResult estAnalyzeExplainResult = new EstAnalyzeExplainResult();
-        estAnalyzeExplainResultList.add(estAnalyzeExplainResult);
-        estAnalyzeExplainResult.setSource(analyzeExplainResult.getSource());
-        estAnalyzeExplainResult.setOuterId(analyzeExplainSqlResult.getOuterId());
-        estAnalyzeExplainResult.setSqlType(analyzeExplainSqlResult.getSqlType());
-        estAnalyzeExplainResult.setExplainId(analyzeExplainSingleResult.getExplainId());
-        estAnalyzeExplainResult.setExplainSelectType(analyzeExplainSingleResult.getExplainSelectType());
-        estAnalyzeExplainResult.setExplainTable(analyzeExplainSingleResult.getExplainTable());
-        estAnalyzeExplainResult.setExplainPartitions(analyzeExplainSingleResult.getExplainPartitions());
-        estAnalyzeExplainResult.setExplainType(analyzeExplainSingleResult.getExplainType());
-        estAnalyzeExplainResult.setExplainPossibleKeys(analyzeExplainSingleResult.getExplainPossibleKeys());
-        estAnalyzeExplainResult.setExplainKey(analyzeExplainSingleResult.getExplainKey());
-        estAnalyzeExplainResult.setExplainKeyLen(analyzeExplainSingleResult.getExplainKeyLen());
-        estAnalyzeExplainResult.setExplainRef(analyzeExplainSingleResult.getExplainRef());
-        estAnalyzeExplainResult.setExplainRows(analyzeExplainSingleResult.getExplainRows());
-        estAnalyzeExplainResult.setExplainFiltered(analyzeExplainSingleResult.getExplainFiltered());
-        estAnalyzeExplainResult.setExplainExtra(analyzeExplainSingleResult.getExplainExtra());
+        AnalyzeExplainResultEntity analyzeExplainResultEntity = new AnalyzeExplainResultEntity();
+        analyzeExplainResultEntityList.add(analyzeExplainResultEntity);
+        analyzeExplainResultEntity.setSource(analyzeExplainResult.getSource());
+        analyzeExplainResultEntity.setOuterId(analyzeExplainSqlResult.getOuterId());
+        analyzeExplainResultEntity.setSqlType(analyzeExplainSqlResult.getSqlType());
+        analyzeExplainResultEntity.setExplainId(analyzeExplainSingleResult.getExplainId());
+        analyzeExplainResultEntity.setExplainSelectType(analyzeExplainSingleResult.getExplainSelectType());
+        analyzeExplainResultEntity.setExplainTable(analyzeExplainSingleResult.getExplainTable());
+        analyzeExplainResultEntity.setExplainPartitions(analyzeExplainSingleResult.getExplainPartitions());
+        analyzeExplainResultEntity.setExplainType(analyzeExplainSingleResult.getExplainType());
+        analyzeExplainResultEntity.setExplainPossibleKeys(analyzeExplainSingleResult.getExplainPossibleKeys());
+        analyzeExplainResultEntity.setExplainKey(analyzeExplainSingleResult.getExplainKey());
+        analyzeExplainResultEntity.setExplainKeyLen(analyzeExplainSingleResult.getExplainKeyLen());
+        analyzeExplainResultEntity.setExplainRef(analyzeExplainSingleResult.getExplainRef());
+        analyzeExplainResultEntity.setExplainRows(analyzeExplainSingleResult.getExplainRows());
+        analyzeExplainResultEntity.setExplainFiltered(analyzeExplainSingleResult.getExplainFiltered());
+        analyzeExplainResultEntity.setExplainExtra(analyzeExplainSingleResult.getExplainExtra());
       }
     }
 
     // todo 后续可以增加一个开关，是不是包含ALL的才能落库
-    Map<Long, List<EstAnalyzeExplainResult>> estAnalyzeExplainResultGroup =
-            estAnalyzeExplainResultList.stream().collect(Collectors.groupingBy(EstAnalyzeExplainResult::getOuterId));
-    estAnalyzeExplainResultGroup.entrySet().removeIf(
+    Map<Long, List<AnalyzeExplainResultEntity>> analyzeExplainResultEntityGroup =
+            analyzeExplainResultEntityList.stream().collect(Collectors.groupingBy(AnalyzeExplainResultEntity::getOuterId));
+    analyzeExplainResultEntityGroup.entrySet().removeIf(
             entry -> {
-              List<EstAnalyzeExplainResult> value = entry.getValue();
-              for (EstAnalyzeExplainResult estAnalyzeExplainResult : value) {
-                if ("ALL".equalsIgnoreCase(estAnalyzeExplainResult.getExplainType())) {
+              List<AnalyzeExplainResultEntity> value = entry.getValue();
+              for (AnalyzeExplainResultEntity analyzeExplainResultEntity : value) {
+                if ("ALL".equalsIgnoreCase(analyzeExplainResultEntity.getExplainType())) {
                   return false;
                 }
               }
               return true;
             });
 
-    estAnalyzeExplainResultList = estAnalyzeExplainResultGroup.values().stream()
+    analyzeExplainResultEntityList = analyzeExplainResultEntityGroup.values().stream()
             .flatMap(Collection::stream)
             .collect(Collectors.toList());
 
-    estAnalyzeExplainResultCurder.batchInsert(estAnalyzeExplainResultList);
+    analyzeExplainResultEntityCurder.batchInsert(analyzeExplainResultEntityList);
   }
 
 }

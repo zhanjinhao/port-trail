@@ -13,10 +13,10 @@ import cn.addenda.porttrail.common.util.CompressUtils;
 import cn.addenda.porttrail.common.util.JdkSerializationUtils;
 import cn.addenda.porttrail.server.bo.servlet.ServletExecutionRequestBo;
 import cn.addenda.porttrail.server.bo.servlet.ServletExecutionResponseBo;
-import cn.addenda.porttrail.server.curd.ServletExecutionRequestCurder;
-import cn.addenda.porttrail.server.curd.ServletExecutionResponseCurder;
-import cn.addenda.porttrail.server.entity.ServletExecutionRequest;
-import cn.addenda.porttrail.server.entity.ServletExecutionResponse;
+import cn.addenda.porttrail.server.curd.ServletExecutionRequestEntityCurder;
+import cn.addenda.porttrail.server.curd.ServletExecutionResponseEntityCurder;
+import cn.addenda.porttrail.server.entity.ServletExecutionRequestEntity;
+import cn.addenda.porttrail.server.entity.ServletExecutionResponseEntity;
 import cn.addenda.porttrail.server.util.ServletCurlUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,16 +30,16 @@ public class ServletExecutionBizImpl implements ServletExecutionBiz {
   private PlatformTransactionHelper transactionHelperNew;
 
   @Autowired
-  private ServletExecutionRequestCurder servletExecutionRequestCurder;
+  private ServletExecutionRequestEntityCurder servletExecutionRequestEntityCurder;
 
   @Autowired
-  private ServletExecutionResponseCurder servletExecutionResponseCurder;
+  private ServletExecutionResponseEntityCurder servletExecutionResponseEntityCurder;
 
   @Override
   public ServletExecutionRequestBo handleServletRequest(ServletRequestDto servletRequestDto) {
     ServiceRuntimeInfo serviceRuntimeInfo = servletRequestDto.getServiceRuntimeInfo();
 
-    ServletExecutionRequest param = ServletExecutionRequest.ofParam();
+    ServletExecutionRequestEntity param = ServletExecutionRequestEntity.ofParam();
     param.setSystemCode(serviceRuntimeInfo.getSystemCode());
     param.setServiceName(serviceRuntimeInfo.getServiceName());
     param.setImageName(serviceRuntimeInfo.getImageName());
@@ -70,7 +70,7 @@ public class ServletExecutionBizImpl implements ServletExecutionBiz {
     param.setCurl(ServletCurlUtils.toCurl(servletRequestBo));
 
     transactionHelperNew.doTransaction(() -> {
-      servletExecutionRequestCurder.insert(param);
+      servletExecutionRequestEntityCurder.insert(param);
     });
 
     return new ServletExecutionRequestBo(param);
@@ -80,7 +80,7 @@ public class ServletExecutionBizImpl implements ServletExecutionBiz {
   public ServletExecutionResponseBo handleServletResponse(ServletResponseDto servletResponseDto) {
     ServiceRuntimeInfo serviceRuntimeInfo = servletResponseDto.getServiceRuntimeInfo();
 
-    ServletExecutionResponse param = ServletExecutionResponse.ofParam();
+    ServletExecutionResponseEntity param = ServletExecutionResponseEntity.ofParam();
     param.setSystemCode(serviceRuntimeInfo.getSystemCode());
     param.setServiceName(serviceRuntimeInfo.getServiceName());
     param.setImageName(serviceRuntimeInfo.getImageName());
@@ -102,7 +102,7 @@ public class ServletExecutionBizImpl implements ServletExecutionBiz {
     }
 
     transactionHelperNew.doTransaction(() -> {
-      servletExecutionResponseCurder.insert(param);
+      servletExecutionResponseEntityCurder.insert(param);
     });
 
     return new ServletExecutionResponseBo(param);

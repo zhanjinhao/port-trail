@@ -3,15 +3,15 @@ package cn.addenda.porttrail.server.biz;
 import cn.addenda.porttrail.common.pojo.db.dto.DbConfigDto;
 import cn.addenda.porttrail.common.pojo.db.dto.PreparedStatementExecutionDto;
 import cn.addenda.porttrail.common.pojo.db.dto.StatementExecutionDto;
-import cn.addenda.porttrail.server.bo.est.EstPreparedStatementExecutionBo;
-import cn.addenda.porttrail.server.bo.est.EstStatementExecutionBo;
+import cn.addenda.porttrail.server.bo.db.PreparedStatementExecutionEntityBo;
+import cn.addenda.porttrail.server.bo.db.StatementExecutionEntityBo;
 
 public interface DbExecutionBiz {
 
   void handleDbConfig(DbConfigDto dbConfigDto);
 
-  EstPreparedStatementExecutionBo handlePreparedStatementExecution(PreparedStatementExecutionDto preparedStatementExecutionDto);
+  PreparedStatementExecutionEntityBo handlePreparedStatementExecution(PreparedStatementExecutionDto preparedStatementExecutionDto);
 
-  EstStatementExecutionBo handleStatementExecution(StatementExecutionDto statementExecutionDto);
+  StatementExecutionEntityBo handleStatementExecution(StatementExecutionDto statementExecutionDto);
 
 }

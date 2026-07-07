@@ -1,6 +1,6 @@
 package cn.addenda.porttrail.server.bo.servlet;
 
-import cn.addenda.porttrail.server.entity.ServletExecutionResponse;
+import cn.addenda.porttrail.server.entity.ServletExecutionResponseEntity;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -8,32 +8,32 @@ import lombok.ToString;
 @Setter
 @Getter
 @ToString
-public class ServletExecutionResponseBo extends ServletExecutionResponse {
+public class ServletExecutionResponseBo extends ServletExecutionResponseEntity {
 
-  public ServletExecutionResponseBo(ServletExecutionResponse servletExecutionResponse) {
-    this.setId(servletExecutionResponse.getId());
-    this.setSystemCode(servletExecutionResponse.getSystemCode());
-    this.setServiceName(servletExecutionResponse.getServiceName());
-    this.setImageName(servletExecutionResponse.getImageName());
-    this.setEnv(servletExecutionResponse.getEnv());
-    this.setInstanceId(servletExecutionResponse.getInstanceId());
-    this.setExecutionId(servletExecutionResponse.getExecutionId());
-    this.setContentType(servletExecutionResponse.getContentType());
-    this.setCharsetEncoding(servletExecutionResponse.getCharsetEncoding());
-    this.setDateTime(servletExecutionResponse.getDateTime());
-    this.setContentLength(servletExecutionResponse.getContentLength());
-    this.setLocale(servletExecutionResponse.getLocale());
-    this.setHeaders(servletExecutionResponse.getHeaders());
-    this.setBody(servletExecutionResponse.getBody());
-    this.setBodyText(servletExecutionResponse.getBodyText());
-    this.setCreator(servletExecutionResponse.getCreator());
-    this.setCreatorName(servletExecutionResponse.getCreatorName());
-    this.setCreateDt(servletExecutionResponse.getCreateDt());
-    this.setModifier(servletExecutionResponse.getModifier());
-    this.setModifierName(servletExecutionResponse.getModifierName());
-    this.setModifyDt(servletExecutionResponse.getModifyDt());
-    this.setDeleteFlag(servletExecutionResponse.getDeleteFlag());
-    this.setDeleteDt(servletExecutionResponse.getDeleteDt());
+  public ServletExecutionResponseBo(ServletExecutionResponseEntity servletExecutionResponseEntity) {
+    this.setId(servletExecutionResponseEntity.getId());
+    this.setSystemCode(servletExecutionResponseEntity.getSystemCode());
+    this.setServiceName(servletExecutionResponseEntity.getServiceName());
+    this.setImageName(servletExecutionResponseEntity.getImageName());
+    this.setEnv(servletExecutionResponseEntity.getEnv());
+    this.setInstanceId(servletExecutionResponseEntity.getInstanceId());
+    this.setExecutionId(servletExecutionResponseEntity.getExecutionId());
+    this.setContentType(servletExecutionResponseEntity.getContentType());
+    this.setCharsetEncoding(servletExecutionResponseEntity.getCharsetEncoding());
+    this.setDateTime(servletExecutionResponseEntity.getDateTime());
+    this.setContentLength(servletExecutionResponseEntity.getContentLength());
+    this.setLocale(servletExecutionResponseEntity.getLocale());
+    this.setHeaders(servletExecutionResponseEntity.getHeaders());
+    this.setBody(servletExecutionResponseEntity.getBody());
+    this.setBodyText(servletExecutionResponseEntity.getBodyText());
+    this.setCreator(servletExecutionResponseEntity.getCreator());
+    this.setCreatorName(servletExecutionResponseEntity.getCreatorName());
+    this.setCreateDt(servletExecutionResponseEntity.getCreateDt());
+    this.setModifier(servletExecutionResponseEntity.getModifier());
+    this.setModifierName(servletExecutionResponseEntity.getModifierName());
+    this.setModifyDt(servletExecutionResponseEntity.getModifyDt());
+    this.setDeleteFlag(servletExecutionResponseEntity.getDeleteFlag());
+    this.setDeleteDt(servletExecutionResponseEntity.getDeleteDt());
   }
 
 }

@@ -1,6 +1,6 @@
 package cn.addenda.porttrail.server.bo.servlet;
 
-import cn.addenda.porttrail.server.entity.ServletExecutionRequest;
+import cn.addenda.porttrail.server.entity.ServletExecutionRequestEntity;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -8,39 +8,39 @@ import lombok.ToString;
 @Setter
 @Getter
 @ToString
-public class ServletExecutionRequestBo extends ServletExecutionRequest {
+public class ServletExecutionRequestBo extends ServletExecutionRequestEntity {
 
-  public ServletExecutionRequestBo(ServletExecutionRequest servletExecutionRequest) {
-    this.setId(servletExecutionRequest.getId());
-    this.setSystemCode(servletExecutionRequest.getSystemCode());
-    this.setServiceName(servletExecutionRequest.getServiceName());
-    this.setImageName(servletExecutionRequest.getImageName());
-    this.setEnv(servletExecutionRequest.getEnv());
-    this.setInstanceId(servletExecutionRequest.getInstanceId());
-    this.setExecutionId(servletExecutionRequest.getExecutionId());
-    this.setVersion(servletExecutionRequest.getVersion());
-    this.setScheme(servletExecutionRequest.getScheme());
-    this.setMethod(servletExecutionRequest.getMethod());
-    this.setUri(servletExecutionRequest.getUri());
-    this.setQueryString(servletExecutionRequest.getQueryString());
-    this.setContentType(servletExecutionRequest.getContentType());
-    this.setCharsetEncoding(servletExecutionRequest.getCharsetEncoding());
-    this.setDateTime(servletExecutionRequest.getDateTime());
-    this.setAllContentLength(servletExecutionRequest.getAllContentLength());
-    this.setContentLength(servletExecutionRequest.getContentLength());
-    this.setLocale(servletExecutionRequest.getLocale());
-    this.setHeaders(servletExecutionRequest.getHeaders());
-    this.setBody(servletExecutionRequest.getBody());
-    this.setBodyText(servletExecutionRequest.getBodyText());
-    this.setCurl(servletExecutionRequest.getCurl());
-    this.setCreator(servletExecutionRequest.getCreator());
-    this.setCreatorName(servletExecutionRequest.getCreatorName());
-    this.setCreateDt(servletExecutionRequest.getCreateDt());
-    this.setModifier(servletExecutionRequest.getModifier());
-    this.setModifierName(servletExecutionRequest.getModifierName());
-    this.setModifyDt(servletExecutionRequest.getModifyDt());
-    this.setDeleteFlag(servletExecutionRequest.getDeleteFlag());
-    this.setDeleteDt(servletExecutionRequest.getDeleteDt());
+  public ServletExecutionRequestBo(ServletExecutionRequestEntity servletExecutionRequestEntity) {
+    this.setId(servletExecutionRequestEntity.getId());
+    this.setSystemCode(servletExecutionRequestEntity.getSystemCode());
+    this.setServiceName(servletExecutionRequestEntity.getServiceName());
+    this.setImageName(servletExecutionRequestEntity.getImageName());
+    this.setEnv(servletExecutionRequestEntity.getEnv());
+    this.setInstanceId(servletExecutionRequestEntity.getInstanceId());
+    this.setExecutionId(servletExecutionRequestEntity.getExecutionId());
+    this.setVersion(servletExecutionRequestEntity.getVersion());
+    this.setScheme(servletExecutionRequestEntity.getScheme());
+    this.setMethod(servletExecutionRequestEntity.getMethod());
+    this.setUri(servletExecutionRequestEntity.getUri());
+    this.setQueryString(servletExecutionRequestEntity.getQueryString());
+    this.setContentType(servletExecutionRequestEntity.getContentType());
+    this.setCharsetEncoding(servletExecutionRequestEntity.getCharsetEncoding());
+    this.setDateTime(servletExecutionRequestEntity.getDateTime());
+    this.setAllContentLength(servletExecutionRequestEntity.getAllContentLength());
+    this.setContentLength(servletExecutionRequestEntity.getContentLength());
+    this.setLocale(servletExecutionRequestEntity.getLocale());
+    this.setHeaders(servletExecutionRequestEntity.getHeaders());
+    this.setBody(servletExecutionRequestEntity.getBody());
+    this.setBodyText(servletExecutionRequestEntity.getBodyText());
+    this.setCurl(servletExecutionRequestEntity.getCurl());
+    this.setCreator(servletExecutionRequestEntity.getCreator());
+    this.setCreatorName(servletExecutionRequestEntity.getCreatorName());
+    this.setCreateDt(servletExecutionRequestEntity.getCreateDt());
+    this.setModifier(servletExecutionRequestEntity.getModifier());
+    this.setModifierName(servletExecutionRequestEntity.getModifierName());
+    this.setModifyDt(servletExecutionRequestEntity.getModifyDt());
+    this.setDeleteFlag(servletExecutionRequestEntity.getDeleteFlag());
+    this.setDeleteDt(servletExecutionRequestEntity.getDeleteDt());
   }
 
 }

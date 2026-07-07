@@ -1,7 +1,7 @@
 package cn.addenda.porttrail.server.biz.analyze;
 
-import cn.addenda.porttrail.server.bo.analyze.result.AnalyzeResult;
-import cn.addenda.porttrail.server.entity.EstDbConfig;
+import cn.addenda.porttrail.server.bo.db.analyze.result.AnalyzeResult;
+import cn.addenda.porttrail.server.entity.DbConfigEntity;
 import com.zaxxer.hikari.HikariDataSource;
 import com.zaxxer.hikari.util.IsolationLevel;
 import lombok.Getter;
@@ -22,12 +22,12 @@ public abstract class AbstractDataSourceAnalyzeHandler<T extends AnalyzeResult>
 
   private final Map<DataSourceKey, HikariDataSource> dataSourceMap = new ConcurrentHashMap<>();
 
-  protected Connection getConnection(EstDbConfig estDbConfig) throws SQLException {
-    return getDataSource(estDbConfig).getConnection();
+  protected Connection getConnection(DbConfigEntity dbConfigEntity) throws SQLException {
+    return getDataSource(dbConfigEntity).getConnection();
   }
 
-  protected DataSource getDataSource(EstDbConfig estDbConfig) {
-    return getDataSource(new DataSourceKey(estDbConfig.getJdbcUrl(), estDbConfig.getUser(), estDbConfig.getPassword(), estDbConfig.getDriverName()));
+  protected DataSource getDataSource(DbConfigEntity dbConfigEntity) {
+    return getDataSource(new DataSourceKey(dbConfigEntity.getJdbcUrl(), dbConfigEntity.getUser(), dbConfigEntity.getPassword(), dbConfigEntity.getDriverName()));
   }
 
   private DataSource getDataSource(DataSourceKey dataSourceKey) {

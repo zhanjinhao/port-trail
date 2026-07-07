@@ -11,13 +11,13 @@ import cn.addenda.porttrail.common.pojo.httpclient.dto.HttpClientRequestDto;
 import cn.addenda.porttrail.common.pojo.httpclient.dto.HttpClientResponseDto;
 import cn.addenda.porttrail.common.util.CompressUtils;
 import cn.addenda.porttrail.common.util.JdkSerializationUtils;
-import cn.addenda.porttrail.server.bo.est.EstEntryPointSnapshotBo;
+import cn.addenda.porttrail.server.bo.EntryPointSnapshotEntityBo;
 import cn.addenda.porttrail.server.bo.httpclient.HttpClientExecutionRequestBo;
 import cn.addenda.porttrail.server.bo.httpclient.HttpClientExecutionResponseBo;
-import cn.addenda.porttrail.server.curd.HttpClientExecutionRequestCurder;
-import cn.addenda.porttrail.server.curd.HttpClientExecutionResponseCurder;
-import cn.addenda.porttrail.server.entity.HttpClientExecutionRequest;
-import cn.addenda.porttrail.server.entity.HttpClientExecutionResponse;
+import cn.addenda.porttrail.server.curd.HttpClientExecutionRequestEntityCurder;
+import cn.addenda.porttrail.server.curd.HttpClientExecutionResponseEntityCurder;
+import cn.addenda.porttrail.server.entity.HttpClientExecutionRequestEntity;
+import cn.addenda.porttrail.server.entity.HttpClientExecutionResponseEntity;
 import cn.addenda.porttrail.server.util.HttpClientCurlUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,22 +31,22 @@ public class HttpClientExecutionBizImpl implements HttpClientExecutionBiz {
   private PlatformTransactionHelper transactionHelperNew;
 
   @Autowired
-  private HttpClientExecutionRequestCurder httpClientExecutionRequestCurder;
+  private HttpClientExecutionRequestEntityCurder httpClientExecutionRequestEntityCurder;
 
   @Autowired
-  private HttpClientExecutionResponseCurder httpClientExecutionResponseCurder;
+  private HttpClientExecutionResponseEntityCurder httpClientExecutionResponseEntityCurder;
 
   @Autowired
-  private EstEntryPointSnapshotBiz estEntryPointSnapshotBiz;
+  private EntryPointSnapshotEntityBiz entryPointSnapshotEntityBiz;
 
   @Override
   public HttpClientExecutionRequestBo handleHttpClientRequest(HttpClientRequestDto httpClientRequestDto) {
     return transactionHelperNew.doTransaction(() -> {
-      EstEntryPointSnapshotBo estEntryPointSnapshotBo = estEntryPointSnapshotBiz.insert(httpClientRequestDto.getEntryPointSnapshot());
+      EntryPointSnapshotEntityBo entryPointSnapshotEntityBo = entryPointSnapshotEntityBiz.insert(httpClientRequestDto.getEntryPointSnapshot());
 
       ServiceRuntimeInfo serviceRuntimeInfo = httpClientRequestDto.getServiceRuntimeInfo();
 
-      HttpClientExecutionRequest param = HttpClientExecutionRequest.ofParam();
+      HttpClientExecutionRequestEntity param = HttpClientExecutionRequestEntity.ofParam();
       param.setSystemCode(serviceRuntimeInfo.getSystemCode());
       param.setServiceName(serviceRuntimeInfo.getServiceName());
       param.setImageName(serviceRuntimeInfo.getImageName());
@@ -75,12 +75,12 @@ public class HttpClientExecutionBizImpl implements HttpClientExecutionBiz {
         param.setBodyText(JacksonUtils.toStr(httpClientRequestBo.getBody()));
       }
       param.setCurl(HttpClientCurlUtils.toCurl(httpClientRequestBo));
-      param.setEntryPointSnapshotId(estEntryPointSnapshotBo.getId());
+      param.setEntryPointSnapshotId(entryPointSnapshotEntityBo.getId());
 
-      httpClientExecutionRequestCurder.insert(param);
+      httpClientExecutionRequestEntityCurder.insert(param);
 
       HttpClientExecutionRequestBo httpClientExecutionRequestBo = new HttpClientExecutionRequestBo(param);
-      httpClientExecutionRequestBo.setEstEntryPointSnapshotBo(estEntryPointSnapshotBo);
+      httpClientExecutionRequestBo.setEntryPointSnapshotEntityBo(entryPointSnapshotEntityBo);
 
       return httpClientExecutionRequestBo;
     });
@@ -90,11 +90,11 @@ public class HttpClientExecutionBizImpl implements HttpClientExecutionBiz {
   @Override
   public HttpClientExecutionResponseBo handleHttpClientResponse(HttpClientResponseDto httpClientResponseDto) {
     return transactionHelperNew.doTransaction(() -> {
-      EstEntryPointSnapshotBo estEntryPointSnapshotBo = estEntryPointSnapshotBiz.insert(httpClientResponseDto.getEntryPointSnapshot());
+      EntryPointSnapshotEntityBo entryPointSnapshotEntityBo = entryPointSnapshotEntityBiz.insert(httpClientResponseDto.getEntryPointSnapshot());
 
       ServiceRuntimeInfo serviceRuntimeInfo = httpClientResponseDto.getServiceRuntimeInfo();
 
-      HttpClientExecutionResponse param = HttpClientExecutionResponse.ofParam();
+      HttpClientExecutionResponseEntity param = HttpClientExecutionResponseEntity.ofParam();
       param.setSystemCode(serviceRuntimeInfo.getSystemCode());
       param.setServiceName(serviceRuntimeInfo.getServiceName());
       param.setImageName(serviceRuntimeInfo.getImageName());
@@ -115,12 +115,12 @@ public class HttpClientExecutionBizImpl implements HttpClientExecutionBiz {
       if (httpClientResponseBo.getBody() instanceof String) {
         param.setBodyText((String) httpClientResponseBo.getBody());
       }
-      param.setEntryPointSnapshotId(estEntryPointSnapshotBo.getId());
+      param.setEntryPointSnapshotId(entryPointSnapshotEntityBo.getId());
 
-      httpClientExecutionResponseCurder.insert(param);
+      httpClientExecutionResponseEntityCurder.insert(param);
 
       HttpClientExecutionResponseBo httpClientExecutionResponseBo = new HttpClientExecutionResponseBo(param);
-      httpClientExecutionResponseBo.setEstEntryPointSnapshotBo(estEntryPointSnapshotBo);
+      httpClientExecutionResponseBo.setEntryPointSnapshotEntityBo(entryPointSnapshotEntityBo);
 
       return httpClientExecutionResponseBo;
     });

@@ -1,6 +1,6 @@
 package cn.addenda.porttrail.server.bo.redis;
 
-import cn.addenda.porttrail.server.bo.est.EstEntryPointSnapshotBo;
+import cn.addenda.porttrail.server.bo.EntryPointSnapshotEntityBo;
 import cn.addenda.porttrail.server.entity.RedisExecutionEntity;
 import lombok.Getter;
 import lombok.Setter;
@@ -11,7 +11,7 @@ import lombok.ToString;
 @ToString
 public class RedisExecutionEntityBo extends RedisExecutionEntity {
 
-  private EstEntryPointSnapshotBo estEntryPointSnapshotBo;
+  private EntryPointSnapshotEntityBo entryPointSnapshotEntityBo;
 
   public RedisExecutionEntityBo(RedisExecutionEntity redisExecutionEntity) {
     this.setId(redisExecutionEntity.getId());

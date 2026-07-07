@@ -1,9 +1,9 @@
 package cn.addenda.porttrail.server.biz.analyze;
 
-import cn.addenda.porttrail.server.bo.analyze.param.AnalyzePreparedStatementExecutionParam;
-import cn.addenda.porttrail.server.bo.analyze.param.AnalyzeStatementExecutionParam;
-import cn.addenda.porttrail.server.bo.analyze.result.AnalyzeResult;
-import cn.addenda.porttrail.server.bo.analyze.result.AnalyzeTableColumnResult;
+import cn.addenda.porttrail.server.bo.db.analyze.param.AnalyzePreparedStatementExecutionParam;
+import cn.addenda.porttrail.server.bo.db.analyze.param.AnalyzeStatementExecutionParam;
+import cn.addenda.porttrail.server.bo.db.analyze.result.AnalyzeResult;
+import cn.addenda.porttrail.server.bo.db.analyze.result.AnalyzeTableColumnResult;
 import org.springframework.stereotype.Component;
 
 @Component

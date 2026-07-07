@@ -6,7 +6,7 @@ import cn.addenda.porttrail.common.pojo.ServiceRuntimeInfo;
 import cn.addenda.porttrail.common.pojo.redis.dto.RedisDto;
 import cn.addenda.porttrail.common.util.CompressUtils;
 import cn.addenda.porttrail.common.util.JdkSerializationUtils;
-import cn.addenda.porttrail.server.bo.est.EstEntryPointSnapshotBo;
+import cn.addenda.porttrail.server.bo.EntryPointSnapshotEntityBo;
 import cn.addenda.porttrail.server.bo.redis.RedisExecutionEntityBo;
 import cn.addenda.porttrail.server.curd.RedisExecutionEntityCurder;
 import cn.addenda.porttrail.server.entity.RedisExecutionEntity;
@@ -27,12 +27,12 @@ public class RedisExecutionBizImpl implements RedisExecutionBiz {
   private RedisExecutionEntityCurder redisExecutionEntityCurder;
 
   @Autowired
-  private EstEntryPointSnapshotBiz estEntryPointSnapshotBiz;
+  private EntryPointSnapshotEntityBiz entryPointSnapshotEntityBiz;
 
   @Override
   public RedisExecutionEntityBo handleRedisExecution(RedisDto redisDto) {
     return transactionHelperNew.doTransaction(() -> {
-      EstEntryPointSnapshotBo estEntryPointSnapshotBo = estEntryPointSnapshotBiz.insert(redisDto.getEntryPointSnapshot());
+      EntryPointSnapshotEntityBo entryPointSnapshotEntityBo = entryPointSnapshotEntityBiz.insert(redisDto.getEntryPointSnapshot());
 
       ServiceRuntimeInfo serviceRuntimeInfo = redisDto.getServiceRuntimeInfo();
 
@@ -56,7 +56,7 @@ public class RedisExecutionBizImpl implements RedisExecutionBiz {
       redisExecutionEntityCurder.insert(param);
 
       RedisExecutionEntityBo redisExecutionEntityBo = new RedisExecutionEntityBo(param);
-      redisExecutionEntityBo.setEstEntryPointSnapshotBo(estEntryPointSnapshotBo);
+      redisExecutionEntityBo.setEntryPointSnapshotEntityBo(entryPointSnapshotEntityBo);
 
       return redisExecutionEntityBo;
     });

@@ -1,13 +1,13 @@
 package cn.addenda.porttrail.server.biz.analyze;
 
 import cn.addenda.porttrail.common.pojo.db.dto.PreparedStatementExecutionDto;
-import cn.addenda.porttrail.server.bo.analyze.param.AnalyzePreparedStatementExecutionParam;
-import cn.addenda.porttrail.server.bo.analyze.param.AnalyzeStatementExecutionParam;
-import cn.addenda.porttrail.server.bo.analyze.result.AnalyzeResult;
-import cn.addenda.porttrail.server.bo.analyze.result.AnalyzeSelectAllResult;
-import cn.addenda.porttrail.server.bo.est.EstStatementSqlBo;
-import cn.addenda.porttrail.server.curd.EstAnalyzeSelectAllResultCurder;
-import cn.addenda.porttrail.server.entity.EstAnalyzeSelectAllResult;
+import cn.addenda.porttrail.server.bo.db.analyze.param.AnalyzePreparedStatementExecutionParam;
+import cn.addenda.porttrail.server.bo.db.analyze.param.AnalyzeStatementExecutionParam;
+import cn.addenda.porttrail.server.bo.db.analyze.result.AnalyzeResult;
+import cn.addenda.porttrail.server.bo.db.analyze.result.AnalyzeSelectAllResult;
+import cn.addenda.porttrail.server.bo.db.StatementSqlEntityBo;
+import cn.addenda.porttrail.server.curd.AnalyzeSelectAllResultEntityCurder;
+import cn.addenda.porttrail.server.entity.AnalyzeSelectAllResultEntity;
 import cn.addenda.porttrail.server.helper.SqlHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -23,7 +23,7 @@ public class AnalyzeSelectAllHandler implements AnalyzeHandler<AnalyzeSelectAllR
   private SqlHelper sqlHelper;
 
   @Autowired
-  private EstAnalyzeSelectAllResultCurder estAnalyzeSelectAllResultCurder;
+  private AnalyzeSelectAllResultEntityCurder analyzeSelectAllResultEntityCurder;
 
   @Override
   public String handlerName() {
@@ -43,7 +43,7 @@ public class AnalyzeSelectAllHandler implements AnalyzeHandler<AnalyzeSelectAllR
     // todo 后续可以加一个开关，没有select all的也落库
     if (b) {
       AnalyzeSelectAllResult.AnalyzeSelectAllSingleResult analyzeSelectAllSingleResult = analyzeSelectAllResult.new AnalyzeSelectAllSingleResult();
-      analyzeSelectAllSingleResult.setOuterId(analyzeParam.getEstPreparedStatementExecutionBo().getId());
+      analyzeSelectAllSingleResult.setOuterId(analyzeParam.getPreparedStatementExecutionEntityBo().getId());
       analyzeSelectAllSingleResult.setIfSelectAll(1);
       analyzeSelectAllResult.getAnalyzeSelectAllSingleResultList().add(analyzeSelectAllSingleResult);
     }
@@ -56,12 +56,12 @@ public class AnalyzeSelectAllHandler implements AnalyzeHandler<AnalyzeSelectAllR
     AnalyzeSelectAllResult analyzeSelectAllResult = new AnalyzeSelectAllResult();
     analyzeSelectAllResult.setSource(AnalyzeResult.SOURCE_STATEMENT_SQL);
 
-    for (EstStatementSqlBo estStatementSqlBo : analyzeParam.getEstStatementExecutionBo().getEstStatementSqlBoList()) {
-      boolean b = sqlHelper.checkIfHasSelectAll(estStatementSqlBo.getSql());
+    for (StatementSqlEntityBo statementSqlEntityBo : analyzeParam.getStatementExecutionEntityBo().getStatementSqlEntityBoList()) {
+      boolean b = sqlHelper.checkIfHasSelectAll(statementSqlEntityBo.getSql());
       // todo 后续可以加一个开关，没有select all的也落库
       if (b) {
         AnalyzeSelectAllResult.AnalyzeSelectAllSingleResult analyzeSelectAllSingleResult = analyzeSelectAllResult.new AnalyzeSelectAllSingleResult();
-        analyzeSelectAllSingleResult.setOuterId(estStatementSqlBo.getId());
+        analyzeSelectAllSingleResult.setOuterId(statementSqlEntityBo.getId());
         analyzeSelectAllSingleResult.setIfSelectAll(1);
         analyzeSelectAllResult.getAnalyzeSelectAllSingleResultList().add(analyzeSelectAllSingleResult);
       }
@@ -79,19 +79,19 @@ public class AnalyzeSelectAllHandler implements AnalyzeHandler<AnalyzeSelectAllR
   public void consume(AnalyzeResult analyzeResult) {
     AnalyzeSelectAllResult analyzeSelectAllResult = (AnalyzeSelectAllResult) analyzeResult;
 
-    List<EstAnalyzeSelectAllResult> estAnalyzeSelectAllResultList = new ArrayList<>();
+    List<AnalyzeSelectAllResultEntity> analyzeSelectAllResultEntityList = new ArrayList<>();
     List<AnalyzeSelectAllResult.AnalyzeSelectAllSingleResult> analyzeSelectAllSingleResultList =
             analyzeSelectAllResult.getAnalyzeSelectAllSingleResultList();
 
     for (AnalyzeSelectAllResult.AnalyzeSelectAllSingleResult analyzeSelectAllSingleResult : analyzeSelectAllSingleResultList) {
-      EstAnalyzeSelectAllResult estAnalyzeSelectAllResult = new EstAnalyzeSelectAllResult();
-      estAnalyzeSelectAllResult.setSource(analyzeSelectAllResult.getSource());
-      estAnalyzeSelectAllResult.setOuterId(analyzeSelectAllSingleResult.getOuterId());
-      estAnalyzeSelectAllResult.setIfSelectAll(analyzeSelectAllSingleResult.getIfSelectAll());
-      estAnalyzeSelectAllResultList.add(estAnalyzeSelectAllResult);
+      AnalyzeSelectAllResultEntity analyzeSelectAllResultEntity = new AnalyzeSelectAllResultEntity();
+      analyzeSelectAllResultEntity.setSource(analyzeSelectAllResult.getSource());
+      analyzeSelectAllResultEntity.setOuterId(analyzeSelectAllSingleResult.getOuterId());
+      analyzeSelectAllResultEntity.setIfSelectAll(analyzeSelectAllSingleResult.getIfSelectAll());
+      analyzeSelectAllResultEntityList.add(analyzeSelectAllResultEntity);
     }
 
-    estAnalyzeSelectAllResultCurder.batchInsert(estAnalyzeSelectAllResultList);
+    analyzeSelectAllResultEntityCurder.batchInsert(analyzeSelectAllResultEntityList);
   }
 
 }

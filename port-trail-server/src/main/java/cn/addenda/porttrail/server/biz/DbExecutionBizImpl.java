@@ -8,7 +8,11 @@ import cn.addenda.porttrail.common.pojo.db.dto.*;
 import cn.addenda.porttrail.common.util.CompressUtils;
 import cn.addenda.porttrail.common.util.DateUtils;
 import cn.addenda.porttrail.common.util.JdkSerializationUtils;
-import cn.addenda.porttrail.server.bo.est.*;
+import cn.addenda.porttrail.server.bo.EntryPointSnapshotEntityBo;
+import cn.addenda.porttrail.server.bo.db.PreparedStatementExecutionEntityBo;
+import cn.addenda.porttrail.server.bo.db.PreparedStatementParameterEntityBo;
+import cn.addenda.porttrail.server.bo.db.StatementExecutionEntityBo;
+import cn.addenda.porttrail.server.bo.db.StatementSqlEntityBo;
 import cn.addenda.porttrail.server.curd.*;
 import cn.addenda.porttrail.server.entity.*;
 import lombok.extern.slf4j.Slf4j;
@@ -28,22 +32,22 @@ public class DbExecutionBizImpl implements DbExecutionBiz {
   private PlatformTransactionHelper transactionHelperNew;
 
   @Autowired
-  private EstDbConfigCurder estDbConfigCurder;
+  private DbConfigEntityCurder dbConfigEntityCurder;
 
   @Autowired
-  private EstPreparedStatementExecutionCurder estPreparedStatementExecutionCurder;
+  private PreparedStatementExecutionEntityCurder preparedStatementExecutionEntityCurder;
 
   @Autowired
-  private EstPreparedStatementParameterCurder estPreparedStatementParameterCurder;
+  private PreparedStatementParameterEntityCurder preparedStatementParameterEntityCurder;
 
   @Autowired
-  private EstStatementExecutionCurder estStatementExecutionCurder;
+  private StatementExecutionEntityCurder statementExecutionEntityCurder;
 
   @Autowired
-  private EstStatementSqlCurder estStatementSqlCurder;
+  private StatementSqlEntityCurder statementSqlEntityCurder;
 
   @Autowired
-  private EstEntryPointSnapshotBiz estEntryPointSnapshotBiz;
+  private EntryPointSnapshotEntityBiz entryPointSnapshotEntityBiz;
 
   /**
    * 数据库配置数据是要落库的。
@@ -69,128 +73,128 @@ public class DbExecutionBizImpl implements DbExecutionBiz {
 
   private void insertDbConfig(DbConfigDto dbConfigDto) {
     transactionHelperNew.doTransaction(() -> {
-      EstEntryPointSnapshotBo estEntryPointSnapshotBo = estEntryPointSnapshotBiz.insert(dbConfigDto.getEntryPointSnapshot());
+      EntryPointSnapshotEntityBo entryPointSnapshotEntityBo = entryPointSnapshotEntityBiz.insert(dbConfigDto.getEntryPointSnapshot());
 
-      EstDbConfig estDbConfig = EstDbConfig.ofParam();
-      estDbConfig.setSystemCode(dbConfigDto.getServiceRuntimeInfo().getSystemCode());
-      estDbConfig.setServiceName(dbConfigDto.getServiceRuntimeInfo().getServiceName());
-      estDbConfig.setImageName(dbConfigDto.getServiceRuntimeInfo().getImageName());
-      estDbConfig.setEnv(dbConfigDto.getServiceRuntimeInfo().getEnv());
-      estDbConfig.setInstanceId(dbConfigDto.getServiceRuntimeInfo().getInstanceId());
-      estDbConfig.setDataSourcePortTrailId(dbConfigDto.getDataSourcePortTrailId());
-      estDbConfig.setConnectionPortTrailId(dbConfigDto.getConnectionPortTrailId());
-      estDbConfig.setStatementPortTrailId(dbConfigDto.getStatementPortTrailId());
-      estDbConfig.setJdbcUrl(dbConfigDto.getJdbcUrl());
-      estDbConfig.setUser(dbConfigDto.getUser());
-      estDbConfig.setPassword(dbConfigDto.getPassword());
-      estDbConfig.setDriverName(dbConfigDto.getDriverName());
-      estDbConfig.setEntryPointSnapshotId(estEntryPointSnapshotBo.getId());
-      estDbConfigCurder.insert(estDbConfig);
+      DbConfigEntity dbConfigEntity = DbConfigEntity.ofParam();
+      dbConfigEntity.setSystemCode(dbConfigDto.getServiceRuntimeInfo().getSystemCode());
+      dbConfigEntity.setServiceName(dbConfigDto.getServiceRuntimeInfo().getServiceName());
+      dbConfigEntity.setImageName(dbConfigDto.getServiceRuntimeInfo().getImageName());
+      dbConfigEntity.setEnv(dbConfigDto.getServiceRuntimeInfo().getEnv());
+      dbConfigEntity.setInstanceId(dbConfigDto.getServiceRuntimeInfo().getInstanceId());
+      dbConfigEntity.setDataSourcePortTrailId(dbConfigDto.getDataSourcePortTrailId());
+      dbConfigEntity.setConnectionPortTrailId(dbConfigDto.getConnectionPortTrailId());
+      dbConfigEntity.setStatementPortTrailId(dbConfigDto.getStatementPortTrailId());
+      dbConfigEntity.setJdbcUrl(dbConfigDto.getJdbcUrl());
+      dbConfigEntity.setUser(dbConfigDto.getUser());
+      dbConfigEntity.setPassword(dbConfigDto.getPassword());
+      dbConfigEntity.setDriverName(dbConfigDto.getDriverName());
+      dbConfigEntity.setEntryPointSnapshotId(entryPointSnapshotEntityBo.getId());
+      dbConfigEntityCurder.insert(dbConfigEntity);
     });
   }
 
   @Override
-  public EstPreparedStatementExecutionBo handlePreparedStatementExecution(PreparedStatementExecutionDto preparedStatementExecutionDto) {
+  public PreparedStatementExecutionEntityBo handlePreparedStatementExecution(PreparedStatementExecutionDto preparedStatementExecutionDto) {
     return transactionHelperNew.doTransaction(() -> {
-      EstEntryPointSnapshotBo estEntryPointSnapshotBo = estEntryPointSnapshotBiz.insert(preparedStatementExecutionDto.getEntryPointSnapshot());
+      EntryPointSnapshotEntityBo entryPointSnapshotEntityBo = entryPointSnapshotEntityBiz.insert(preparedStatementExecutionDto.getEntryPointSnapshot());
 
-      EstPreparedStatementExecution estPreparedStatementExecution = EstPreparedStatementExecution.ofParam();
-      estPreparedStatementExecution.setSystemCode(preparedStatementExecutionDto.getServiceRuntimeInfo().getSystemCode());
-      estPreparedStatementExecution.setServiceName(preparedStatementExecutionDto.getServiceRuntimeInfo().getServiceName());
-      estPreparedStatementExecution.setImageName(preparedStatementExecutionDto.getServiceRuntimeInfo().getImageName());
-      estPreparedStatementExecution.setEnv(preparedStatementExecutionDto.getServiceRuntimeInfo().getEnv());
-      estPreparedStatementExecution.setInstanceId(preparedStatementExecutionDto.getServiceRuntimeInfo().getInstanceId());
-      estPreparedStatementExecution.setDataSourcePortTrailId(preparedStatementExecutionDto.getDataSourcePortTrailId());
-      estPreparedStatementExecution.setConnectionPortTrailId(preparedStatementExecutionDto.getConnectionPortTrailId());
-      estPreparedStatementExecution.setStatementPortTrailId(preparedStatementExecutionDto.getStatementPortTrailId());
-      estPreparedStatementExecution.setParameterizedSql(preparedStatementExecutionDto.getParameterizedSql());
-      estPreparedStatementExecution.setStatementState(preparedStatementExecutionDto.getStatementState());
-      estPreparedStatementExecution.setTxId(preparedStatementExecutionDto.getTxId());
-      estPreparedStatementExecution.setStart(DateUtils.timestampToLocalDateTime(preparedStatementExecutionDto.getStart()));
-      estPreparedStatementExecution.setEnd(DateUtils.timestampToLocalDateTime(preparedStatementExecutionDto.getEnd()));
-      estPreparedStatementExecution.setCost((int) (preparedStatementExecutionDto.getEnd() - preparedStatementExecutionDto.getStart()));
-      estPreparedStatementExecution.setEntryPointSnapshotId(estEntryPointSnapshotBo.getId());
-      estPreparedStatementExecutionCurder.insert(estPreparedStatementExecution);
+      PreparedStatementExecutionEntity preparedStatementExecutionEntity = PreparedStatementExecutionEntity.ofParam();
+      preparedStatementExecutionEntity.setSystemCode(preparedStatementExecutionDto.getServiceRuntimeInfo().getSystemCode());
+      preparedStatementExecutionEntity.setServiceName(preparedStatementExecutionDto.getServiceRuntimeInfo().getServiceName());
+      preparedStatementExecutionEntity.setImageName(preparedStatementExecutionDto.getServiceRuntimeInfo().getImageName());
+      preparedStatementExecutionEntity.setEnv(preparedStatementExecutionDto.getServiceRuntimeInfo().getEnv());
+      preparedStatementExecutionEntity.setInstanceId(preparedStatementExecutionDto.getServiceRuntimeInfo().getInstanceId());
+      preparedStatementExecutionEntity.setDataSourcePortTrailId(preparedStatementExecutionDto.getDataSourcePortTrailId());
+      preparedStatementExecutionEntity.setConnectionPortTrailId(preparedStatementExecutionDto.getConnectionPortTrailId());
+      preparedStatementExecutionEntity.setStatementPortTrailId(preparedStatementExecutionDto.getStatementPortTrailId());
+      preparedStatementExecutionEntity.setParameterizedSql(preparedStatementExecutionDto.getParameterizedSql());
+      preparedStatementExecutionEntity.setStatementState(preparedStatementExecutionDto.getStatementState());
+      preparedStatementExecutionEntity.setTxId(preparedStatementExecutionDto.getTxId());
+      preparedStatementExecutionEntity.setStart(DateUtils.timestampToLocalDateTime(preparedStatementExecutionDto.getStart()));
+      preparedStatementExecutionEntity.setEnd(DateUtils.timestampToLocalDateTime(preparedStatementExecutionDto.getEnd()));
+      preparedStatementExecutionEntity.setCost((int) (preparedStatementExecutionDto.getEnd() - preparedStatementExecutionDto.getStart()));
+      preparedStatementExecutionEntity.setEntryPointSnapshotId(entryPointSnapshotEntityBo.getId());
+      preparedStatementExecutionEntityCurder.insert(preparedStatementExecutionEntity);
 
       PreparedStatementExecutionBo preparedStatementExecutionBo = new PreparedStatementExecutionBo(preparedStatementExecutionDto);
       List<PreparedStatementParameter> preparedStatementParameterList = preparedStatementExecutionBo.getPreparedStatementParameterList();
       List<PreparedStatementParameterDto> preparedStatementParameterDtoList = preparedStatementExecutionDto.getPreparedStatementParameterDtoList();
 
-      List<EstPreparedStatementParameter> estPreparedStatementParameterList = new ArrayList<>();
+      List<PreparedStatementParameterEntity> preparedStatementParameterEntityList = new ArrayList<>();
 
       for (int i = 0; i < preparedStatementParameterList.size(); i++) {
         PreparedStatementParameter preparedStatementParameter = preparedStatementParameterList.get(i);
         PreparedStatementParameterDto preparedStatementParameterDto = preparedStatementParameterDtoList.get(i);
 
-        EstPreparedStatementParameter estPreparedStatementParameter = EstPreparedStatementParameter.ofParam();
-        estPreparedStatementParameterList.add(estPreparedStatementParameter);
+        PreparedStatementParameterEntity preparedStatementParameterEntity = PreparedStatementParameterEntity.ofParam();
+        preparedStatementParameterEntityList.add(preparedStatementParameterEntity);
 
-        estPreparedStatementParameter.setPreparedStatementExecutionId(estPreparedStatementExecution.getId());
-        estPreparedStatementParameter.setParameterJson(JacksonUtils.toStr(preparedStatementParameter));
-        estPreparedStatementParameter.setParameterBytes(CompressUtils.compress(JdkSerializationUtils.serialize(preparedStatementParameterDto)));
-        estPreparedStatementParameter.setCapacity(preparedStatementParameter.getCapacity());
-        estPreparedStatementParameter.setOrderInConnection(preparedStatementParameter.getOrderInConnection());
-        estPreparedStatementParameter.setOrderInStatement(preparedStatementParameter.getOrderInStatement());
-        estPreparedStatementParameter.setPreparedStatementExecutionId(estPreparedStatementExecution.getId());
+        preparedStatementParameterEntity.setPreparedStatementExecutionId(preparedStatementExecutionEntity.getId());
+        preparedStatementParameterEntity.setParameterJson(JacksonUtils.toStr(preparedStatementParameter));
+        preparedStatementParameterEntity.setParameterBytes(CompressUtils.compress(JdkSerializationUtils.serialize(preparedStatementParameterDto)));
+        preparedStatementParameterEntity.setCapacity(preparedStatementParameter.getCapacity());
+        preparedStatementParameterEntity.setOrderInConnection(preparedStatementParameter.getOrderInConnection());
+        preparedStatementParameterEntity.setOrderInStatement(preparedStatementParameter.getOrderInStatement());
+        preparedStatementParameterEntity.setPreparedStatementExecutionId(preparedStatementExecutionEntity.getId());
       }
 
-      estPreparedStatementParameterCurder.batchInsert(estPreparedStatementParameterList);
+      preparedStatementParameterEntityCurder.batchInsert(preparedStatementParameterEntityList);
 
 
-      List<EstPreparedStatementParameterBo> estPreparedStatementParameterBoList = estPreparedStatementParameterList.stream()
-              .map(EstPreparedStatementParameterBo::new)
+      List<PreparedStatementParameterEntityBo> preparedStatementParameterEntityBoList = preparedStatementParameterEntityList.stream()
+              .map(PreparedStatementParameterEntityBo::new)
               .collect(Collectors.toList());
 
-      EstPreparedStatementExecutionBo result = new EstPreparedStatementExecutionBo(estPreparedStatementExecution);
-      result.setEstEntryPointSnapshotBo(estEntryPointSnapshotBo);
-      result.setEstPreparedStatementParameterBoList(estPreparedStatementParameterBoList);
+      PreparedStatementExecutionEntityBo result = new PreparedStatementExecutionEntityBo(preparedStatementExecutionEntity);
+      result.setEntryPointSnapshotEntityBo(entryPointSnapshotEntityBo);
+      result.setPreparedStatementParameterEntityBoList(preparedStatementParameterEntityBoList);
 
       return result;
     });
   }
 
   @Override
-  public EstStatementExecutionBo handleStatementExecution(StatementExecutionDto statementExecutionDto) {
+  public StatementExecutionEntityBo handleStatementExecution(StatementExecutionDto statementExecutionDto) {
     return transactionHelperNew.doTransaction(() -> {
-      EstEntryPointSnapshotBo estEntryPointSnapshotBo = estEntryPointSnapshotBiz.insert(statementExecutionDto.getEntryPointSnapshot());
+      EntryPointSnapshotEntityBo entryPointSnapshotEntityBo = entryPointSnapshotEntityBiz.insert(statementExecutionDto.getEntryPointSnapshot());
 
-      EstStatementExecution estStatementExecution = EstStatementExecution.ofParam();
-      estStatementExecution.setSystemCode(statementExecutionDto.getServiceRuntimeInfo().getSystemCode());
-      estStatementExecution.setServiceName(statementExecutionDto.getServiceRuntimeInfo().getServiceName());
-      estStatementExecution.setImageName(statementExecutionDto.getServiceRuntimeInfo().getImageName());
-      estStatementExecution.setEnv(statementExecutionDto.getServiceRuntimeInfo().getEnv());
-      estStatementExecution.setInstanceId(statementExecutionDto.getServiceRuntimeInfo().getInstanceId());
-      estStatementExecution.setDataSourcePortTrailId(statementExecutionDto.getDataSourcePortTrailId());
-      estStatementExecution.setConnectionPortTrailId(statementExecutionDto.getConnectionPortTrailId());
-      estStatementExecution.setStatementPortTrailId(statementExecutionDto.getStatementPortTrailId());
-      estStatementExecution.setStatementState(statementExecutionDto.getStatementState());
-      estStatementExecution.setTxId(statementExecutionDto.getTxId());
-      estStatementExecution.setStart(DateUtils.timestampToLocalDateTime(statementExecutionDto.getStart()));
-      estStatementExecution.setEnd(DateUtils.timestampToLocalDateTime(statementExecutionDto.getEnd()));
-      estStatementExecution.setCost((int) (statementExecutionDto.getEnd() - statementExecutionDto.getStart()));
-      estStatementExecution.setEntryPointSnapshotId(estEntryPointSnapshotBo.getId());
-      estStatementExecutionCurder.insert(estStatementExecution);
+      StatementExecutionEntity statementExecutionEntity = StatementExecutionEntity.ofParam();
+      statementExecutionEntity.setSystemCode(statementExecutionDto.getServiceRuntimeInfo().getSystemCode());
+      statementExecutionEntity.setServiceName(statementExecutionDto.getServiceRuntimeInfo().getServiceName());
+      statementExecutionEntity.setImageName(statementExecutionDto.getServiceRuntimeInfo().getImageName());
+      statementExecutionEntity.setEnv(statementExecutionDto.getServiceRuntimeInfo().getEnv());
+      statementExecutionEntity.setInstanceId(statementExecutionDto.getServiceRuntimeInfo().getInstanceId());
+      statementExecutionEntity.setDataSourcePortTrailId(statementExecutionDto.getDataSourcePortTrailId());
+      statementExecutionEntity.setConnectionPortTrailId(statementExecutionDto.getConnectionPortTrailId());
+      statementExecutionEntity.setStatementPortTrailId(statementExecutionDto.getStatementPortTrailId());
+      statementExecutionEntity.setStatementState(statementExecutionDto.getStatementState());
+      statementExecutionEntity.setTxId(statementExecutionDto.getTxId());
+      statementExecutionEntity.setStart(DateUtils.timestampToLocalDateTime(statementExecutionDto.getStart()));
+      statementExecutionEntity.setEnd(DateUtils.timestampToLocalDateTime(statementExecutionDto.getEnd()));
+      statementExecutionEntity.setCost((int) (statementExecutionDto.getEnd() - statementExecutionDto.getStart()));
+      statementExecutionEntity.setEntryPointSnapshotId(entryPointSnapshotEntityBo.getId());
+      statementExecutionEntityCurder.insert(statementExecutionEntity);
 
       List<StatementSqlDto> statementSqlDtoList = statementExecutionDto.getStatementSqlDtoList();
-      List<EstStatementSql> estStatementSqlList = new ArrayList<>();
+      List<StatementSqlEntity> statementSqlEntityList = new ArrayList<>();
       for (StatementSqlDto statementSqlDto : statementSqlDtoList) {
-        EstStatementSql estStatementSql = EstStatementSql.ofParam();
-        estStatementSqlList.add(estStatementSql);
-        estStatementSql.setStatementExecutionId(estStatementExecution.getId());
-        estStatementSql.setSql(statementSqlDto.getSql());
-        estStatementSql.setOrderInStatement(statementSqlDto.getOrderInStatement());
-        estStatementSql.setOrderInConnection(statementSqlDto.getOrderInConnection());
+        StatementSqlEntity statementSqlEntity = StatementSqlEntity.ofParam();
+        statementSqlEntityList.add(statementSqlEntity);
+        statementSqlEntity.setStatementExecutionId(statementExecutionEntity.getId());
+        statementSqlEntity.setSql(statementSqlDto.getSql());
+        statementSqlEntity.setOrderInStatement(statementSqlDto.getOrderInStatement());
+        statementSqlEntity.setOrderInConnection(statementSqlDto.getOrderInConnection());
       }
 
-      estStatementSqlCurder.batchInsert(estStatementSqlList);
+      statementSqlEntityCurder.batchInsert(statementSqlEntityList);
 
-      List<EstStatementSqlBo> estStatementSqlBoList = estStatementSqlList.stream()
-              .map(EstStatementSqlBo::new)
+      List<StatementSqlEntityBo> statementSqlEntityBoList = statementSqlEntityList.stream()
+              .map(StatementSqlEntityBo::new)
               .collect(Collectors.toList());
 
-      EstStatementExecutionBo result = new EstStatementExecutionBo(estStatementExecution);
-      result.setEstEntryPointSnapshotBo(estEntryPointSnapshotBo);
-      result.setEstStatementSqlBoList(estStatementSqlBoList);
+      StatementExecutionEntityBo result = new StatementExecutionEntityBo(statementExecutionEntity);
+      result.setEntryPointSnapshotEntityBo(entryPointSnapshotEntityBo);
+      result.setStatementSqlEntityBoList(statementSqlEntityBoList);
 
       return result;
     });

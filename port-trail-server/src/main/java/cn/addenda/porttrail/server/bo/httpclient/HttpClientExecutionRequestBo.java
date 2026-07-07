@@ -1,7 +1,7 @@
 package cn.addenda.porttrail.server.bo.httpclient;
 
-import cn.addenda.porttrail.server.bo.est.EstEntryPointSnapshotBo;
-import cn.addenda.porttrail.server.entity.HttpClientExecutionRequest;
+import cn.addenda.porttrail.server.bo.EntryPointSnapshotEntityBo;
+import cn.addenda.porttrail.server.entity.HttpClientExecutionRequestEntity;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -9,42 +9,42 @@ import lombok.ToString;
 @Setter
 @Getter
 @ToString
-public class HttpClientExecutionRequestBo extends HttpClientExecutionRequest {
+public class HttpClientExecutionRequestBo extends HttpClientExecutionRequestEntity {
 
-  private EstEntryPointSnapshotBo estEntryPointSnapshotBo;
+  private EntryPointSnapshotEntityBo entryPointSnapshotEntityBo;
 
-  public HttpClientExecutionRequestBo(HttpClientExecutionRequest httpClientExecutionRequest) {
-    this.setId(httpClientExecutionRequest.getId());
-    this.setSystemCode(httpClientExecutionRequest.getSystemCode());
-    this.setServiceName(httpClientExecutionRequest.getServiceName());
-    this.setImageName(httpClientExecutionRequest.getImageName());
-    this.setEnv(httpClientExecutionRequest.getEnv());
-    this.setInstanceId(httpClientExecutionRequest.getInstanceId());
-    this.setExecutionId(httpClientExecutionRequest.getExecutionId());
-    this.setClientName(httpClientExecutionRequest.getClientName());
-    this.setVersion(httpClientExecutionRequest.getVersion());
-    this.setScheme(httpClientExecutionRequest.getScheme());
-    this.setMethod(httpClientExecutionRequest.getMethod());
-    this.setUri(httpClientExecutionRequest.getUri());
-    this.setQueryString(httpClientExecutionRequest.getQueryString());
-    this.setContentType(httpClientExecutionRequest.getContentType());
-    this.setCharsetEncoding(httpClientExecutionRequest.getCharsetEncoding());
-    this.setDateTime(httpClientExecutionRequest.getDateTime());
-    this.setContentLength(httpClientExecutionRequest.getContentLength());
-    this.setLocale(httpClientExecutionRequest.getLocale());
-    this.setHeaders(httpClientExecutionRequest.getHeaders());
-    this.setBody(httpClientExecutionRequest.getBody());
-    this.setBodyText(httpClientExecutionRequest.getBodyText());
-    this.setCurl(httpClientExecutionRequest.getCurl());
-    this.setEntryPointSnapshotId(httpClientExecutionRequest.getEntryPointSnapshotId());
-    this.setCreator(httpClientExecutionRequest.getCreator());
-    this.setCreatorName(httpClientExecutionRequest.getCreatorName());
-    this.setCreateDt(httpClientExecutionRequest.getCreateDt());
-    this.setModifier(httpClientExecutionRequest.getModifier());
-    this.setModifierName(httpClientExecutionRequest.getModifierName());
-    this.setModifyDt(httpClientExecutionRequest.getModifyDt());
-    this.setDeleteFlag(httpClientExecutionRequest.getDeleteFlag());
-    this.setDeleteDt(httpClientExecutionRequest.getDeleteDt());
+  public HttpClientExecutionRequestBo(HttpClientExecutionRequestEntity httpClientExecutionRequestEntity) {
+    this.setId(httpClientExecutionRequestEntity.getId());
+    this.setSystemCode(httpClientExecutionRequestEntity.getSystemCode());
+    this.setServiceName(httpClientExecutionRequestEntity.getServiceName());
+    this.setImageName(httpClientExecutionRequestEntity.getImageName());
+    this.setEnv(httpClientExecutionRequestEntity.getEnv());
+    this.setInstanceId(httpClientExecutionRequestEntity.getInstanceId());
+    this.setExecutionId(httpClientExecutionRequestEntity.getExecutionId());
+    this.setClientName(httpClientExecutionRequestEntity.getClientName());
+    this.setVersion(httpClientExecutionRequestEntity.getVersion());
+    this.setScheme(httpClientExecutionRequestEntity.getScheme());
+    this.setMethod(httpClientExecutionRequestEntity.getMethod());
+    this.setUri(httpClientExecutionRequestEntity.getUri());
+    this.setQueryString(httpClientExecutionRequestEntity.getQueryString());
+    this.setContentType(httpClientExecutionRequestEntity.getContentType());
+    this.setCharsetEncoding(httpClientExecutionRequestEntity.getCharsetEncoding());
+    this.setDateTime(httpClientExecutionRequestEntity.getDateTime());
+    this.setContentLength(httpClientExecutionRequestEntity.getContentLength());
+    this.setLocale(httpClientExecutionRequestEntity.getLocale());
+    this.setHeaders(httpClientExecutionRequestEntity.getHeaders());
+    this.setBody(httpClientExecutionRequestEntity.getBody());
+    this.setBodyText(httpClientExecutionRequestEntity.getBodyText());
+    this.setCurl(httpClientExecutionRequestEntity.getCurl());
+    this.setEntryPointSnapshotId(httpClientExecutionRequestEntity.getEntryPointSnapshotId());
+    this.setCreator(httpClientExecutionRequestEntity.getCreator());
+    this.setCreatorName(httpClientExecutionRequestEntity.getCreatorName());
+    this.setCreateDt(httpClientExecutionRequestEntity.getCreateDt());
+    this.setModifier(httpClientExecutionRequestEntity.getModifier());
+    this.setModifierName(httpClientExecutionRequestEntity.getModifierName());
+    this.setModifyDt(httpClientExecutionRequestEntity.getModifyDt());
+    this.setDeleteFlag(httpClientExecutionRequestEntity.getDeleteFlag());
+    this.setDeleteDt(httpClientExecutionRequestEntity.getDeleteDt());
   }
 
 }
