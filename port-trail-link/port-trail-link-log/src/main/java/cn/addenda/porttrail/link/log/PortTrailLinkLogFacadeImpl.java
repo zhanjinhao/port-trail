@@ -96,7 +96,7 @@ public class PortTrailLinkLogFacadeImpl implements LogFacade {
 
   @Override
   public boolean isInfoEnabled() {
-    return isInfoEnabled();
+    return logger.isInfoEnabled();
   }
 
   @Override
@@ -126,7 +126,7 @@ public class PortTrailLinkLogFacadeImpl implements LogFacade {
 
   @Override
   public boolean isWarnEnabled() {
-    return isWarnEnabled();
+    return logger.isWarnEnabled();
   }
 
   @Override
@@ -156,7 +156,7 @@ public class PortTrailLinkLogFacadeImpl implements LogFacade {
 
   @Override
   public boolean isErrorEnabled() {
-    return isErrorEnabled();
+    return logger.isErrorEnabled();
   }
 
   @Override
