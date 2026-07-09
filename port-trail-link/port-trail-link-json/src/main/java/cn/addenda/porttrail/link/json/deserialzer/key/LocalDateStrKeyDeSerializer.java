@@ -18,7 +18,7 @@ public class LocalDateStrKeyDeSerializer extends KeyDeserializer {
     if (s == null || s.isEmpty() || "null".equals(s)) {
       return null;
     }
-    if (StringUtils.checkIsDigit(s) && s.length() > 8) {
+    if (StringUtils.isStrictlyNumeric(s) && s.length() > 8) {
       return DateUtils.timestampToLocalDateTime(Long.parseLong(s)).toLocalDate();
     }
     return DateUtils.parseLd(s, DateUtils.yMd_FORMATTER);

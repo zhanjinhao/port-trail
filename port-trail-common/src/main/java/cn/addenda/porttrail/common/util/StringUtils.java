@@ -29,21 +29,16 @@ public class StringUtils {
     }
 
     StringBuilder result = new StringBuilder();
-    for (int i = 0; i < values.length; i++) {
-      if (i == 0) {
-        result.append(!hasText(values[i]) ? "" : values[i]);
-      } else {
-        result.append(!hasText(values[i]) ? "" : separator + values[i]);
+    for (String value : values) {
+      if (!hasText(value)) {
+        continue;
       }
+      if (result.length() > 0) {
+        result.append(separator);
+      }
+      result.append(value);
     }
     return result.toString();
-  }
-
-  public static boolean checkIsDigit(String piece) {
-    if (!hasText(piece)) {
-      return false;
-    }
-    return piece.matches("\\d+");
   }
 
   public static String discardNull(String str) {
@@ -61,7 +56,7 @@ public class StringUtils {
     return str != null && !str.isEmpty() && containsText(str);
   }
 
-  public static boolean containsText(CharSequence str) {
+  private static boolean containsText(CharSequence str) {
     int strLen = str.length();
 
     for (int i = 0; i < strLen; ++i) {
