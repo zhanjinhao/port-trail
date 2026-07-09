@@ -34,8 +34,10 @@ public class JVMShutdown {
     });
   }
 
-  public synchronized void addJvmShutdownCallback(JVMShutdownCallback jvmShutdownCallback) {
-    jvmShutdownCallbackList.add(jvmShutdownCallback);
+  public void addJvmShutdownCallback(JVMShutdownCallback jvmShutdownCallback) {
+    synchronized (JVMShutdown.class) {
+      jvmShutdownCallbackList.add(jvmShutdownCallback);
+    }
   }
 
 }

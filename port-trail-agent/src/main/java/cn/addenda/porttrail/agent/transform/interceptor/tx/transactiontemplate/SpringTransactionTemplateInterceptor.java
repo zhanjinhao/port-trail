@@ -6,6 +6,7 @@ import cn.addenda.porttrail.agent.transform.interceptor.tx.AbstractTxEntryPointI
 import cn.addenda.porttrail.common.entrypoint.EntryPoint;
 import cn.addenda.porttrail.common.entrypoint.EntryPointType;
 import cn.addenda.porttrail.infrastructure.log.PortTrailLogger;
+import cn.addenda.porttrail.stacktrace.IdentifierMatherFactory;
 import cn.addenda.porttrail.stacktrace.StackTraceUtils;
 import net.bytebuddy.implementation.bind.annotation.*;
 
@@ -39,9 +40,9 @@ public class SpringTransactionTemplateInterceptor extends AbstractTxEntryPointIn
   ) throws Exception {
     log.info("TargetObj is [{}] and it's classloader is [{}].", targetObj, targetObj.getClass().getClassLoader());
 
-    // todo test
-
-    String callerInfo = StackTraceUtils.getCallerInfo(false, false, false, TRANSACTION_TEMPLATE_NAME);
+    String callerInfo = StackTraceUtils.getCallerInfo(
+            false, false, false,
+            IdentifierMatherFactory.withHash(TRANSACTION_TEMPLATE_NAME));
     return callWithEntryPoint(callerInfo, zuper);
   }
 
