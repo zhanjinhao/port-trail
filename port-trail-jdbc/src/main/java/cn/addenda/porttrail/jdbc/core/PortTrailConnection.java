@@ -278,6 +278,7 @@ public class PortTrailConnection extends AbstractPortTrailConnection implements 
   private void closeAllPortTrailPreparedStatement() throws SQLException {
     synchronized (abstractStatementExecutionBoQueue) {
       Set<Map.Entry<String, PortTrailPreparedStatement>> entries = new HashSet<>(portTrailPreparedStatementMap.entrySet());
+      SQLException firstException = null;
       for (Map.Entry<String, PortTrailPreparedStatement> entry : entries) {
         PortTrailPreparedStatement portTrailPreparedStatement = entry.getValue();
         try {
@@ -285,8 +286,15 @@ public class PortTrailConnection extends AbstractPortTrailConnection implements 
           portTrailPreparedStatement.closePortTrail();
         } catch (SQLException e) {
           portTrailLogger.error("exception occurred when {} close, {}.", PortTrailPreparedStatement.class, portTrailPreparedStatement, e);
-          throw e;
+          if (firstException == null) {
+            firstException = e;
+          } else {
+            firstException.addSuppressed(e);
+          }
         }
+      }
+      if (firstException != null) {
+        throw firstException;
       }
     }
   }
@@ -308,6 +316,7 @@ public class PortTrailConnection extends AbstractPortTrailConnection implements 
   private void closeAllPortTrailStatement() throws SQLException {
     synchronized (abstractStatementExecutionBoQueue) {
       Set<Map.Entry<String, PortTrailStatement>> entries = new HashSet<>(portTrailStatementMap.entrySet());
+      SQLException firstException = null;
       for (Map.Entry<String, PortTrailStatement> entry : entries) {
         PortTrailStatement portTrailStatement = entry.getValue();
         try {
@@ -315,8 +324,15 @@ public class PortTrailConnection extends AbstractPortTrailConnection implements 
           portTrailStatement.closePortTrail();
         } catch (SQLException e) {
           portTrailLogger.error("exception occurred when {} close, {}.", PortTrailStatement.class, portTrailStatement, e);
-          throw e;
+          if (firstException == null) {
+            firstException = e;
+          } else {
+            firstException.addSuppressed(e);
+          }
         }
+      }
+      if (firstException != null) {
+        throw firstException;
       }
     }
   }
