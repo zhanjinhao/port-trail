@@ -170,6 +170,7 @@ public class PortTrailHttpRequestInterceptor extends AbstractPortTrailHttpInterc
       } else if (MediaType.ifRequestMultipartFormContentType(contentType)) {
         httpClientRequestBo.setContentLength(AbstractHttpClientExecution.UNKNOWN_CONTENT_LENGTH);
         httpClientRequestBo.setBody(HttpClient4MultipartFormVisitor.extractMultipartFormRequestBody(entity));
+      } else if (MediaType.ifRequestBinaryContentType(contentType)) {
         httpClientRequestBo.setContentLength(AbstractHttpClientExecution.UNKNOWN_CONTENT_LENGTH);
         httpClientRequestBo.setBody(HttpClientRequestBo.BODY_BYTE_ARRAY);
       }
