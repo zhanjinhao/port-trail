@@ -269,7 +269,7 @@ public class PortTrailConnection extends AbstractPortTrailConnection implements 
     }
   }
 
-  public void removePortTrailStatement(PortTrailPreparedStatement portTrailPreparedStatement) {
+  public void removePortTrailPreparedStatement(PortTrailPreparedStatement portTrailPreparedStatement) {
     synchronized (abstractStatementExecutionBoQueue) {
       portTrailPreparedStatementMap.remove(portTrailPreparedStatement.getPortTrailId());
     }

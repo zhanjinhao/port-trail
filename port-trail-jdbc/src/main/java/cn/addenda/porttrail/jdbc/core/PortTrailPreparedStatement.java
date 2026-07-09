@@ -406,7 +406,7 @@ public class PortTrailPreparedStatement
   public void closePortTrail() throws SQLException {
     // execute的数据，已经写入executionBoQueue了，随着事务的执行会写出去。没有execute的数据会丢失。
     portTrailStatementSqlAttachment.clearBatch();
-    getPortTrailConnection().removePortTrailStatement(this);
+    getPortTrailConnection().removePortTrailPreparedStatement(this);
   }
 
   @Override
