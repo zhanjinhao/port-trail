@@ -91,13 +91,15 @@ public class AbstractStatementExecutionBoQueue {
   }
 
   public void reset() {
-    Iterator<AbstractStatementExecutionBo> iterator = abstractStatementExecutionBoList.iterator();
-    // 正常情况下，这段循环是进不去的
-    while (iterator.hasNext()) {
-      AbstractStatementExecutionBo abstractStatementExecutionBo = iterator.next();
-      abstractStatementExecutionBo.setStatementState(AbstractStatementExecutionBo.STATEMENT_STATE_UNKNOWN);
-      write(abstractStatementExecutionBo);
-      iterator.remove();
+    synchronized (this) {
+      Iterator<AbstractStatementExecutionBo> iterator = abstractStatementExecutionBoList.iterator();
+      // 正常情况下，这段循环是进不去的
+      while (iterator.hasNext()) {
+        AbstractStatementExecutionBo abstractStatementExecutionBo = iterator.next();
+        abstractStatementExecutionBo.setStatementState(AbstractStatementExecutionBo.STATEMENT_STATE_UNKNOWN);
+        write(abstractStatementExecutionBo);
+        iterator.remove();
+      }
     }
   }
 
