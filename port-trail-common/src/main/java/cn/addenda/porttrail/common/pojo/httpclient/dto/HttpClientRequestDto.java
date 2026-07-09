@@ -107,7 +107,7 @@ public class HttpClientRequestDto extends AbstractHttpClientDto {
     this.setCharsetEncoding(httpClientRequestBo.getCharsetEncoding());
     this.setHeaderMap(httpClientRequestBo.getHeaderMap());
     this.setDatetime(httpClientRequestBo.getDatetime());
-    this.setAllContentLength(httpClientRequestBo.getContentLength());
+    this.setAllContentLength(httpClientRequestBo.getAllContentLength());
     this.setContentLength(httpClientRequestBo.getContentLength());
     this.setLocale(
             Optional.ofNullable(httpClientRequestBo.getLocale())

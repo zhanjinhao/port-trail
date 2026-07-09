@@ -50,6 +50,9 @@ public class HttpClientRequestBo extends AbstractHttpClientExecution {
   private long datetime;
 
   // HttpMessage.getFirstHeader("Content-Length")
+  private int allContentLength;
+
+  // BODY里的长度
   private int contentLength;
 
   // HttpMessage.getFirstHeader("Accept-Language")
@@ -99,7 +102,7 @@ public class HttpClientRequestBo extends AbstractHttpClientExecution {
     this.setCharsetEncoding(httpClientRequestDto.getCharsetEncoding());
     this.setHeaderMap(httpClientRequestDto.getHeaderMap());
     this.setDatetime(httpClientRequestDto.getDatetime());
-    this.setContentLength(httpClientRequestDto.getAllContentLength());
+    this.setAllContentLength(httpClientRequestDto.getAllContentLength());
     this.setContentLength(httpClientRequestDto.getContentLength());
     this.setLocale(
             Optional.ofNullable(httpClientRequestDto.getLocale())

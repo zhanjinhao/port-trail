@@ -5,7 +5,7 @@ import cn.addenda.porttrail.common.entrypoint.EntryPointSnapshot;
 import java.nio.charset.StandardCharsets;
 
 public abstract class AbstractHttpClientExecution implements HttpClientExecution {
-
+  public static final int UNKNOWN_CONTENT_LENGTH = -2;
   public static final String UNSUPPORTED_CONTENT_TYPE = "@UNSUPPORTED#_$CONTENT%_^TYPE&";
   public static final String UNSUPPORTED_CHARSET_ENCODING = "@UNSUPPORTED#_$CHARSET%_^ENCODING&";
   public static final String BODY_EMPTY = "@BODY#_^EMPTY&";

@@ -68,7 +68,7 @@ public class PortTrailHttpRequestInterceptor extends AbstractPortTrailHttpInterc
     Header contentLengthHeader = request.getFirstHeader(HTTP.CONTENT_LEN);
     if (contentLengthHeader != null) {
       try {
-        httpClientRequestBo.setContentLength(Integer.parseInt(contentLengthHeader.getValue()));
+        httpClientRequestBo.setAllContentLength(Integer.parseInt(contentLengthHeader.getValue()));
       } catch (NumberFormatException ignored) {
       }
     }
@@ -149,20 +149,25 @@ public class PortTrailHttpRequestInterceptor extends AbstractPortTrailHttpInterc
       // 如果没有content-type，按text处理，如果报错就设置为UNSUPPORTED_CONTENT_TYPE
       try {
         byte[] bodyBytes = EntityUtils.toByteArray(request.getEntity());
+        httpClientRequestBo.setContentLength(bodyBytes.length);
         httpClientRequestBo.setBody(extractTextRequestBody(bodyBytes, null, contentEncoding, charsetEncoding, executionId, true));
       } catch (Throwable t) {
+        httpClientRequestBo.setContentLength(AbstractHttpClientExecution.UNKNOWN_CONTENT_LENGTH);
         httpClientRequestBo.setBody(AbstractHttpClientExecution.UNSUPPORTED_CONTENT_TYPE);
       }
     } else if (MediaType.ifRequestContentType(contentType)) {
       if (MediaType.ifRequestTextContentType(contentType)) {
         byte[] bodyBytes = EntityUtils.toByteArray(request.getEntity());
+        httpClientRequestBo.setContentLength(bodyBytes.length);
         httpClientRequestBo.setBody(extractTextRequestBody(bodyBytes, contentType, contentEncoding, charsetEncoding, executionId, false));
       } else if (MediaType.ifRequestMultipartFormContentType(contentType)) {
+        httpClientRequestBo.setContentLength(AbstractHttpClientExecution.UNKNOWN_CONTENT_LENGTH);
         httpClientRequestBo.setBody(HttpClient4MultipartFormVisitor.extractMultipartFormRequestBody(entity));
-      } else if (MediaType.ifRequestBinaryContentType(contentType)) {
+        httpClientRequestBo.setContentLength(AbstractHttpClientExecution.UNKNOWN_CONTENT_LENGTH);
         httpClientRequestBo.setBody(HttpClientRequestBo.BODY_BYTE_ARRAY);
       }
     } else {
+      httpClientRequestBo.setContentLength(AbstractHttpClientExecution.UNKNOWN_CONTENT_LENGTH);
       httpClientRequestBo.setBody(AbstractHttpClientExecution.UNSUPPORTED_CONTENT_TYPE);
     }
   }
