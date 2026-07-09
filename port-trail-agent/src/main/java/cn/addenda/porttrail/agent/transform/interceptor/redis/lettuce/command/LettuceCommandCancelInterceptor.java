@@ -25,7 +25,7 @@ public class LettuceCommandCancelInterceptor implements Interceptor {
   private static final AgentRedisWriter agentRedisWriter = AgentRedisWriter.getInstance();
 
   private static final PortTrailLogger log =
-          AgentPortTrailLoggerFactory.getInstance().getPortTrailLogger(LettuceCommandCompleteExceptionallyInterceptor.class);
+          AgentPortTrailLoggerFactory.getInstance().getPortTrailLogger(LettuceCommandCancelInterceptor.class);
 
   @RuntimeType
   public Object intercept(
