@@ -147,8 +147,10 @@ public class PortTrailHttpResponseInterceptor extends AbstractPortTrailHttpInter
   private String extractBinaryResponseBody(HttpResponse response, String charsetEncoding) {
     // 解析 ，获取attachment的filename
     Header contentTypeHeader = response.getFirstHeader("Content-Disposition");
+    if (contentTypeHeader == null) {
+      return HttpClientResponseBo.UNKNOWN_FILENAME;
+    }
     String header = contentTypeHeader.getValue();
-
     if (header == null || header.isEmpty()) {
       return HttpClientResponseBo.UNKNOWN_FILENAME;
     } else {
