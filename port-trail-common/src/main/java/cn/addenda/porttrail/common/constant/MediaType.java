@@ -121,7 +121,7 @@ public class MediaType {
             || StringUtils.startsWithIgnoreCase(contentType, MediaType.TEXT_MARKDOWN_VALUE)
             || StringUtils.startsWithIgnoreCase(contentType, MediaType.APPLICATION_SOAP_XML)
             || StringUtils.startsWithIgnoreCase(contentType, MediaType.APPLICATION_SVG_XML)
-            || ifRequestFormUrlencodedContentType(contentType);
+            || StringUtils.startsWithIgnoreCase(contentType, MediaType.APPLICATION_FORM_URLENCODED_VALUE);
   }
 
   public static boolean ifResponseBinaryContentType(String contentType) {
