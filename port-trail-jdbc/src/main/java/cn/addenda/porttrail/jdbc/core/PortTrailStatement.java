@@ -35,8 +35,11 @@ public class PortTrailStatement extends AbstractPortTrailStatement<Statement, Po
 
   @Override
   public void close() throws SQLException {
-    delegate.close();
-    closePortTrail();
+    try {
+      delegate.close();
+    } finally {
+      closePortTrail();
+    }
   }
 
   @Override

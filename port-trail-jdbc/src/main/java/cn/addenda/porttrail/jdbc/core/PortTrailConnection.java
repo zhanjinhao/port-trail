@@ -98,8 +98,12 @@ public class PortTrailConnection extends AbstractPortTrailConnection implements 
 
   @Override
   public void close() throws SQLException {
-    connection.close();
-    closePortTrail();
+    try {
+      connection.close();
+    } finally {
+      TxContext.remove();
+      closePortTrail();
+    }
   }
 
   @Override

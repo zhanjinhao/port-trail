@@ -398,8 +398,11 @@ public class PortTrailPreparedStatement
 
   @Override
   public void close() throws SQLException {
-    delegate.close();
-    closePortTrail();
+    try {
+      delegate.close();
+    } finally {
+      closePortTrail();
+    }
   }
 
   @Override
