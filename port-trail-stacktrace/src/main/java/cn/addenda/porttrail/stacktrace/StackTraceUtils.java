@@ -10,6 +10,7 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.*;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
@@ -21,6 +22,8 @@ public class StackTraceUtils {
 
   @Getter
   private static final Set<IdentifierMather> defaultExcludeSet;
+
+  private static final Pattern ANONYMOUS_INNER_CLASS_PATTERN = Pattern.compile("\\$\\d+");
 
   private static final String EXCLUDED_PATH = "META-INF/port-trail-stacktrace.excluded";
 
@@ -134,11 +137,11 @@ public class StackTraceUtils {
     }
     for (StackTraceElement stackTraceElement : stackTraceElements) {
       String methodName = stackTraceElement.getMethodName();
-      if (ifExcludeLambda && methodName.matches(".*lambda\\$.*")) {
+      if (ifExcludeLambda && methodName.contains("lambda$")) {
         continue;
       }
       String className = stackTraceElement.getClassName();
-      if (ifExcludeAnonymousInnerClass && className.matches(".*\\$\\d+.*")) {
+      if (ifExcludeAnonymousInnerClass && ANONYMOUS_INNER_CLASS_PATTERN.matcher(className).find()) {
         continue;
       }
       boolean flag = IdentifierMatherFactory.match(excludeSet, stackTraceElement);
