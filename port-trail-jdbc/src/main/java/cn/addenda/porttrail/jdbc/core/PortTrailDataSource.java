@@ -137,6 +137,7 @@ public class PortTrailDataSource extends WrapperAdapter implements DataSource, P
     // 使用 entrySet 的副本进行遍历，避免并发修改异常
     Set<Map.Entry<String, PortTrailConnection>> entries = new HashSet<>(portTrailConnectionMap.entrySet());
 
+    SQLException firstException = null;
     for (Map.Entry<String, PortTrailConnection> entry : entries) {
       PortTrailConnection portTrailConnection = entry.getValue();
       try {
@@ -144,8 +145,15 @@ public class PortTrailDataSource extends WrapperAdapter implements DataSource, P
         portTrailConnection.closePortTrail();
       } catch (SQLException e) {
         portTrailLogger.error("exception occurred when {} close, {}.", PortTrailConnection.class, portTrailConnection, e);
-        throw e;
+        if (firstException == null) {
+          firstException = e;
+        } else {
+          firstException.addSuppressed(e);
+        }
       }
+    }
+    if (firstException != null) {
+      throw firstException;
     }
   }
 
