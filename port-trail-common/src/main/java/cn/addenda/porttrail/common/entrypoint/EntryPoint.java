@@ -22,7 +22,7 @@ public class EntryPoint implements Serializable {
    */
   private String detail;
   /**
-   * 同一个实例下entryId不会相同
+   * 同一个JVM实例下entryId不会相同
    */
   private long entryId;
 
