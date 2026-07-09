@@ -39,8 +39,11 @@ public class CompressUtils {
       while (!inflater.finished()) {
         byte[] buffer = new byte[2048];
         int count = inflater.inflate(buffer);
-        if (count <= 0)
-          break;
+        if (count <= 0) {
+          throw new PortTrailException(
+                  String.format("Deflate解压异常: 数据不完整, inflater.finished=%s, inflater.needsInput=%s, inflater.needsDictionary=%s",
+                          inflater.finished(), inflater.needsInput(), inflater.needsDictionary()));
+        }
         out.write(buffer, 0, count);
       }
     } catch (DataFormatException e) {
