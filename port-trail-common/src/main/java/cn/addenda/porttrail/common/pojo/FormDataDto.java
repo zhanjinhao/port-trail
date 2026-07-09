@@ -34,8 +34,10 @@ public class FormDataDto implements Serializable {
     this.setName(formData.getName());
     this.setSize(formData.getSize());
     Map<String, List<String>> headerMap2 = new HashMap<>();
-    for (Map.Entry<String, List<String>> entry : formData.getHeaderMap().entrySet()) {
-      headerMap2.put(entry.getKey(), Optional.ofNullable(entry.getValue()).map(ArrayList::new).orElse(null));
+    if (formData.getHeaderMap() != null) {
+      for (Map.Entry<String, List<String>> entry : formData.getHeaderMap().entrySet()) {
+        headerMap2.put(entry.getKey(), Optional.ofNullable(entry.getValue()).map(ArrayList::new).orElse(null));
+      }
     }
     this.setHeaderMap(headerMap2);
     this.setSubmittedFileName(formData.getSubmittedFileName());
