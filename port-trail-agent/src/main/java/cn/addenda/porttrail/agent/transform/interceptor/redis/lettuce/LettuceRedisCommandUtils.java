@@ -80,12 +80,23 @@ public class LettuceRedisCommandUtils {
       } catch (PortTrailException e) {
         // UTF-8 解码
         CharsetDecoder decoder = UTF8_DECODER.get();
-        return decoder.decode(ByteBuffer.wrap(bytes)).toString();
+        try {
+          return decoder.decode(ByteBuffer.wrap(bytes)).toString();
+        } catch (CharacterCodingException s) {
+          decoder.reset();
+          throw s;
+        }
       }
     }
     // UTF-8 解码
     CharsetDecoder decoder = UTF8_DECODER.get();
-    return decoder.decode(ByteBuffer.wrap(bytes)).toString();
+    decoder.reset();
+    try {
+      return decoder.decode(ByteBuffer.wrap(bytes)).toString();
+    } catch (CharacterCodingException s) {
+      decoder.reset();
+      throw s;
+    }
   }
 
 }
