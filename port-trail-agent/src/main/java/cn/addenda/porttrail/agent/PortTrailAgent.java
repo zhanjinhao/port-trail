@@ -42,6 +42,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.jar.JarFile;
 
+import static cn.addenda.porttrail.agent.transform.interceptor.tx.transactiontemplate.SpringTransactionTemplateInterceptorPointDefine.TRANSACTION_TEMPLATE_NAME;
 import static net.bytebuddy.matcher.ElementMatchers.nameContains;
 import static net.bytebuddy.matcher.ElementMatchers.nameStartsWith;
 
@@ -106,7 +107,7 @@ public class PortTrailAgent {
             .ignore(
                     nameStartsWith("net.bytebuddy.")
                             .or(nameStartsWith("org.springframework.")
-//                                    .and(ElementMatchers.not(ElementMatchers.named(SERVER_PROPERTIES_SERVLET_NAME)))
+                                    .and(ElementMatchers.not(ElementMatchers.named(TRANSACTION_TEMPLATE_NAME)))
                             )
                             .or(nameStartsWith("org.slf4j."))
                             .or(nameStartsWith("org.groovy."))
