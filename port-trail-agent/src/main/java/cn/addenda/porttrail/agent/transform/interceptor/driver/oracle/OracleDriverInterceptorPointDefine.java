@@ -10,7 +10,7 @@ import java.util.List;
 
 public class OracleDriverInterceptorPointDefine implements InterceptorPointDefine {
 
-  public static final String DRIVER_NAME = "java.oracle.Driver";
+  public static final String DRIVER_NAME = "oracle.jdbc.driver.OracleDriver";
 
   @Override
   public ClassMatch getEnhancedClass() {
