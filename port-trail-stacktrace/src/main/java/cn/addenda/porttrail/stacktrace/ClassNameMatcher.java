@@ -2,11 +2,11 @@ package cn.addenda.porttrail.stacktrace;
 
 import java.util.Objects;
 
-public class ClassNameMather implements IdentifierMather {
+public class ClassNameMatcher implements IdentifierMatcher {
 
   private final String className;
 
-  public ClassNameMather(String className) {
+  public ClassNameMatcher(String className) {
     this.className = className;
     if (className == null || className.isEmpty()) {
       throw new StackTraceException("className can not be null or empty.");
@@ -20,7 +20,7 @@ public class ClassNameMather implements IdentifierMather {
 
   @Override
   public String toString() {
-    return "ClassNameMather{" +
+    return "ClassNameMatcher{" +
             "className='" + className + '\'' +
             '}';
   }
@@ -29,7 +29,7 @@ public class ClassNameMather implements IdentifierMather {
   public boolean equals(Object o) {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
-    ClassNameMather that = (ClassNameMather) o;
+    ClassNameMatcher that = (ClassNameMatcher) o;
     return Objects.equals(className, that.className);
   }
 

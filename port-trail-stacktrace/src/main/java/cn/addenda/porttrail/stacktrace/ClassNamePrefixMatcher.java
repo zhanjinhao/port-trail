@@ -2,11 +2,11 @@ package cn.addenda.porttrail.stacktrace;
 
 import java.util.Objects;
 
-public class ClassNamePrefixMather implements IdentifierMather {
+public class ClassNamePrefixMatcher implements IdentifierMatcher {
 
   private final String classNamePrefix;
 
-  public ClassNamePrefixMather(String classNamePrefix) {
+  public ClassNamePrefixMatcher(String classNamePrefix) {
     this.classNamePrefix = classNamePrefix;
     if (classNamePrefix == null || classNamePrefix.isEmpty()) {
       throw new StackTraceException("classNamePrefix can not be null or empty.");
@@ -20,7 +20,7 @@ public class ClassNamePrefixMather implements IdentifierMather {
 
   @Override
   public String toString() {
-    return "ClassNamePrefixMather{" +
+    return "ClassNamePrefixMatcher{" +
             "classNamePrefix='" + classNamePrefix + '\'' +
             '}';
   }
@@ -29,7 +29,7 @@ public class ClassNamePrefixMather implements IdentifierMather {
   public boolean equals(Object o) {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
-    ClassNamePrefixMather that = (ClassNamePrefixMather) o;
+    ClassNamePrefixMatcher that = (ClassNamePrefixMatcher) o;
     return Objects.equals(classNamePrefix, that.classNamePrefix);
   }
 

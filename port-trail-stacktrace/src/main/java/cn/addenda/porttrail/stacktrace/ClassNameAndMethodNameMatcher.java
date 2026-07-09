@@ -2,13 +2,13 @@ package cn.addenda.porttrail.stacktrace;
 
 import java.util.Objects;
 
-public class ClassNameAndMethodNameMather implements IdentifierMather {
+public class ClassNameAndMethodNameMatcher implements IdentifierMatcher {
 
   private final String className;
 
   private final String methodName;
 
-  public ClassNameAndMethodNameMather(String className, String methodName) {
+  public ClassNameAndMethodNameMatcher(String className, String methodName) {
     this.className = className;
     this.methodName = methodName;
     if (methodName == null || methodName.isEmpty()) {
@@ -26,7 +26,7 @@ public class ClassNameAndMethodNameMather implements IdentifierMather {
 
   @Override
   public String toString() {
-    return "ClassNameAndMethodNameMather{" +
+    return "ClassNameAndMethodNameMatcher{" +
             "className='" + className + '\'' +
             ", methodName='" + methodName + '\'' +
             '}';
@@ -36,7 +36,7 @@ public class ClassNameAndMethodNameMather implements IdentifierMather {
   public boolean equals(Object o) {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
-    ClassNameAndMethodNameMather that = (ClassNameAndMethodNameMather) o;
+    ClassNameAndMethodNameMatcher that = (ClassNameAndMethodNameMatcher) o;
     return Objects.equals(className, that.className) && Objects.equals(methodName, that.methodName);
   }
 

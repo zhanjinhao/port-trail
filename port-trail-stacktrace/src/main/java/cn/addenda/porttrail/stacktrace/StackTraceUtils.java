@@ -21,14 +21,14 @@ import java.util.stream.Collectors;
 public class StackTraceUtils {
 
   @Getter
-  private static final Set<IdentifierMather> defaultExcludeSet;
+  private static final Set<IdentifierMatcher> defaultExcludeSet;
 
   private static final Pattern ANONYMOUS_INNER_CLASS_PATTERN = Pattern.compile("\\$\\d+");
 
   private static final String EXCLUDED_PATH = "META-INF/port-trail-stacktrace.excluded";
 
   static {
-    Set<IdentifierMather> lines = new HashSet<>();
+    Set<IdentifierMatcher> lines = new HashSet<>();
     try {
       ClassLoader classLoader = StackTraceUtils.class.getClassLoader();
       Enumeration<URL> urls = classLoader.getResources(EXCLUDED_PATH);
@@ -43,7 +43,7 @@ public class StackTraceUtils {
             if (line.isEmpty()) {
               continue;
             }
-            lines.add(IdentifierMatherFactory.getIdentifierMatcher(line));
+            lines.add(IdentifierMatcherFactory.getIdentifierMatcher(line));
           }
         }
       }
@@ -120,17 +120,17 @@ public class StackTraceUtils {
 
   private static StackTraceElement determineStackTraceElement(
           boolean ifExcludeLambda, boolean ifExcludeAnonymousInnerClass, String... excludes) {
-    Set<IdentifierMather> excludeSet = defaultExcludeSet;
+    Set<IdentifierMatcher> excludeSet = defaultExcludeSet;
     if (excludes != null) {
       excludeSet = new HashSet<>(defaultExcludeSet);
       excludeSet.addAll(Arrays.stream(excludes).filter(Objects::nonNull)
-              .map(IdentifierMatherFactory::getIdentifierMatcher).collect(Collectors.toList()));
+              .map(IdentifierMatcherFactory::getIdentifierMatcher).collect(Collectors.toList()));
     }
     return determineStackTraceElement(Thread.currentThread().getStackTrace(), excludeSet, ifExcludeLambda, ifExcludeAnonymousInnerClass);
   }
 
   private static StackTraceElement determineStackTraceElement(
-          StackTraceElement[] stackTraceElements, Set<IdentifierMather> excludeSet,
+          StackTraceElement[] stackTraceElements, Set<IdentifierMatcher> excludeSet,
           boolean ifExcludeLambda, boolean ifExcludeAnonymousInnerClass) {
     if (stackTraceElements == null || stackTraceElements.length == 0) {
       throw new IllegalArgumentException("The arg `stackTraceElements` can not null and can not be empty.");
@@ -144,7 +144,7 @@ public class StackTraceUtils {
       if (ifExcludeAnonymousInnerClass && ANONYMOUS_INNER_CLASS_PATTERN.matcher(className).find()) {
         continue;
       }
-      boolean flag = IdentifierMatherFactory.match(excludeSet, stackTraceElement);
+      boolean flag = IdentifierMatcherFactory.match(excludeSet, stackTraceElement);
       if (!flag) {
         return stackTraceElement;
       }
@@ -157,8 +157,8 @@ public class StackTraceUtils {
     return Arrays.stream(stackTraceElements).map(StackTraceElement::toString).collect(Collectors.joining(",", "[", "]"));
   }
 
-  private static String toString(Set<IdentifierMather> excludeSet) {
-    return excludeSet.stream().map(IdentifierMather::toString).collect(Collectors.joining(",", "[", "]"));
+  private static String toString(Set<IdentifierMatcher> excludeSet) {
+    return excludeSet.stream().map(IdentifierMatcher::toString).collect(Collectors.joining(",", "[", "]"));
   }
 
   private static String extractSimpleClassName(String className) {

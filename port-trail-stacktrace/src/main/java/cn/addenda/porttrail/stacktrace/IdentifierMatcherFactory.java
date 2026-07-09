@@ -8,17 +8,17 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-import static cn.addenda.porttrail.stacktrace.IdentifierMather.HASH;
+import static cn.addenda.porttrail.stacktrace.IdentifierMatcher.HASH;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
-public class IdentifierMatherFactory {
+public class IdentifierMatcherFactory {
 
 
-  private static final Map<String, IdentifierMather> identifierMatherMap = new ConcurrentHashMap<>();
+  private static final Map<String, IdentifierMatcher> identifierMatcherMap = new ConcurrentHashMap<>();
 
-  public static boolean match(Set<IdentifierMather> identifierMatherSet, StackTraceElement stackTraceElement) {
-    for (IdentifierMather identifierMather : identifierMatherSet) {
-      if (identifierMather.match(stackTraceElement)) {
+  public static boolean match(Set<IdentifierMatcher> identifierMatcherSet, StackTraceElement stackTraceElement) {
+    for (IdentifierMatcher identifierMatcher : identifierMatcherSet) {
+      if (identifierMatcher.match(stackTraceElement)) {
         return true;
       }
     }
@@ -26,34 +26,34 @@ public class IdentifierMatherFactory {
   }
 
   /**
-   * 获取IdentifierMather
+   * 获取IdentifierMatcher
    */
-  public static IdentifierMather getIdentifierMatcher(String identifier) {
-    return identifierMatherMap.computeIfAbsent(identifier,
+  public static IdentifierMatcher getIdentifierMatcher(String identifier) {
+    return identifierMatcherMap.computeIfAbsent(identifier,
             s -> {
               if (!identifier.startsWith(HASH)) {
-                return new ClassNamePrefixMather(identifier);
+                return new ClassNamePrefixMatcher(identifier);
               }
 
               String[] split = identifier.substring(1).split(HASH);
               if (split.length == 1) {
-                return new ClassNameMather(split[0]);
+                return new ClassNameMatcher(split[0]);
               }
-              return new ClassNameAndMethodNameMather(split[0], split[1]);
+              return new ClassNameAndMethodNameMatcher(split[0], split[1]);
             });
   }
 
   /**
-   * 获取IdentifierMather
+   * 获取IdentifierMatcher
    */
-  public static IdentifierMather getIdentifierMatcher(Class<?> clazz) {
+  public static IdentifierMatcher getIdentifierMatcher(Class<?> clazz) {
     return getIdentifierMatcher(withHash(clazz.getName()));
   }
 
   /**
-   * 获取IdentifierMather
+   * 获取IdentifierMatcher
    */
-  public static IdentifierMather getIdentifierMatcher(Class<?> clazz, boolean ifPrefix) {
+  public static IdentifierMatcher getIdentifierMatcher(Class<?> clazz, boolean ifPrefix) {
     if (ifPrefix) {
       return getIdentifierMatcher(clazz.getName());
     }
