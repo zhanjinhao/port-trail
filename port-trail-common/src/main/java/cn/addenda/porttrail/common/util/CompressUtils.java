@@ -19,8 +19,8 @@ public class CompressUtils {
     try {
       deflater.setInput(bytes);
       deflater.finish();
+      byte[] buffer = new byte[512];
       while (!deflater.finished()) {
-        byte[] buffer = new byte[2048];
         int count = deflater.deflate(buffer);
         out.write(buffer, 0, count);
       }
@@ -36,8 +36,8 @@ public class CompressUtils {
 
     try {
       inflater.setInput(bytes);
+      byte[] buffer = new byte[512];
       while (!inflater.finished()) {
-        byte[] buffer = new byte[2048];
         int count = inflater.inflate(buffer);
         if (count <= 0) {
           throw new PortTrailException(
