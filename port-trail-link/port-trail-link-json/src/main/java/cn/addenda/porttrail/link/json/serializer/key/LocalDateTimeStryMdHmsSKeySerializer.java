@@ -1,4 +1,4 @@
-package cn.addenda.porttrail.link.json.serialzer;
+package cn.addenda.porttrail.link.json.serializer.key;
 
 import cn.addenda.porttrail.common.util.DateUtils;
 import com.fasterxml.jackson.core.JsonGenerator;
@@ -12,16 +12,16 @@ import java.time.LocalDateTime;
  * @author addenda
  * @since 2021/9/13
  */
-public class LocalDateTimeStryMdHmsSSerializer extends JsonSerializer<LocalDateTime> {
+public class LocalDateTimeStryMdHmsSKeySerializer extends JsonSerializer<LocalDateTime> {
 
   @Override
   @SneakyThrows
   public void serialize(LocalDateTime localDateTime, JsonGenerator jgen, SerializerProvider provider) {
     if (localDateTime == null) {
-      jgen.writeString((String) null);
+      jgen.writeFieldName("null");
       return;
     }
-    jgen.writeString(DateUtils.format(localDateTime, DateUtils.yMdHmsS_FORMATTER));
+    jgen.writeFieldName(DateUtils.format(localDateTime, DateUtils.yMdHmsS_FORMATTER));
   }
 
 }

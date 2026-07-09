@@ -1,4 +1,4 @@
-package cn.addenda.porttrail.link.json.deserialzer;
+package cn.addenda.porttrail.link.json.deserializer;
 
 import cn.addenda.porttrail.common.util.DateUtils;
 import com.fasterxml.jackson.core.JsonParser;

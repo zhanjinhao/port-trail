@@ -1,26 +1,20 @@
-package cn.addenda.porttrail.link.json.deserialzer;
+package cn.addenda.porttrail.link.json.deserializer.key;
 
 import cn.addenda.porttrail.common.util.DateUtils;
 import cn.addenda.porttrail.common.util.StringUtils;
-import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.JsonDeserializer;
-import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.KeyDeserializer;
 import lombok.SneakyThrows;
-
-import java.time.LocalDate;
 
 /**
  * @author addenda
  * @since 2021/9/13
  */
-public class LocalDateStrDeSerializer extends JsonDeserializer<LocalDate> {
+public class LocalDateStrKeyDeSerializer extends KeyDeserializer {
 
   @Override
   @SneakyThrows
-  public LocalDate deserialize(JsonParser jp, DeserializationContext ctxt) {
-    JsonNode jsonNode = jp.getCodec().readTree(jp);
-    final String s = jsonNode.asText();
+  public Object deserializeKey(String s, DeserializationContext ctxt) {
     if (s == null || s.isEmpty() || "null".equals(s)) {
       return null;
     }

@@ -1,4 +1,4 @@
-package cn.addenda.porttrail.link.json.deserialzer.key;
+package cn.addenda.porttrail.link.json.deserializer.key;
 
 import cn.addenda.porttrail.common.util.DateUtils;
 import com.fasterxml.jackson.databind.DeserializationContext;

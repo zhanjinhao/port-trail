@@ -1,4 +1,4 @@
-package cn.addenda.porttrail.link.json.serialzer.key;
+package cn.addenda.porttrail.link.json.serializer.key;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonSerializer;
