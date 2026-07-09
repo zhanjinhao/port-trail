@@ -38,6 +38,9 @@ public class EntryPointSnapshot implements Serializable {
   }
 
   public String formatToString() {
+    if (entryPointList == null) {
+      return "empty_entry";
+    }
     StringBuilder sb = new StringBuilder();
     for (EntryPoint entryPoint : entryPointList) {
       if (sb.length() > 0) {
