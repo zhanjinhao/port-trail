@@ -332,10 +332,11 @@ public class LinkFacade {
            BufferedReader bufferedReader = new BufferedReader(inputStreamReader);) {
         while (true) {
           String s = bufferedReader.readLine();
-          if (s != null && !s.trim().isEmpty()) {
-            nameList.add(s);
-          } else {
+          if (s == null) {
             break;
+          }
+          if (!s.trim().isEmpty()) {
+            nameList.add(s);
           }
         }
       } catch (IOException x) {
