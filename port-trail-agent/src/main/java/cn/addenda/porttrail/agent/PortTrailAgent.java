@@ -65,20 +65,34 @@ public class PortTrailAgent {
 
     AgentBuilder with = new AgentBuilder.Default(byteBuddy)
             .with(new AgentBuilder.PoolStrategy() {
+
+              private List<File> bootJarList;
+
+              private List<File> linkJarList;
+
+              private List<File> getBootJarList() {
+                if (bootJarList == null) {
+                  File bootDir = new File(AgentPackage.getPath(), "boot");
+                  bootJarList = searchJars(bootDir);
+                }
+                return bootJarList;
+              }
+
+              private List<File> getLinkJarList() {
+                if (linkJarList == null) {
+                  File linkDir = new File(AgentPackage.getPath(), "link");
+                  linkJarList = searchJars(linkDir);
+                }
+                return linkJarList;
+              }
+
               @Override
               public TypePool typePool(ClassFileLocator classFileLocator, ClassLoader classLoader) {
-                File bootDir = new File(AgentPackage.getPath(), "boot");
-                File linkDir = new File(AgentPackage.getPath(), "link");
-
-                // 收集所有JAR文件
-                List<File> bootJars = searchJars(bootDir);
-                List<File> linkJars = searchJars(linkDir);
-
                 // 创建复合ClassFileLocator
                 List<ClassFileLocator> locators = new java.util.ArrayList<>();
                 locators.add(classFileLocator);
 
-                for (File jar : bootJars) {
+                for (File jar : getBootJarList()) {
                   try {
                     locators.add(ClassFileLocator.ForJarFile.of(jar));
                   } catch (IOException e) {
@@ -86,7 +100,7 @@ public class PortTrailAgent {
                   }
                 }
 
-                for (File jar : linkJars) {
+                for (File jar : getLinkJarList()) {
                   try {
                     locators.add(ClassFileLocator.ForJarFile.of(jar));
                   } catch (IOException e) {
