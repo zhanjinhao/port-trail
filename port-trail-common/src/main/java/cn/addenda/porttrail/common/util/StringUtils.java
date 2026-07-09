@@ -90,6 +90,10 @@ public class StringUtils {
         start = i;
         break;
       }
+      if (i == length - 1) {
+        // “aaa”移除'a'时场景
+        return "";
+      }
     }
 
     int end = length - 1;
