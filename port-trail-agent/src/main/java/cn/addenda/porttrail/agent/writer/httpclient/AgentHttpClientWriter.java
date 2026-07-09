@@ -122,7 +122,7 @@ public class AgentHttpClientWriter extends AbstractAgentWriter implements HttpCl
       return;
     }
 
-    int hashSlotIndex = Math.abs(executionId.hashCode() % hashSlotCount);
+    int hashSlotIndex = (executionId.hashCode() & Integer.MAX_VALUE) % hashSlotCount;
     HttpClientExecutionConsumer httpClientExecutionConsumer = httpClientExecutionConsumerList.get(hashSlotIndex);
     httpClientExecutionConsumer.offer(httpClientExecution);
   }

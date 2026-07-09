@@ -137,7 +137,7 @@ public class AgentDbWriter extends AbstractAgentWriter implements DbWriter {
       return;
     }
 
-    int hashSlotIndex = Math.abs(connectionPortTrailId.hashCode() % hashSlotCount);
+    int hashSlotIndex = (connectionPortTrailId.hashCode() & Integer.MAX_VALUE) % hashSlotCount;
     DbExecutionConsumer dbExecutionConsumer = dbExecutionConsumerList.get(hashSlotIndex);
     dbExecutionConsumer.offer(dbExecution);
   }

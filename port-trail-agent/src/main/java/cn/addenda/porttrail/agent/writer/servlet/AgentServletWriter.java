@@ -12,10 +12,7 @@ import cn.addenda.porttrail.infrastructure.jvm.JVMShutdownCallback;
 import cn.addenda.porttrail.infrastructure.log.PortTrailLogger;
 import cn.addenda.porttrail.infrastructure.writer.ServletWriter;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.Properties;
+import java.util.*;
 import java.util.concurrent.LinkedBlockingQueue;
 
 /**
@@ -122,7 +119,7 @@ public class AgentServletWriter extends AbstractAgentWriter implements ServletWr
       return;
     }
 
-    int hashSlotIndex = Math.abs(executionId.hashCode() % hashSlotCount);
+    int hashSlotIndex = (executionId.hashCode() & Integer.MAX_VALUE) % hashSlotCount;
     ServletExecutionConsumer servletExecutionConsumer = servletExecutionConsumerList.get(hashSlotIndex);
     servletExecutionConsumer.offer(servletExecution);
   }

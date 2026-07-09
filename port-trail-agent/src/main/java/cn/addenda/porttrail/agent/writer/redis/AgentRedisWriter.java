@@ -14,6 +14,7 @@ import cn.addenda.porttrail.infrastructure.writer.RedisWriter;
 
 import java.util.*;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * 两个功能：
@@ -112,8 +113,10 @@ public class AgentRedisWriter extends AbstractAgentWriter implements RedisWriter
     }
   }
 
+  private final AtomicLong seq = new AtomicLong(1L);
+
   private void offer(RedisExecution redisExecution) {
-    int hashSlotIndex = Math.abs(UUID.randomUUID().toString().replace("-", "").hashCode() % hashSlotCount);
+    int hashSlotIndex = (int) (seq.getAndIncrement() % hashSlotCount);
     RedisExecutionConsumer redisExecutionConsumer = redisExecutionConsumerList.get(hashSlotIndex);
     redisExecutionConsumer.offer(redisExecution);
   }
