@@ -123,6 +123,13 @@ public class PortTrailHttpRequestInterceptor extends AbstractPortTrailHttpInterc
       return;
     }
 
+    // 已知内容长度超过阈值时，跳过body采集，避免BufferedHttpEntity将大请求体全部加载到内存导致OOM
+    if (contentLength > requestMaxBodyLength) {
+      httpClientRequestBo.setContentLength(AbstractHttpClientExecution.UNKNOWN_CONTENT_LENGTH);
+      httpClientRequestBo.setBody(AbstractHttpClientExecution.BODY_EXCEED_LENGTH);
+      return;
+    }
+
     // 将实体包装为缓冲实体，允许多次读取
     if (!(entity instanceof BufferedHttpEntity)) {
       // 后续可以安全地多次读取
