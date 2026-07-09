@@ -18,8 +18,12 @@ public class JVMShutdown {
     Runtime.getRuntime().addShutdownHook(new Thread() {
       @Override
       public void run() {
-        jvmShutdownCallbackList.sort(Comparator.comparing(JVMShutdownCallback::getOrder));
-        for (JVMShutdownCallback jvmShutdownCallback : jvmShutdownCallbackList) {
+        List<JVMShutdownCallback> snapshot;
+        synchronized (JVMShutdown.class) {
+          snapshot = new ArrayList<>(jvmShutdownCallbackList);
+        }
+        snapshot.sort(Comparator.comparing(JVMShutdownCallback::getOrder));
+        for (JVMShutdownCallback jvmShutdownCallback : snapshot) {
           try {
             jvmShutdownCallback.shutdown();
           } catch (Throwable e) {
