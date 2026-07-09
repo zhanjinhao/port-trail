@@ -23,7 +23,7 @@ public class LocaleData {
   }
 
   public LocaleData(LocaleDataDto localeDataDto) {
-    this.language = localeDataDto.getCountry();
+    this.language = localeDataDto.getLanguage();
     this.country = localeDataDto.getCountry();
     this.variant = localeDataDto.getVariant();
   }
