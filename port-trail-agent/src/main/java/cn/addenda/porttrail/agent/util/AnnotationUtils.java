@@ -9,8 +9,6 @@ import lombok.NoArgsConstructor;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 
-import static cn.addenda.porttrail.agent.transform.interceptor.job.xxl.jobhandler.XxlJobHandlerInterceptorPointDefine.JOB_HANDLER_NAME;
-
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class AnnotationUtils {
 
@@ -42,7 +40,7 @@ public class AnnotationUtils {
     }
     Annotation[] annotations = aClass.getAnnotations();
     for (Annotation annotation : annotations) {
-      if (JOB_HANDLER_NAME.equals(annotation.annotationType().getName())) {
+      if (annotationName.equals(annotation.annotationType().getName())) {
         return annotation;
       }
     }
