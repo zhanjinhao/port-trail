@@ -10,6 +10,9 @@ import java.io.StringWriter;
 public class ThrowableUtils {
 
   public static String getThrowableStr(Throwable throwable) {
+    if (throwable == null) {
+      return null;
+    }
     StringWriter errors = new StringWriter();
     throwable.printStackTrace(new PrintWriter(errors));
     return errors.toString();
