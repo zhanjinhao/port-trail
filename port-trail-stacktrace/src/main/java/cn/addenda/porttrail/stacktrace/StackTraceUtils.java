@@ -162,15 +162,7 @@ public class StackTraceUtils {
   }
 
   private static String extractSimpleClassName(String className) {
-    StringBuilder simpleClassName = new StringBuilder();
-    for (int i = className.length() - 1; i > -1; i--) {
-      char c = className.charAt(i);
-      if (c == '.') {
-        break;
-      }
-      simpleClassName.append(c);
-    }
-    return simpleClassName.reverse().toString();
+    return className.substring(className.lastIndexOf('.') + 1);
   }
 
 }
