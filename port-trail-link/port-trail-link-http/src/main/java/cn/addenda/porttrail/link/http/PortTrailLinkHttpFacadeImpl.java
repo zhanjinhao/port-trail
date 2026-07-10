@@ -1,10 +1,8 @@
 package cn.addenda.porttrail.link.http;
 
 import cn.addenda.porttrail.facade.HttpFacade;
+import cn.addenda.porttrail.facade.HttpRequestResult;
 import cn.addenda.porttrail.infrastructure.jvm.JVMShutdownCallback;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
 import org.apache.hc.client5.http.classic.methods.HttpPost;
 import org.apache.hc.client5.http.config.ConnectionConfig;
 import org.apache.hc.client5.http.config.RequestConfig;
@@ -72,20 +70,26 @@ public class PortTrailLinkHttpFacadeImpl implements HttpFacade, JVMShutdownCallb
     return Integer.parseInt(HttpConfigAware.getHttpProperties().getProperty(propertyName));
   }
 
-  public void sendRequest(String uri, String jsonParam) {
-    PortTrailLinkHttpException.runWithPortTrailLinkHttpException(
-            () -> doSendRequest(uri, jsonParam)
-    );
+  public HttpRequestResult sendRequest(String uri, String jsonParam) {
+    long startMillis = System.currentTimeMillis();
+    try {
+      return doSendRequest(uri, jsonParam, startMillis);
+    } catch (IOException e) {
+      return new HttpRequestResult(-1, System.currentTimeMillis() - startMillis, e.getMessage());
+    }
   }
 
   @Override
-  public void sendRequest(String uri, byte[] bytesParam) {
-    PortTrailLinkHttpException.runWithPortTrailLinkHttpException(
-            () -> doSendRequest(uri, bytesParam)
-    );
+  public HttpRequestResult sendRequest(String uri, byte[] bytesParam) {
+    long startMillis = System.currentTimeMillis();
+    try {
+      return doSendRequest(uri, bytesParam, startMillis);
+    } catch (IOException e) {
+      return new HttpRequestResult(-1, System.currentTimeMillis() - startMillis, e.getMessage());
+    }
   }
 
-  private void doSendRequest(String uri, String jsonParam) throws IOException {
+  private HttpRequestResult doSendRequest(String uri, String jsonParam, long startMillis) throws IOException {
     final HttpPost httpPost = new HttpPost(uri);
 
     // 设置请求头，指定内容类型为 JSON
@@ -95,16 +99,16 @@ public class PortTrailLinkHttpFacadeImpl implements HttpFacade, JVMShutdownCallb
     StringEntity entity = new StringEntity(jsonParam, ContentType.APPLICATION_JSON);
     httpPost.setEntity(entity);
 
-    final Result result = closeableHttpClient.execute(httpPost, response -> {
+    return closeableHttpClient.execute(httpPost, response -> {
       // Process response message and convert it into a value object
       if (response.getEntity() == null) {
-        return new Result(response.getCode(), null);
+        return new HttpRequestResult(response.getCode(), System.currentTimeMillis() - startMillis, null);
       }
-      return new Result(response.getCode(), EntityUtils.toString(response.getEntity()));
+      return new HttpRequestResult(response.getCode(), System.currentTimeMillis() - startMillis, EntityUtils.toString(response.getEntity()));
     });
   }
 
-  private void doSendRequest(String uri, byte[] bytesParam) throws IOException {
+  private HttpRequestResult doSendRequest(String uri, byte[] bytesParam, long startMillis) throws IOException {
     final HttpPost httpPost = new HttpPost(uri);
 
     // 设置请求头，指定内容类型为 JSON
@@ -114,12 +118,12 @@ public class PortTrailLinkHttpFacadeImpl implements HttpFacade, JVMShutdownCallb
     ByteArrayEntity entity = new ByteArrayEntity(bytesParam, ContentType.APPLICATION_OCTET_STREAM);
     httpPost.setEntity(entity);
 
-    final Result result = closeableHttpClient.execute(httpPost, response -> {
+    return closeableHttpClient.execute(httpPost, response -> {
       // Process response message and convert it into a value object
       if (response.getEntity() == null) {
-        return new Result(response.getCode(), null);
+        return new HttpRequestResult(response.getCode(), System.currentTimeMillis() - startMillis, null);
       }
-      return new Result(response.getCode(), EntityUtils.toString(response.getEntity()));
+      return new HttpRequestResult(response.getCode(), System.currentTimeMillis() - startMillis, EntityUtils.toString(response.getEntity()));
     });
   }
 
@@ -133,21 +137,6 @@ public class PortTrailLinkHttpFacadeImpl implements HttpFacade, JVMShutdownCallb
   @Override
   public Integer getOrder() {
     return 100;
-  }
-
-  @Setter
-  @Getter
-  @ToString
-  static class Result {
-
-    final int status;
-    final String content;
-
-    Result(final int status, final String content) {
-      this.status = status;
-      this.content = content;
-    }
-
   }
 
 }
