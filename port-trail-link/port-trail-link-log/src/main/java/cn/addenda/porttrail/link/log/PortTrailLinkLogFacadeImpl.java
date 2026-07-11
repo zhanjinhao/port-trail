@@ -1,6 +1,8 @@
 package cn.addenda.porttrail.link.log;
 
 import cn.addenda.porttrail.facade.LogFacade;
+import cn.addenda.porttrail.infrastructure.jvm.JVMShutdown;
+import cn.addenda.porttrail.infrastructure.jvm.JVMShutdownCallback;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.core.Logger;
 import org.apache.logging.log4j.core.LoggerContext;
@@ -19,14 +21,39 @@ public class PortTrailLinkLogFacadeImpl implements LogFacade {
   private final Logger logger;
 
   private static final Log4jContextFactory factory = new Log4jContextFactory(new ClassLoaderContextSelector());
+  private static volatile LoggerContext loggerContext;
+
+  private static LoggerContext getLoggerContext() {
+    if (loggerContext == null) {
+      synchronized (PortTrailLinkLogFacadeImpl.class) {
+        if (loggerContext == null) {
+          Properties logProperties = LogConfigAware.getLogProperties();
+          String absolutePath = logProperties.getProperty("log4j2.conf.absolutePath");
+          loggerContext = factory.getContext(FQCN, null, null, false, new File(absolutePath).toURI(), null);
+          JVMShutdown.getInstance().addJvmShutdownCallback(new JVMShutdownCallback() {
+            @Override
+            public void shutdown() throws Throwable {
+              try {
+                loggerContext.stop();
+              } catch (Throwable ignore) {
+              }
+            }
+
+            @Override
+            public Integer getOrder() {
+              return 100;
+            }
+          });
+        }
+      }
+    }
+    return loggerContext;
+  }
 
   public PortTrailLinkLogFacadeImpl(String name, String fqcn) {
     this.name = name;
     this.fqcn = fqcn;
-    Properties logProperties = LogConfigAware.getLogProperties();
-    String absolutePath = logProperties.getProperty("log4j2.conf.absolutePath");
-    LoggerContext context = factory.getContext(FQCN, null, null, false, new File(absolutePath).toURI(), null);
-    this.logger = context.getLogger(name);
+    this.logger = getLoggerContext().getLogger(name);
   }
 
   public PortTrailLinkLogFacadeImpl(String name) {
