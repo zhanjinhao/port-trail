@@ -75,7 +75,7 @@ public class PortTrailLinkHttpFacadeImpl implements HttpFacade, JVMShutdownCallb
     try {
       return doSendRequest(uri, jsonParam, startMillis);
     } catch (IOException e) {
-      return new HttpRequestResult(-1, System.currentTimeMillis() - startMillis, e.getMessage());
+      return new HttpRequestResult(-1, System.currentTimeMillis() - startMillis, e);
     }
   }
 
@@ -85,7 +85,7 @@ public class PortTrailLinkHttpFacadeImpl implements HttpFacade, JVMShutdownCallb
     try {
       return doSendRequest(uri, bytesParam, startMillis);
     } catch (IOException e) {
-      return new HttpRequestResult(-1, System.currentTimeMillis() - startMillis, e.getMessage());
+      return new HttpRequestResult(-1, System.currentTimeMillis() - startMillis, e);
     }
   }
 
@@ -102,7 +102,7 @@ public class PortTrailLinkHttpFacadeImpl implements HttpFacade, JVMShutdownCallb
     return closeableHttpClient.execute(httpPost, response -> {
       // Process response message and convert it into a value object
       if (response.getEntity() == null) {
-        return new HttpRequestResult(response.getCode(), System.currentTimeMillis() - startMillis, null);
+        return new HttpRequestResult(response.getCode(), System.currentTimeMillis() - startMillis, (String) null);
       }
       return new HttpRequestResult(response.getCode(), System.currentTimeMillis() - startMillis, EntityUtils.toString(response.getEntity()));
     });
@@ -121,7 +121,7 @@ public class PortTrailLinkHttpFacadeImpl implements HttpFacade, JVMShutdownCallb
     return closeableHttpClient.execute(httpPost, response -> {
       // Process response message and convert it into a value object
       if (response.getEntity() == null) {
-        return new HttpRequestResult(response.getCode(), System.currentTimeMillis() - startMillis, null);
+        return new HttpRequestResult(response.getCode(), System.currentTimeMillis() - startMillis, (String) null);
       }
       return new HttpRequestResult(response.getCode(), System.currentTimeMillis() - startMillis, EntityUtils.toString(response.getEntity()));
     });

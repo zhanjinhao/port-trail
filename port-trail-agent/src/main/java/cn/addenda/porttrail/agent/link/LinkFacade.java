@@ -2,11 +2,13 @@ package cn.addenda.porttrail.agent.link;
 
 import cn.addenda.porttrail.agent.AgentPackage;
 import cn.addenda.porttrail.agent.PortTrailAgentStartException;
+import cn.addenda.porttrail.agent.log.AgentPortTrailLoggerFactory;
 import cn.addenda.porttrail.agent.util.FileUtils;
 import cn.addenda.porttrail.common.util.CompressUtils;
 import cn.addenda.porttrail.facade.*;
 import cn.addenda.porttrail.infrastructure.jvm.JVMShutdown;
 import cn.addenda.porttrail.infrastructure.jvm.JVMShutdownCallback;
+import cn.addenda.porttrail.infrastructure.log.PortTrailLogger;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
@@ -45,6 +47,7 @@ public class LinkFacade {
   static String sendHttpClientRequestUrl;
   static String sendHttpClientResponseUrl;
   static String sendRedisExecutionUrl;
+  static PortTrailLogger httpFacadeLog;
 
   private static void initHttpFacade() {
     httpFacadeImpl = AgentPackage.getAgentProperties().getProperty("httpFacade.impl");
@@ -72,38 +75,59 @@ public class LinkFacade {
     sendHttpClientRequestUrl = AgentPackage.getAgentProperties().getProperty("sendHttpClientRequest.url");
     sendHttpClientResponseUrl = AgentPackage.getAgentProperties().getProperty("sendHttpClientResponse.url");
     sendRedisExecutionUrl = AgentPackage.getAgentProperties().getProperty("sendRedisExecution.url");
+    httpFacadeLog = AgentPortTrailLoggerFactory.getInstance().getPortTrailLogger(HttpFacade.class);
   }
 
   public static void sendStatementExecution(byte[] bytes) {
-    httpFacade.sendRequest(sendStatementExecutionUrl, CompressUtils.compress(bytes));
+    HttpRequestResult httpRequestResult = httpFacade.sendRequest(sendStatementExecutionUrl, CompressUtils.compress(bytes));
+    checkHttpRequestResult(sendStatementExecutionUrl, httpRequestResult);
   }
 
   public static void sendPreparedStatementExecution(byte[] bytes) {
-    httpFacade.sendRequest(sendPreparedStatementExecutionUrl, CompressUtils.compress(bytes));
+    HttpRequestResult httpRequestResult = httpFacade.sendRequest(sendPreparedStatementExecutionUrl, CompressUtils.compress(bytes));
+    checkHttpRequestResult(sendPreparedStatementExecutionUrl, httpRequestResult);
   }
 
   public static void sendDbConfig(String dbConfig) {
-    httpFacade.sendRequest(sendDbConfigUrl, dbConfig);
+    HttpRequestResult httpRequestResult = httpFacade.sendRequest(sendDbConfigUrl, dbConfig);
+    checkHttpRequestResult(sendDbConfigUrl, httpRequestResult);
   }
 
   public static void sendServletRequest(byte[] bytes) {
-    httpFacade.sendRequest(sendServletRequestUrl, CompressUtils.compress(bytes));
+    HttpRequestResult httpRequestResult = httpFacade.sendRequest(sendServletRequestUrl, CompressUtils.compress(bytes));
+    checkHttpRequestResult(sendServletRequestUrl, httpRequestResult);
   }
 
   public static void sendServletResponse(byte[] bytes) {
-    httpFacade.sendRequest(sendServletResponseUrl, CompressUtils.compress(bytes));
+    HttpRequestResult httpRequestResult = httpFacade.sendRequest(sendServletResponseUrl, CompressUtils.compress(bytes));
+    checkHttpRequestResult(sendServletResponseUrl, httpRequestResult);
   }
 
   public static void sendHttpClientRequest(byte[] bytes) {
-    httpFacade.sendRequest(sendHttpClientRequestUrl, CompressUtils.compress(bytes));
+    HttpRequestResult httpRequestResult = httpFacade.sendRequest(sendHttpClientRequestUrl, CompressUtils.compress(bytes));
+    checkHttpRequestResult(sendHttpClientRequestUrl, httpRequestResult);
   }
 
   public static void sendHttpClientResponse(byte[] bytes) {
-    httpFacade.sendRequest(sendHttpClientResponseUrl, CompressUtils.compress(bytes));
+    HttpRequestResult httpRequestResult = httpFacade.sendRequest(sendHttpClientResponseUrl, CompressUtils.compress(bytes));
+    checkHttpRequestResult(sendHttpClientResponseUrl, httpRequestResult);
   }
 
   public static void sendRedisExecution(byte[] bytes) {
-    httpFacade.sendRequest(sendRedisExecutionUrl, CompressUtils.compress(bytes));
+    HttpRequestResult httpRequestResult = httpFacade.sendRequest(sendRedisExecutionUrl, CompressUtils.compress(bytes));
+    checkHttpRequestResult(sendRedisExecutionUrl, httpRequestResult);
+  }
+
+  private static void checkHttpRequestResult(String url, HttpRequestResult httpRequestResult) {
+    if (httpRequestResult.getStatus() == -1) {
+      httpFacadeLog.error("请求[{}]异常, 耗时[{}ms].", url, httpRequestResult.getCost(), httpRequestResult.getThrowable());
+    } else if (httpRequestResult.getStatus() < 200 || httpRequestResult.getStatus() >= 300) {
+      httpFacadeLog.error("[{}]服务端响应异常, 响应码[{}], 耗时[{}ms].", url, httpRequestResult.getCost(), httpRequestResult.getThrowable());
+    } else {
+      if (httpFacadeLog.isDebugEnabled()) {
+        httpFacadeLog.debug("请求[{}]成功, 耗时[{}ms].", url, httpRequestResult.getCost());
+      }
+    }
   }
 
   // ------------------------
