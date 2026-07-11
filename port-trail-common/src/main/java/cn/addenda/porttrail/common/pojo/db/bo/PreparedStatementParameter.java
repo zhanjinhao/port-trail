@@ -128,7 +128,7 @@ public class PreparedStatementParameter implements SqlOrder {
     if (bytes == null) {
       return null;
     }
-    if (Arrays.equals(bytes, PreparedStatementParameter.UN_SUPPORTED_PARAMETER)) {
+    if (Arrays.equals(bytes, PreparedStatementParameter.getUN_SUPPORTED_PARAMETER())) {
       return null;
     }
     return JdkSerializationUtils.deserialize(bytes);
