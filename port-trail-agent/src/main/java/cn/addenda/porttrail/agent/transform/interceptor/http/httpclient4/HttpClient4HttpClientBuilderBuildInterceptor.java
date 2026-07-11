@@ -21,17 +21,20 @@ public class HttpClient4HttpClientBuilderBuildInterceptor implements Interceptor
 
   private final HttpClientWriter httpClientWriter;
 
-  private final int requestMaxBodyLength;
+  private static final int requestMaxBodyLength;
 
-  private final int responseMaxBodyLength;
+  private static final int responseMaxBodyLength;
 
   public HttpClient4HttpClientBuilderBuildInterceptor() {
     this.httpClientWriter = AgentHttpClientWriter.getInstance();
-    this.requestMaxBodyLength = initRequestMaxBodyLength();
-    this.responseMaxBodyLength = initResponseMaxBodyLength();
   }
 
-  private int initRequestMaxBodyLength() {
+  static {
+    requestMaxBodyLength = initRequestMaxBodyLength();
+    responseMaxBodyLength = initResponseMaxBodyLength();
+  }
+
+  private static int initRequestMaxBodyLength() {
     Properties agentProperties = AgentPackage.getAgentProperties();
     // in kb
     String property = agentProperties.getProperty("httpClientWriter.request.maxBodyLength");
@@ -42,7 +45,7 @@ public class HttpClient4HttpClientBuilderBuildInterceptor implements Interceptor
     }
   }
 
-  private int initResponseMaxBodyLength() {
+  private static int initResponseMaxBodyLength() {
     Properties agentProperties = AgentPackage.getAgentProperties();
     String property = agentProperties.getProperty("httpClientWriter.response.maxBodyLength");
     try {

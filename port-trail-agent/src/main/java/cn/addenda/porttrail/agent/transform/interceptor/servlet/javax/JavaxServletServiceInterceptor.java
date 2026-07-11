@@ -35,20 +35,23 @@ public class JavaxServletServiceInterceptor extends AbstractDeduplicationEntryPo
 
   private final ServletWriter servletWriter;
 
-  private final int requestMaxBodyLength;
+  private static final int requestMaxBodyLength;
 
-  private final int responseMaxBodyLength;
+  private static final int responseMaxBodyLength;
 
   private static final PortTrailLogger log =
           AgentPortTrailLoggerFactory.getInstance().getPortTrailLogger(JavaxServletServiceInterceptor.class);
 
   public JavaxServletServiceInterceptor() {
     this.servletWriter = AgentServletWriter.getInstance();
-    this.requestMaxBodyLength = initRequestMaxBodyLength();
-    this.responseMaxBodyLength = initResponseMaxBodyLength();
   }
 
-  private int initRequestMaxBodyLength() {
+  static {
+    requestMaxBodyLength = initRequestMaxBodyLength();
+    responseMaxBodyLength = initResponseMaxBodyLength();
+  }
+
+  private static int initRequestMaxBodyLength() {
     Properties agentProperties = AgentPackage.getAgentProperties();
     // in kb
     String property = agentProperties.getProperty("servletWriter.request.maxBodyLength");
@@ -59,7 +62,7 @@ public class JavaxServletServiceInterceptor extends AbstractDeduplicationEntryPo
     }
   }
 
-  private int initResponseMaxBodyLength() {
+  private static int initResponseMaxBodyLength() {
     Properties agentProperties = AgentPackage.getAgentProperties();
     String property = agentProperties.getProperty("servletWriter.response.maxBodyLength");
     try {
