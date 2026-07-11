@@ -1,6 +1,7 @@
 package cn.addenda.porttrail.jdbc.core;
 
 import cn.addenda.porttrail.common.pojo.db.bo.AbstractStatementExecutionBo;
+import cn.addenda.porttrail.common.pojo.db.bo.PreparedStatementParameter;
 import cn.addenda.porttrail.common.tuple.Binary;
 import cn.addenda.porttrail.common.tuple.Ternary;
 import cn.addenda.porttrail.common.tuple.Unary;
@@ -13,8 +14,6 @@ import java.math.BigDecimal;
 import java.net.URL;
 import java.sql.*;
 import java.util.Calendar;
-
-import static cn.addenda.porttrail.common.pojo.db.bo.PreparedStatementParameter.UN_SUPPORTED_PARAMETER;
 
 /**
  * @author addenda
@@ -223,55 +222,55 @@ public class PortTrailPreparedStatement
   @Override
   public void setBytes(int parameterIndex, byte[] x) throws SQLException {
     delegate.setBytes(parameterIndex, x);
-    portTrailStatementSqlAttachment.set(parameterIndex, "setBytes", Unary.of(UN_SUPPORTED_PARAMETER));
+    portTrailStatementSqlAttachment.set(parameterIndex, "setBytes", Unary.of(getUN_SUPPORTED_PARAMETER()));
   }
 
   @Override
   public void setAsciiStream(int parameterIndex, InputStream x, int length) throws SQLException {
     delegate.setAsciiStream(parameterIndex, x, length);
-    portTrailStatementSqlAttachment.set(parameterIndex, "setAsciiStream", Binary.of(UN_SUPPORTED_PARAMETER, length));
+    portTrailStatementSqlAttachment.set(parameterIndex, "setAsciiStream", Binary.of(getUN_SUPPORTED_PARAMETER(), length));
   }
 
   @Override
   public void setUnicodeStream(int parameterIndex, InputStream x, int length) throws SQLException {
     delegate.setUnicodeStream(parameterIndex, x, length);
-    portTrailStatementSqlAttachment.set(parameterIndex, "setUnicodeStream", Binary.of(UN_SUPPORTED_PARAMETER, length));
+    portTrailStatementSqlAttachment.set(parameterIndex, "setUnicodeStream", Binary.of(getUN_SUPPORTED_PARAMETER(), length));
   }
 
   @Override
   public void setBinaryStream(int parameterIndex, InputStream x, int length) throws SQLException {
     delegate.setBinaryStream(parameterIndex, x, length);
-    portTrailStatementSqlAttachment.set(parameterIndex, "setBinaryStream", Binary.of(UN_SUPPORTED_PARAMETER, length));
+    portTrailStatementSqlAttachment.set(parameterIndex, "setBinaryStream", Binary.of(getUN_SUPPORTED_PARAMETER(), length));
   }
 
   @Override
   public void setCharacterStream(int parameterIndex, Reader reader, int length) throws SQLException {
     delegate.setCharacterStream(parameterIndex, reader, length);
-    portTrailStatementSqlAttachment.set(parameterIndex, "setCharacterStream", Binary.of(UN_SUPPORTED_PARAMETER, length));
+    portTrailStatementSqlAttachment.set(parameterIndex, "setCharacterStream", Binary.of(getUN_SUPPORTED_PARAMETER(), length));
   }
 
   @Override
   public void setRef(int parameterIndex, Ref x) throws SQLException {
     delegate.setRef(parameterIndex, x);
-    portTrailStatementSqlAttachment.set(parameterIndex, "setRef", Unary.of(UN_SUPPORTED_PARAMETER));
+    portTrailStatementSqlAttachment.set(parameterIndex, "setRef", Unary.of(getUN_SUPPORTED_PARAMETER()));
   }
 
   @Override
   public void setBlob(int parameterIndex, Blob x) throws SQLException {
     delegate.setBlob(parameterIndex, x);
-    portTrailStatementSqlAttachment.set(parameterIndex, "setBlob", Unary.of(UN_SUPPORTED_PARAMETER));
+    portTrailStatementSqlAttachment.set(parameterIndex, "setBlob", Unary.of(getUN_SUPPORTED_PARAMETER()));
   }
 
   @Override
   public void setClob(int parameterIndex, Clob x) throws SQLException {
     delegate.setClob(parameterIndex, x);
-    portTrailStatementSqlAttachment.set(parameterIndex, "setClob", Unary.of(UN_SUPPORTED_PARAMETER));
+    portTrailStatementSqlAttachment.set(parameterIndex, "setClob", Unary.of(getUN_SUPPORTED_PARAMETER()));
   }
 
   @Override
   public void setArray(int parameterIndex, Array x) throws SQLException {
     delegate.setArray(parameterIndex, x);
-    portTrailStatementSqlAttachment.set(parameterIndex, "setArray", Unary.of(UN_SUPPORTED_PARAMETER));
+    portTrailStatementSqlAttachment.set(parameterIndex, "setArray", Unary.of(getUN_SUPPORTED_PARAMETER()));
   }
 
   @Override
@@ -282,7 +281,7 @@ public class PortTrailPreparedStatement
   @Override
   public void setURL(int parameterIndex, URL x) throws SQLException {
     delegate.setURL(parameterIndex, x);
-    portTrailStatementSqlAttachment.set(parameterIndex, "setURL", Unary.of(UN_SUPPORTED_PARAMETER));
+    portTrailStatementSqlAttachment.set(parameterIndex, "setURL", Unary.of(getUN_SUPPORTED_PARAMETER()));
   }
 
   @Override
@@ -293,103 +292,103 @@ public class PortTrailPreparedStatement
   @Override
   public void setRowId(int parameterIndex, RowId x) throws SQLException {
     delegate.setRowId(parameterIndex, x);
-    portTrailStatementSqlAttachment.set(parameterIndex, "setRowId", Unary.of(UN_SUPPORTED_PARAMETER));
+    portTrailStatementSqlAttachment.set(parameterIndex, "setRowId", Unary.of(getUN_SUPPORTED_PARAMETER()));
   }
 
   @Override
   public void setNCharacterStream(int parameterIndex, Reader value, long length) throws SQLException {
     delegate.setNCharacterStream(parameterIndex, value, length);
-    portTrailStatementSqlAttachment.set(parameterIndex, "setNCharacterStream", Binary.of(UN_SUPPORTED_PARAMETER, length));
+    portTrailStatementSqlAttachment.set(parameterIndex, "setNCharacterStream", Binary.of(getUN_SUPPORTED_PARAMETER(), length));
   }
 
   @Override
   public void setNClob(int parameterIndex, NClob value) throws SQLException {
     delegate.setNClob(parameterIndex, value);
-    portTrailStatementSqlAttachment.set(parameterIndex, "setNClob", Unary.of(UN_SUPPORTED_PARAMETER));
+    portTrailStatementSqlAttachment.set(parameterIndex, "setNClob", Unary.of(getUN_SUPPORTED_PARAMETER()));
   }
 
   @Override
   public void setClob(int parameterIndex, Reader reader, long length) throws SQLException {
     delegate.setClob(parameterIndex, reader, length);
-    portTrailStatementSqlAttachment.set(parameterIndex, "setClob", Binary.of(UN_SUPPORTED_PARAMETER, length));
+    portTrailStatementSqlAttachment.set(parameterIndex, "setClob", Binary.of(getUN_SUPPORTED_PARAMETER(), length));
   }
 
   @Override
   public void setBlob(int parameterIndex, InputStream inputStream, long length) throws SQLException {
     delegate.setBlob(parameterIndex, inputStream, length);
-    portTrailStatementSqlAttachment.set(parameterIndex, "setBlob", Binary.of(UN_SUPPORTED_PARAMETER, length));
+    portTrailStatementSqlAttachment.set(parameterIndex, "setBlob", Binary.of(getUN_SUPPORTED_PARAMETER(), length));
   }
 
   @Override
   public void setNClob(int parameterIndex, Reader reader, long length) throws SQLException {
     delegate.setNClob(parameterIndex, reader, length);
-    portTrailStatementSqlAttachment.set(parameterIndex, "setNClob", Binary.of(UN_SUPPORTED_PARAMETER, length));
+    portTrailStatementSqlAttachment.set(parameterIndex, "setNClob", Binary.of(getUN_SUPPORTED_PARAMETER(), length));
   }
 
   @Override
   public void setSQLXML(int parameterIndex, SQLXML xmlObject) throws SQLException {
     delegate.setSQLXML(parameterIndex, xmlObject);
-    portTrailStatementSqlAttachment.set(parameterIndex, "setSQLXML", Unary.of(UN_SUPPORTED_PARAMETER));
+    portTrailStatementSqlAttachment.set(parameterIndex, "setSQLXML", Unary.of(getUN_SUPPORTED_PARAMETER()));
   }
 
   @Override
   public void setAsciiStream(int parameterIndex, InputStream x, long length) throws SQLException {
     delegate.setAsciiStream(parameterIndex, x, length);
-    portTrailStatementSqlAttachment.set(parameterIndex, "setAsciiStream", Binary.of(UN_SUPPORTED_PARAMETER, length));
+    portTrailStatementSqlAttachment.set(parameterIndex, "setAsciiStream", Binary.of(getUN_SUPPORTED_PARAMETER(), length));
   }
 
   @Override
   public void setBinaryStream(int parameterIndex, InputStream x, long length) throws SQLException {
     delegate.setBinaryStream(parameterIndex, x, length);
-    portTrailStatementSqlAttachment.set(parameterIndex, "setBinaryStream", Binary.of(UN_SUPPORTED_PARAMETER, length));
+    portTrailStatementSqlAttachment.set(parameterIndex, "setBinaryStream", Binary.of(getUN_SUPPORTED_PARAMETER(), length));
   }
 
   @Override
   public void setCharacterStream(int parameterIndex, Reader reader, long length) throws SQLException {
     delegate.setCharacterStream(parameterIndex, reader, length);
-    portTrailStatementSqlAttachment.set(parameterIndex, "setCharacterStream", Binary.of(UN_SUPPORTED_PARAMETER, length));
+    portTrailStatementSqlAttachment.set(parameterIndex, "setCharacterStream", Binary.of(getUN_SUPPORTED_PARAMETER(), length));
   }
 
   @Override
   public void setAsciiStream(int parameterIndex, InputStream x) throws SQLException {
     delegate.setAsciiStream(parameterIndex, x);
-    portTrailStatementSqlAttachment.set(parameterIndex, "setAsciiStream", Unary.of(UN_SUPPORTED_PARAMETER));
+    portTrailStatementSqlAttachment.set(parameterIndex, "setAsciiStream", Unary.of(getUN_SUPPORTED_PARAMETER()));
   }
 
   @Override
   public void setBinaryStream(int parameterIndex, InputStream x) throws SQLException {
     delegate.setBinaryStream(parameterIndex, x);
-    portTrailStatementSqlAttachment.set(parameterIndex, "setBinaryStream", Unary.of(UN_SUPPORTED_PARAMETER));
+    portTrailStatementSqlAttachment.set(parameterIndex, "setBinaryStream", Unary.of(getUN_SUPPORTED_PARAMETER()));
   }
 
   @Override
   public void setCharacterStream(int parameterIndex, Reader reader) throws SQLException {
     delegate.setCharacterStream(parameterIndex, reader);
-    portTrailStatementSqlAttachment.set(parameterIndex, "setCharacterStream", Unary.of(UN_SUPPORTED_PARAMETER));
+    portTrailStatementSqlAttachment.set(parameterIndex, "setCharacterStream", Unary.of(getUN_SUPPORTED_PARAMETER()));
   }
 
   @Override
   public void setNCharacterStream(int parameterIndex, Reader value) throws SQLException {
     delegate.setNCharacterStream(parameterIndex, value);
-    portTrailStatementSqlAttachment.set(parameterIndex, "setNCharacterStream", Unary.of(UN_SUPPORTED_PARAMETER));
+    portTrailStatementSqlAttachment.set(parameterIndex, "setNCharacterStream", Unary.of(getUN_SUPPORTED_PARAMETER()));
   }
 
   @Override
   public void setClob(int parameterIndex, Reader reader) throws SQLException {
     delegate.setClob(parameterIndex, reader);
-    portTrailStatementSqlAttachment.set(parameterIndex, "setClob", Unary.of(UN_SUPPORTED_PARAMETER));
+    portTrailStatementSqlAttachment.set(parameterIndex, "setClob", Unary.of(getUN_SUPPORTED_PARAMETER()));
   }
 
   @Override
   public void setBlob(int parameterIndex, InputStream inputStream) throws SQLException {
     delegate.setBlob(parameterIndex, inputStream);
-    portTrailStatementSqlAttachment.set(parameterIndex, "setBlob", Unary.of(UN_SUPPORTED_PARAMETER));
+    portTrailStatementSqlAttachment.set(parameterIndex, "setBlob", Unary.of(getUN_SUPPORTED_PARAMETER()));
   }
 
   @Override
   public void setNClob(int parameterIndex, Reader reader) throws SQLException {
     delegate.setNClob(parameterIndex, reader);
-    portTrailStatementSqlAttachment.set(parameterIndex, "setNClob", Unary.of(UN_SUPPORTED_PARAMETER));
+    portTrailStatementSqlAttachment.set(parameterIndex, "setNClob", Unary.of(getUN_SUPPORTED_PARAMETER()));
   }
 
   // --------------------
@@ -591,6 +590,10 @@ public class PortTrailPreparedStatement
   private void executeQuery(long start) {
     portTrailStatementSqlAttachment.executePreparedSql(AbstractStatementExecutionBo.STATEMENT_STATE_QUERY, getTxId(), start, curMills());
     newTxIdIfAutoCommit();
+  }
+
+  private byte[] getUN_SUPPORTED_PARAMETER() {
+    return PreparedStatementParameter.getUN_SUPPORTED_PARAMETER();
   }
 
 }

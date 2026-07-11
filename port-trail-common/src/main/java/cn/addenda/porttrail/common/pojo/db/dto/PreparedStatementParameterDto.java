@@ -76,7 +76,7 @@ public class PreparedStatementParameterDto implements Serializable {
       if (f1 instanceof Serializable) {
         return JdkSerializationUtils.serialize(f1);
       } else {
-        return PreparedStatementParameter.UN_SUPPORTED_PARAMETER;
+        return PreparedStatementParameter.getUN_SUPPORTED_PARAMETER();
       }
     }
   }

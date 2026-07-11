@@ -17,7 +17,8 @@ import java.util.List;
 @ToString
 public class PreparedStatementParameter implements SqlOrder {
 
-  public static final byte[] UN_SUPPORTED_PARAMETER = new byte[]{-1};
+  @Getter
+  private static final byte[] UN_SUPPORTED_PARAMETER = new byte[]{-1};
 
   @Getter
   @Setter

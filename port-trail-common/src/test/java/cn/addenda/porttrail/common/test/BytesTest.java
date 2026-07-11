@@ -10,7 +10,7 @@ class BytesTest {
 
   @Test
   void test1() {
-    byte[] unSupportedClass = PreparedStatementParameter.UN_SUPPORTED_PARAMETER;
+    byte[] unSupportedClass = PreparedStatementParameter.getUN_SUPPORTED_PARAMETER();
     boolean equals = Arrays.equals(new byte[]{-1}, unSupportedClass);
     Assertions.assertTrue(equals);
   }
