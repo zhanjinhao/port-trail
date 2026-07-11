@@ -23,7 +23,11 @@ import java.util.Optional;
 @ToString
 public class HttpClientRequestDto extends AbstractHttpClientDto {
 
-  public static final byte[] BODY_BYTE_ARRAY = new byte[]{-11};
+  private static final byte[] BODY_BYTE_ARRAY = new byte[]{-11};
+
+  public static byte[] getBODY_BYTE_ARRAY() {
+    return BODY_BYTE_ARRAY.clone();
+  }
 
   // request.getProtocol()
   private String version;
@@ -115,17 +119,17 @@ public class HttpClientRequestDto extends AbstractHttpClientDto {
     );
     Object bodyOfBo = httpClientRequestBo.getBody();
     if (Objects.equals(AbstractHttpClientExecution.UNSUPPORTED_CONTENT_TYPE, bodyOfBo)) {
-      this.setBody(UNSUPPORTED_CONTENT_TYPE);
+      this.setBody(getUNSUPPORTED_CONTENT_TYPE());
     } else if (Objects.equals(AbstractHttpClientExecution.UNSUPPORTED_CHARSET_ENCODING, bodyOfBo)) {
-      this.setBody(UNSUPPORTED_CHARSET_ENCODING);
+      this.setBody(getUNSUPPORTED_CHARSET_ENCODING());
     } else if (Objects.equals(AbstractHttpClientExecution.BODY_EMPTY, bodyOfBo)) {
-      this.setBody(BODY_EMPTY);
+      this.setBody(getBODY_EMPTY());
     } else if (Objects.equals(AbstractHttpClientExecution.BODY_EXCEED_LENGTH, bodyOfBo)) {
-      this.setBody(BODY_EXCEED_LENGTH);
+      this.setBody(getBODY_EXCEED_LENGTH());
     } else if (Objects.equals(AbstractHttpClientExecution.UNSUPPORTED_CONTENT_ENCODING, bodyOfBo)) {
-      this.setBody(UNSUPPORTED_CONTENT_ENCODING);
+      this.setBody(getUNSUPPORTED_CONTENT_ENCODING());
     } else if (Objects.equals(HttpClientRequestBo.BODY_BYTE_ARRAY, bodyOfBo)) {
-      this.setBody(BODY_BYTE_ARRAY);
+      this.setBody(getBODY_BYTE_ARRAY());
     } else if (bodyOfBo instanceof Serializable) {
       if (bodyOfBo instanceof FormDataList) {
         this.setBody(JdkSerializationUtils.serialize(new FormDataDtoList((FormDataList) bodyOfBo)));

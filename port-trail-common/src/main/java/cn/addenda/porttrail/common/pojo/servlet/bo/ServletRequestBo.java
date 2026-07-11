@@ -101,15 +101,15 @@ public class ServletRequestBo extends AbstractServletExecution {
     byte[] bodyOfDto = servletRequestDto.getBody();
     if (bodyOfDto == null) {
       this.setBody(null);
-    } else if (Arrays.equals(AbstractServletDto.UNSUPPORTED_CONTENT_TYPE, bodyOfDto)) {
+    } else if (Arrays.equals(AbstractServletDto.getUNSUPPORTED_CONTENT_TYPE(), bodyOfDto)) {
       this.setBody(UNSUPPORTED_CONTENT_TYPE);
-    } else if (Arrays.equals(AbstractServletDto.UNSUPPORTED_CHARSET_ENCODING, bodyOfDto)) {
+    } else if (Arrays.equals(AbstractServletDto.getUNSUPPORTED_CHARSET_ENCODING(), bodyOfDto)) {
       this.setBody(UNSUPPORTED_CHARSET_ENCODING);
-    } else if (Arrays.equals(AbstractServletDto.BODY_EMPTY, bodyOfDto)) {
+    } else if (Arrays.equals(AbstractServletDto.getBODY_EMPTY(), bodyOfDto)) {
       this.setBody(BODY_EMPTY);
-    } else if (Arrays.equals(AbstractServletDto.BODY_EXCEED_LENGTH, bodyOfDto)) {
+    } else if (Arrays.equals(AbstractServletDto.getBODY_EXCEED_LENGTH(), bodyOfDto)) {
       this.setBody(BODY_EXCEED_LENGTH);
-    } else if (Arrays.equals(ServletRequestDto.BODY_BYTE_ARRAY, bodyOfDto)) {
+    } else if (Arrays.equals(ServletRequestDto.getBODY_BYTE_ARRAY(), bodyOfDto)) {
       this.setBody(BODY_BYTE_ARRAY);
     } else {
       Object obj = JdkSerializationUtils.deserialize(bodyOfDto);

@@ -20,7 +20,11 @@ import java.util.Optional;
 @ToString
 public class HttpClientResponseDto extends AbstractHttpClientDto {
 
-  public static final byte[] UNKNOWN_FILENAME = new byte[]{-21};
+  private static final byte[] UNKNOWN_FILENAME = new byte[]{-21};
+
+  public static byte[] getUNKNOWN_FILENAME() {
+    return UNKNOWN_FILENAME.clone();
+  }
 
   // response.getContentType()：优先于headerMap
   private String contentType;
@@ -87,17 +91,17 @@ public class HttpClientResponseDto extends AbstractHttpClientDto {
     this.setHeaderMap(httpClientResponseBo.getHeaderMap());
     Object bodyOfBo = httpClientResponseBo.getBody();
     if (Objects.equals(AbstractHttpClientExecution.UNSUPPORTED_CONTENT_TYPE, bodyOfBo)) {
-      this.setBody(UNSUPPORTED_CONTENT_TYPE);
+      this.setBody(getUNSUPPORTED_CONTENT_TYPE());
     } else if (Objects.equals(AbstractHttpClientExecution.UNSUPPORTED_CHARSET_ENCODING, bodyOfBo)) {
-      this.setBody(UNSUPPORTED_CHARSET_ENCODING);
+      this.setBody(getUNSUPPORTED_CHARSET_ENCODING());
     } else if (Objects.equals(AbstractHttpClientExecution.BODY_EMPTY, bodyOfBo)) {
-      this.setBody(BODY_EMPTY);
+      this.setBody(getBODY_EMPTY());
     } else if (Objects.equals(AbstractHttpClientExecution.BODY_EXCEED_LENGTH, bodyOfBo)) {
-      this.setBody(BODY_EXCEED_LENGTH);
+      this.setBody(getBODY_EXCEED_LENGTH());
     } else if (Objects.equals(AbstractHttpClientExecution.UNSUPPORTED_CONTENT_ENCODING, bodyOfBo)) {
-      this.setBody(UNSUPPORTED_CONTENT_ENCODING);
+      this.setBody(getUNSUPPORTED_CONTENT_ENCODING());
     } else if (Objects.equals(HttpClientResponseBo.UNKNOWN_FILENAME, bodyOfBo)) {
-      this.setBody(UNKNOWN_FILENAME);
+      this.setBody(getUNKNOWN_FILENAME());
     } else if (bodyOfBo instanceof Serializable) {
       this.setBody(JdkSerializationUtils.serialize(bodyOfBo));
     } else {

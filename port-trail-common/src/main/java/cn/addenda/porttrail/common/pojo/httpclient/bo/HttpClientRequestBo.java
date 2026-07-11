@@ -111,17 +111,17 @@ public class HttpClientRequestBo extends AbstractHttpClientExecution {
     byte[] bodyOfDto = httpClientRequestDto.getBody();
     if (bodyOfDto == null) {
       this.setBody(null);
-    } else if (Arrays.equals(AbstractHttpClientDto.UNSUPPORTED_CONTENT_TYPE, bodyOfDto)) {
+    } else if (Arrays.equals(AbstractHttpClientDto.getUNSUPPORTED_CONTENT_TYPE(), bodyOfDto)) {
       this.setBody(UNSUPPORTED_CONTENT_TYPE);
-    } else if (Arrays.equals(AbstractHttpClientDto.UNSUPPORTED_CHARSET_ENCODING, bodyOfDto)) {
+    } else if (Arrays.equals(AbstractHttpClientDto.getUNSUPPORTED_CHARSET_ENCODING(), bodyOfDto)) {
       this.setBody(UNSUPPORTED_CHARSET_ENCODING);
-    } else if (Arrays.equals(AbstractHttpClientDto.BODY_EMPTY, bodyOfDto)) {
+    } else if (Arrays.equals(AbstractHttpClientDto.getBODY_EMPTY(), bodyOfDto)) {
       this.setBody(BODY_EMPTY);
-    } else if (Arrays.equals(AbstractHttpClientDto.BODY_EXCEED_LENGTH, bodyOfDto)) {
+    } else if (Arrays.equals(AbstractHttpClientDto.getBODY_EXCEED_LENGTH(), bodyOfDto)) {
       this.setBody(BODY_EXCEED_LENGTH);
-    } else if (Arrays.equals(AbstractHttpClientDto.UNSUPPORTED_CONTENT_ENCODING, bodyOfDto)) {
+    } else if (Arrays.equals(AbstractHttpClientDto.getUNSUPPORTED_CONTENT_ENCODING(), bodyOfDto)) {
       this.setBody(UNSUPPORTED_CONTENT_ENCODING);
-    } else if (Arrays.equals(HttpClientRequestDto.BODY_BYTE_ARRAY, bodyOfDto)) {
+    } else if (Arrays.equals(HttpClientRequestDto.getBODY_BYTE_ARRAY(), bodyOfDto)) {
       this.setBody(BODY_BYTE_ARRAY);
     } else {
       Object obj = JdkSerializationUtils.deserialize(bodyOfDto);

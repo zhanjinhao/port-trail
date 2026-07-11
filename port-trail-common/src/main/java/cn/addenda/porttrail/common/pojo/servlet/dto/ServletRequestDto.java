@@ -20,7 +20,11 @@ import java.util.*;
 @ToString
 public class ServletRequestDto extends AbstractServletDto {
 
-  public static final byte[] BODY_BYTE_ARRAY = new byte[]{-11};
+  private static final byte[] BODY_BYTE_ARRAY = new byte[]{-11};
+
+  public static byte[] getBODY_BYTE_ARRAY() {
+    return BODY_BYTE_ARRAY.clone();
+  }
 
   // request.getProtocol()
   private String version;
@@ -102,15 +106,15 @@ public class ServletRequestDto extends AbstractServletDto {
     );
     Object bodyOfBo = servletRequestBo.getBody();
     if (Objects.equals(AbstractServletExecution.UNSUPPORTED_CONTENT_TYPE, bodyOfBo)) {
-      this.setBody(UNSUPPORTED_CONTENT_TYPE);
+      this.setBody(getUNSUPPORTED_CONTENT_TYPE());
     } else if (Objects.equals(AbstractServletExecution.UNSUPPORTED_CHARSET_ENCODING, bodyOfBo)) {
-      this.setBody(UNSUPPORTED_CHARSET_ENCODING);
+      this.setBody(getUNSUPPORTED_CHARSET_ENCODING());
     } else if (Objects.equals(AbstractServletExecution.BODY_EMPTY, bodyOfBo)) {
-      this.setBody(BODY_EMPTY);
+      this.setBody(getBODY_EMPTY());
     } else if (Objects.equals(AbstractServletExecution.BODY_EXCEED_LENGTH, bodyOfBo)) {
-      this.setBody(BODY_EXCEED_LENGTH);
+      this.setBody(getBODY_EXCEED_LENGTH());
     } else if (Objects.equals(ServletRequestBo.BODY_BYTE_ARRAY, bodyOfBo)) {
-      this.setBody(BODY_BYTE_ARRAY);
+      this.setBody(getBODY_BYTE_ARRAY());
     } else if (bodyOfBo instanceof Serializable) {
       if (bodyOfBo instanceof FormDataList) {
         this.setBody(JdkSerializationUtils.serialize(new FormDataDtoList((FormDataList) bodyOfBo)));
@@ -138,7 +142,7 @@ public class ServletRequestDto extends AbstractServletDto {
 //      return AbstractServletExecution.BODY_EMPTY;
 //    } else if (Arrays.equals(BODY_EXCEED_LENGTH, bodyOfDto)) {
 //      return AbstractServletExecution.BODY_EXCEED_LENGTH;
-//    } else if (Arrays.equals(ServletRequestDto.BODY_BYTE_ARRAY, bodyOfDto)) {
+//    } else if (Arrays.equals(ServletRequestDto.getBODY_BYTE_ARRAY(), bodyOfDto)) {
 //      return ServletRequestBo.BODY_BYTE_ARRAY;
 //    } else {
 //      Object obj = JdkSerializationUtils.deserialize(bodyOfDto);
