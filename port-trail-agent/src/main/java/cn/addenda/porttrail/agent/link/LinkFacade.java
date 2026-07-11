@@ -26,9 +26,9 @@ public class LinkFacade {
 
   static {
     initConfig();
+    initLogFacade();
     initHttpFacade();
     initJsonFacade();
-    initLogFacade();
   }
 
   // ------------------------
@@ -152,6 +152,7 @@ public class LinkFacade {
 
   private static void initLogFacade() {
     logFacadeImpl = AgentPackage.getAgentProperties().getProperty("logFacade.impl");
+    logFacadeMap = new ConcurrentHashMap<>();
   }
 
   private static LogFacade _createLogFacade(String name) {
@@ -188,7 +189,7 @@ public class LinkFacade {
     return applyWithLinkClassLoader(runnable);
   }
 
-  private static final Map<String, LogFacade> logFacadeMap = new ConcurrentHashMap<>();
+  private static Map<String, LogFacade> logFacadeMap;
 
   public static LogFacade createLogFacade(String name) {
     return logFacadeMap.computeIfAbsent(name, s -> {
@@ -205,8 +206,9 @@ public class LinkFacade {
   }
 
   public static LogFacade createLogFacade(String name, String fqcn) {
-    return logFacadeMap.computeIfAbsent(name, s -> {
-      LogFacade logFacade = _createLogFacade(s, fqcn);
+    String cacheKey = name + "#" + fqcn;
+    return logFacadeMap.computeIfAbsent(cacheKey, s -> {
+      LogFacade logFacade = _createLogFacade(name, fqcn);
       if (logFacade instanceof JVMShutdownCallback) {
         JVMShutdown.getInstance().addJvmShutdownCallback((JVMShutdownCallback) logFacade);
       }
