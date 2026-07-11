@@ -13,6 +13,11 @@ public class JdbcPortTrailLogger implements PortTrailLogger {
   }
 
   @Override
+  public boolean isTraceEnabled() {
+    return log.isTraceEnabled();
+  }
+
+  @Override
   public void trace(String msg) {
     log.trace(msg);
   }
@@ -20,6 +25,11 @@ public class JdbcPortTrailLogger implements PortTrailLogger {
   @Override
   public void trace(String format, Object... arguments) {
     log.trace(format, arguments);
+  }
+
+  @Override
+  public boolean isDebugEnabled() {
+    return log.isDebugEnabled();
   }
 
   @Override
@@ -33,6 +43,11 @@ public class JdbcPortTrailLogger implements PortTrailLogger {
   }
 
   @Override
+  public boolean isInfoEnabled() {
+    return log.isInfoEnabled();
+  }
+
+  @Override
   public void info(String msg) {
     log.info(msg);
   }
@@ -43,6 +58,11 @@ public class JdbcPortTrailLogger implements PortTrailLogger {
   }
 
   @Override
+  public boolean isWarnEnabled() {
+    return log.isWarnEnabled();
+  }
+
+  @Override
   public void warn(String msg) {
     log.warn(msg);
   }
@@ -50,6 +70,11 @@ public class JdbcPortTrailLogger implements PortTrailLogger {
   @Override
   public void warn(String format, Object... arguments) {
     log.warn(format, arguments);
+  }
+
+  @Override
+  public boolean isErrorEnabled() {
+    return log.isErrorEnabled();
   }
 
   @Override

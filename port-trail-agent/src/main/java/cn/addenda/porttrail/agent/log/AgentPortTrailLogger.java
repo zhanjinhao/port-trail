@@ -17,6 +17,11 @@ public class AgentPortTrailLogger implements PortTrailLogger {
   }
 
   @Override
+  public boolean isTraceEnabled() {
+    return logFacade.isTraceEnabled();
+  }
+
+  @Override
   public void trace(String msg) {
     logFacade.trace(msg);
   }
@@ -24,6 +29,11 @@ public class AgentPortTrailLogger implements PortTrailLogger {
   @Override
   public void trace(String format, Object... arguments) {
     logFacade.trace(format, arguments);
+  }
+
+  @Override
+  public boolean isDebugEnabled() {
+    return logFacade.isDebugEnabled();
   }
 
   @Override
@@ -37,6 +47,11 @@ public class AgentPortTrailLogger implements PortTrailLogger {
   }
 
   @Override
+  public boolean isInfoEnabled() {
+    return logFacade.isInfoEnabled();
+  }
+
+  @Override
   public void info(String msg) {
     logFacade.info(msg);
   }
@@ -47,6 +62,11 @@ public class AgentPortTrailLogger implements PortTrailLogger {
   }
 
   @Override
+  public boolean isWarnEnabled() {
+    return logFacade.isWarnEnabled();
+  }
+
+  @Override
   public void warn(String msg) {
     logFacade.warn(msg);
   }
@@ -54,6 +74,11 @@ public class AgentPortTrailLogger implements PortTrailLogger {
   @Override
   public void warn(String format, Object... arguments) {
     logFacade.warn(format, arguments);
+  }
+
+  @Override
+  public boolean isErrorEnabled() {
+    return logFacade.isErrorEnabled();
   }
 
   @Override
