@@ -48,4 +48,19 @@ public class EntryPoint implements Serializable {
     return new EntryPoint(entryPoint.getEntryPointType(), entryPoint.getDetail(), entryPoint.getEntryId());
   }
 
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+    EntryPoint that = (EntryPoint) o;
+    return entryId == that.entryId &&
+            entryPointType == that.entryPointType &&
+            java.util.Objects.equals(detail, that.detail);
+  }
+
+  @Override
+  public int hashCode() {
+    return java.util.Objects.hash(entryPointType, detail, entryId);
+  }
+
 }

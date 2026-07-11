@@ -51,4 +51,20 @@ public class EntryPointSnapshot implements Serializable {
     return sb.toString();
   }
 
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+    EntryPointSnapshot that = (EntryPointSnapshot) o;
+    return java.util.Objects.equals(threadName, that.threadName) &&
+            java.util.Objects.equals(entryPointList, that.entryPointList) &&
+            java.util.Objects.equals(traceId, that.traceId) &&
+            java.util.Objects.equals(seqId, that.seqId);
+  }
+
+  @Override
+  public int hashCode() {
+    return java.util.Objects.hash(threadName, entryPointList, traceId, seqId);
+  }
+
 }
