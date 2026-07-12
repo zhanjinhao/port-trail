@@ -122,7 +122,7 @@ public class LinkFacade {
     if (httpRequestResult.getStatus() == -1) {
       httpFacadeLog.error("请求[{}]异常, 耗时[{}ms].", url, httpRequestResult.getCost(), httpRequestResult.getThrowable());
     } else if (httpRequestResult.getStatus() < 200 || httpRequestResult.getStatus() >= 300) {
-      httpFacadeLog.error("[{}]服务端响应异常, 响应码[{}], 耗时[{}ms].", url, httpRequestResult.getCost(), httpRequestResult.getThrowable());
+      httpFacadeLog.error("[{}]服务端响应异常, 响应码[{}], 耗时[{}ms].", url, httpRequestResult.getStatus(), httpRequestResult.getCost(), httpRequestResult.getThrowable());
     } else {
       if (httpFacadeLog.isDebugEnabled()) {
         httpFacadeLog.debug("请求[{}]成功, 耗时[{}ms].", url, httpRequestResult.getCost());
