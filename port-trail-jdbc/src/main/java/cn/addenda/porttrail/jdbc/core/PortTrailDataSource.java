@@ -105,11 +105,14 @@ public class PortTrailDataSource extends WrapperAdapter implements DataSource, P
 
   @Override
   public void close() throws Exception {
-    // 如果DataSource是AutoCloseable的实现，调用close()方法
-    if (dataSource instanceof AutoCloseable) {
-      ((AutoCloseable) dataSource).close();
+    try {
+      // 如果DataSource是AutoCloseable的实现，调用close()方法
+      if (dataSource instanceof AutoCloseable) {
+        ((AutoCloseable) dataSource).close();
+      }
+    } finally {
+      closePortTrail();
     }
-    closePortTrail();
   }
 
   // ----------------------------------
