@@ -30,6 +30,7 @@ public class RedisExecutionEntityBo extends RedisExecutionEntity {
     this.setStartTime(redisExecutionEntity.getStartTime());
     this.setEndTime(redisExecutionEntity.getEndTime());
     this.setCost(redisExecutionEntity.getCost());
+    this.setEntryPointSnapshotId(redisExecutionEntity.getEntryPointSnapshotId());
     this.setCreateDt(redisExecutionEntity.getCreateDt());
     this.setModifier(redisExecutionEntity.getModifier());
     this.setModifierName(redisExecutionEntity.getModifierName());

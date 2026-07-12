@@ -90,6 +90,10 @@ public class RedisExecutionEntity extends SimpleBaseModel implements Serializabl
    * cost
    */
   private Integer cost;
+  /**
+   * 入口点快照ID
+   */
+  private Long entryPointSnapshotId;
 
   public static RedisExecutionEntity ofParam() {
     return new RedisExecutionEntity();

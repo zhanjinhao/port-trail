@@ -52,6 +52,7 @@ public class RedisExecutionBizImpl implements RedisExecutionBiz {
       param.setStartTime(DateUtils.timestampToLocalDateTime(redisDto.getStartTime()));
       param.setEndTime(DateUtils.timestampToLocalDateTime(redisDto.getEndTime()));
       param.setCost(redisDto.getCost());
+      param.setEntryPointSnapshotId(entryPointSnapshotEntityBo.getId());
 
       redisExecutionEntityCurder.insert(param);
 
