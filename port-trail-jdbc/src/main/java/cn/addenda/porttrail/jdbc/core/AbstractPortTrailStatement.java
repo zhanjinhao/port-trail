@@ -273,4 +273,9 @@ public abstract class AbstractPortTrailStatement<T extends Statement, P extends 
     return portTrailConnection.getAbstractStatementExecutionBoQueue();
   }
 
+  @Override
+  protected Object getDelegate() {
+    return delegate;
+  }
+
 }

@@ -172,4 +172,9 @@ public class PortTrailDataSource extends WrapperAdapter implements DataSource, P
             "} " + super.toString();
   }
 
+  @Override
+  protected Object getDelegate() {
+    return dataSource;
+  }
+
 }

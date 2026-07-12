@@ -182,4 +182,9 @@ public abstract class AbstractPortTrailConnection extends WrapperAdapter impleme
             "} " + super.toString();
   }
 
+  @Override
+  protected Object getDelegate() {
+    return connection;
+  }
+
 }
