@@ -213,7 +213,8 @@ public abstract class AbstractPortTrailStatement<T extends Statement, P extends 
 
   @Override
   public Connection getConnection() throws SQLException {
-    return getPortTrailConnection().getConnection();
+    // 这里不能返回底层的连接，因为底层连接的close被调用时不会清理portTrail的资源
+    return getPortTrailConnection();
   }
 
   // -----------------
