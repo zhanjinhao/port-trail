@@ -46,15 +46,15 @@ public class Binary<T1, T2> implements Map.Entry<T1, T2>, Tuple {
   @Override
   public boolean equals(Object o) {
     if (this == o) return true;
-    if (!(o instanceof Binary)) return false;
-    Binary<?, ?> binary = (Binary<?, ?>) o;
-    return Objects.equals(f1, binary.f1)
-            && Objects.equals(f2, binary.f2);
+    if (!(o instanceof Map.Entry)) return false;
+    Map.Entry<?, ?> entry = (Map.Entry<?, ?>) o;
+    return Objects.equals(getKey(), entry.getKey())
+            && Objects.equals(getValue(), entry.getValue());
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(f1, f2);
+    return Objects.hashCode(f1) ^ Objects.hashCode(f2);
   }
 
 
