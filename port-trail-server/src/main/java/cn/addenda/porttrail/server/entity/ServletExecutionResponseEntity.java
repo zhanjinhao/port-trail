@@ -41,6 +41,8 @@ public class ServletExecutionResponseEntity extends SimpleBaseModel implements S
   private byte[] body;
   private String bodyText;
 
+  private Long entryPointSnapshotId;
+
   public static ServletExecutionResponseEntity ofParam() {
     return new ServletExecutionResponseEntity();
   }

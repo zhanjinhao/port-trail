@@ -72,6 +72,7 @@ public class ServletResponseDto extends AbstractServletDto {
 
   public ServletResponseDto(ServletResponseBo servletResponseBo) {
     super(servletResponseBo.getExecutionId());
+    this.setEntryPointSnapshot(servletResponseBo.getEntryPointSnapshot());
     this.setContentType(servletResponseBo.getContentType());
     this.setCharsetEncoding(servletResponseBo.getCharsetEncoding());
     this.setContentLength(servletResponseBo.getContentLength());

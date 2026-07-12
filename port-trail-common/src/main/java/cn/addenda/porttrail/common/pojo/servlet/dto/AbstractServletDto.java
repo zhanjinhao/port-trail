@@ -1,5 +1,6 @@
 package cn.addenda.porttrail.common.pojo.servlet.dto;
 
+import cn.addenda.porttrail.common.entrypoint.EntryPointSnapshot;
 import cn.addenda.porttrail.common.pojo.AbstractDto;
 import lombok.Getter;
 import lombok.Setter;
@@ -32,6 +33,8 @@ public class AbstractServletDto extends AbstractDto {
   }
 
   private final String executionId;
+
+  private EntryPointSnapshot entryPointSnapshot;
 
   public AbstractServletDto(String executionId) {
     this.executionId = executionId;

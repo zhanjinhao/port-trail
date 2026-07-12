@@ -11,6 +11,7 @@ import cn.addenda.porttrail.common.pojo.servlet.dto.ServletRequestDto;
 import cn.addenda.porttrail.common.pojo.servlet.dto.ServletResponseDto;
 import cn.addenda.porttrail.common.util.CompressUtils;
 import cn.addenda.porttrail.common.util.JdkSerializationUtils;
+import cn.addenda.porttrail.server.bo.EntryPointSnapshotEntityBo;
 import cn.addenda.porttrail.server.bo.servlet.ServletExecutionRequestBo;
 import cn.addenda.porttrail.server.bo.servlet.ServletExecutionResponseBo;
 import cn.addenda.porttrail.server.curd.ServletExecutionRequestEntityCurder;
@@ -35,77 +36,90 @@ public class ServletExecutionBizImpl implements ServletExecutionBiz {
   @Autowired
   private ServletExecutionResponseEntityCurder servletExecutionResponseEntityCurder;
 
+  @Autowired
+  private EntryPointSnapshotEntityBiz entryPointSnapshotEntityBiz;
+
   @Override
   public ServletExecutionRequestBo handleServletRequest(ServletRequestDto servletRequestDto) {
-    ServiceRuntimeInfo serviceRuntimeInfo = servletRequestDto.getServiceRuntimeInfo();
+    return transactionHelperNew.doTransaction(() -> {
+      EntryPointSnapshotEntityBo entryPointSnapshotEntityBo = entryPointSnapshotEntityBiz.insert(servletRequestDto.getEntryPointSnapshot());
 
-    ServletExecutionRequestEntity param = ServletExecutionRequestEntity.ofParam();
-    param.setSystemCode(serviceRuntimeInfo.getSystemCode());
-    param.setServiceName(serviceRuntimeInfo.getServiceName());
-    param.setImageName(serviceRuntimeInfo.getImageName());
-    param.setEnv(serviceRuntimeInfo.getEnv());
-    param.setInstanceId(serviceRuntimeInfo.getInstanceId());
-    param.setExecutionId(servletRequestDto.getExecutionId());
-    param.setVersion(servletRequestDto.getVersion());
-    param.setScheme(servletRequestDto.getScheme());
-    param.setMethod(servletRequestDto.getMethod());
-    param.setUri(servletRequestDto.getUri());
-    param.setQueryString(servletRequestDto.getQueryString());
-    param.setContentType(servletRequestDto.getContentType());
-    param.setCharsetEncoding(servletRequestDto.getCharsetEncoding());
-    param.setDateTime(DateUtils.timestampToLocalDateTime(servletRequestDto.getDatetime()));
-    param.setAllContentLength(servletRequestDto.getAllContentLength());
-    param.setContentLength(servletRequestDto.getContentLength());
-    param.setLocale(JacksonUtils.toStr(servletRequestDto.getLocale()));
-    param.setHeaders(JacksonUtils.toStr(servletRequestDto.getHeaderMap()));
-    param.setBody(CompressUtils.compress(JdkSerializationUtils.serialize(servletRequestDto.getBody())));
+      ServiceRuntimeInfo serviceRuntimeInfo = servletRequestDto.getServiceRuntimeInfo();
 
-    ServletRequestBo servletRequestBo = new ServletRequestBo(servletRequestDto);
-    if (servletRequestBo.getBody() instanceof String) {
-      param.setBodyText((String) servletRequestBo.getBody());
-    }
-    if (servletRequestBo.getBody() instanceof FormDataList) {
-      param.setBodyText(JacksonUtils.toStr(servletRequestBo.getBody()));
-    }
-    param.setCurl(ServletCurlUtils.toCurl(servletRequestBo));
+      ServletExecutionRequestEntity param = ServletExecutionRequestEntity.ofParam();
+      param.setSystemCode(serviceRuntimeInfo.getSystemCode());
+      param.setServiceName(serviceRuntimeInfo.getServiceName());
+      param.setImageName(serviceRuntimeInfo.getImageName());
+      param.setEnv(serviceRuntimeInfo.getEnv());
+      param.setInstanceId(serviceRuntimeInfo.getInstanceId());
+      param.setExecutionId(servletRequestDto.getExecutionId());
+      param.setVersion(servletRequestDto.getVersion());
+      param.setScheme(servletRequestDto.getScheme());
+      param.setMethod(servletRequestDto.getMethod());
+      param.setUri(servletRequestDto.getUri());
+      param.setQueryString(servletRequestDto.getQueryString());
+      param.setContentType(servletRequestDto.getContentType());
+      param.setCharsetEncoding(servletRequestDto.getCharsetEncoding());
+      param.setDateTime(DateUtils.timestampToLocalDateTime(servletRequestDto.getDatetime()));
+      param.setAllContentLength(servletRequestDto.getAllContentLength());
+      param.setContentLength(servletRequestDto.getContentLength());
+      param.setLocale(JacksonUtils.toStr(servletRequestDto.getLocale()));
+      param.setHeaders(JacksonUtils.toStr(servletRequestDto.getHeaderMap()));
+      param.setBody(CompressUtils.compress(JdkSerializationUtils.serialize(servletRequestDto.getBody())));
+      param.setEntryPointSnapshotId(entryPointSnapshotEntityBo.getId());
 
-    transactionHelperNew.doTransaction(() -> {
+      ServletRequestBo servletRequestBo = new ServletRequestBo(servletRequestDto);
+      if (servletRequestBo.getBody() instanceof String) {
+        param.setBodyText((String) servletRequestBo.getBody());
+      }
+      if (servletRequestBo.getBody() instanceof FormDataList) {
+        param.setBodyText(JacksonUtils.toStr(servletRequestBo.getBody()));
+      }
+      param.setCurl(ServletCurlUtils.toCurl(servletRequestBo));
+
       servletExecutionRequestEntityCurder.insert(param);
-    });
 
-    return new ServletExecutionRequestBo(param);
+      ServletExecutionRequestBo servletExecutionRequestBo = new ServletExecutionRequestBo(param);
+      servletExecutionRequestBo.setEntryPointSnapshotEntityBo(entryPointSnapshotEntityBo);
+      return servletExecutionRequestBo;
+    });
   }
 
   @Override
   public ServletExecutionResponseBo handleServletResponse(ServletResponseDto servletResponseDto) {
-    ServiceRuntimeInfo serviceRuntimeInfo = servletResponseDto.getServiceRuntimeInfo();
+    return transactionHelperNew.doTransaction(() -> {
+      EntryPointSnapshotEntityBo entryPointSnapshotEntityBo = entryPointSnapshotEntityBiz.insert(servletResponseDto.getEntryPointSnapshot());
 
-    ServletExecutionResponseEntity param = ServletExecutionResponseEntity.ofParam();
-    param.setSystemCode(serviceRuntimeInfo.getSystemCode());
-    param.setServiceName(serviceRuntimeInfo.getServiceName());
-    param.setImageName(serviceRuntimeInfo.getImageName());
-    param.setEnv(serviceRuntimeInfo.getEnv());
-    param.setInstanceId(serviceRuntimeInfo.getInstanceId());
-    param.setExecutionId(servletResponseDto.getExecutionId());
-    param.setContentType(servletResponseDto.getContentType());
-    param.setCharsetEncoding(servletResponseDto.getCharsetEncoding());
-    param.setDateTime(DateUtils.timestampToLocalDateTime(servletResponseDto.getDatetime()));
-    param.setContentLength(servletResponseDto.getContentLength());
-    param.setLocale(JacksonUtils.toStr(servletResponseDto.getLocale()));
-    param.setStatus(servletResponseDto.getStatus());
-    param.setHeaders(JacksonUtils.toStr(servletResponseDto.getHeaderMap()));
-    param.setBody(CompressUtils.compress(JdkSerializationUtils.serialize(servletResponseDto.getBody())));
+      ServiceRuntimeInfo serviceRuntimeInfo = servletResponseDto.getServiceRuntimeInfo();
 
-    ServletResponseBo servletResponseBo = new ServletResponseBo(servletResponseDto);
-    if (servletResponseBo.getBody() instanceof String) {
-      param.setBodyText((String) servletResponseBo.getBody());
-    }
+      ServletExecutionResponseEntity param = ServletExecutionResponseEntity.ofParam();
+      param.setSystemCode(serviceRuntimeInfo.getSystemCode());
+      param.setServiceName(serviceRuntimeInfo.getServiceName());
+      param.setImageName(serviceRuntimeInfo.getImageName());
+      param.setEnv(serviceRuntimeInfo.getEnv());
+      param.setInstanceId(serviceRuntimeInfo.getInstanceId());
+      param.setExecutionId(servletResponseDto.getExecutionId());
+      param.setContentType(servletResponseDto.getContentType());
+      param.setCharsetEncoding(servletResponseDto.getCharsetEncoding());
+      param.setDateTime(DateUtils.timestampToLocalDateTime(servletResponseDto.getDatetime()));
+      param.setContentLength(servletResponseDto.getContentLength());
+      param.setLocale(JacksonUtils.toStr(servletResponseDto.getLocale()));
+      param.setStatus(servletResponseDto.getStatus());
+      param.setHeaders(JacksonUtils.toStr(servletResponseDto.getHeaderMap()));
+      param.setBody(CompressUtils.compress(JdkSerializationUtils.serialize(servletResponseDto.getBody())));
+      param.setEntryPointSnapshotId(entryPointSnapshotEntityBo.getId());
 
-    transactionHelperNew.doTransaction(() -> {
+      ServletResponseBo servletResponseBo = new ServletResponseBo(servletResponseDto);
+      if (servletResponseBo.getBody() instanceof String) {
+        param.setBodyText((String) servletResponseBo.getBody());
+      }
+
       servletExecutionResponseEntityCurder.insert(param);
-    });
 
-    return new ServletExecutionResponseBo(param);
+      ServletExecutionResponseBo servletExecutionResponseBo = new ServletExecutionResponseBo(param);
+      servletExecutionResponseBo.setEntryPointSnapshotEntityBo(entryPointSnapshotEntityBo);
+      return servletExecutionResponseBo;
+    });
   }
 
 }

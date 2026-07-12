@@ -1,5 +1,7 @@
 package cn.addenda.porttrail.common.pojo.servlet.bo;
 
+import cn.addenda.porttrail.common.entrypoint.EntryPointSnapshot;
+
 import java.nio.charset.StandardCharsets;
 
 public abstract class AbstractServletExecution implements ServletExecution {
@@ -13,6 +15,8 @@ public abstract class AbstractServletExecution implements ServletExecution {
 
   private final String executionId;
 
+  private EntryPointSnapshot entryPointSnapshot;
+
   protected AbstractServletExecution(String executionId) {
     this.executionId = executionId;
   }
@@ -20,6 +24,16 @@ public abstract class AbstractServletExecution implements ServletExecution {
   @Override
   public String getExecutionId() {
     return executionId;
+  }
+
+  @Override
+  public void setEntryPointSnapshot(EntryPointSnapshot entryPointSnapshot) {
+    this.entryPointSnapshot = entryPointSnapshot;
+  }
+
+  @Override
+  public EntryPointSnapshot getEntryPointSnapshot() {
+    return entryPointSnapshot;
   }
 
 }

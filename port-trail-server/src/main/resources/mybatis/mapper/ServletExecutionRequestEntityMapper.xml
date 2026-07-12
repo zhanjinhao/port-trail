@@ -10,7 +10,7 @@
     , `system_code`, `service_name`, `image_name`, `env`, `instance_id`, `execution_id`,
     `version`, `scheme`, `method`, `uri`, `query_string`, `content_type`, `charset_encoding`, `date_time`, `all_content_length`, `content_length`, `locale`,
     `headers`, `body`, `body_text`,
-    `curl`
+    `curl`, `entry_point_snapshot_id`
   </sql>
 
   <sql id="setCondition">
@@ -76,6 +76,9 @@
     </if>
     <if test="curl != null">
       `curl` = #{curl,jdbcType=VARCHAR},
+    </if>
+    <if test="entryPointSnapshotId != null">
+      `entry_point_snapshot_id` = #{entryPointSnapshotId,jdbcType=BIGINT},
     </if>
   </sql>
 
@@ -145,6 +148,9 @@
     </if>
     <if test="curl != null">
       and `curl` = #{curl,jdbcType=VARCHAR}
+    </if>
+    <if test="entryPointSnapshotId != null">
+      and `entry_point_snapshot_id` = #{entryPointSnapshotId,jdbcType=BIGINT}
     </if>
   </sql>
 

@@ -1,5 +1,6 @@
 package cn.addenda.porttrail.server.bo.servlet;
 
+import cn.addenda.porttrail.server.bo.EntryPointSnapshotEntityBo;
 import cn.addenda.porttrail.server.entity.ServletExecutionRequestEntity;
 import lombok.Getter;
 import lombok.Setter;
@@ -9,6 +10,8 @@ import lombok.ToString;
 @Getter
 @ToString
 public class ServletExecutionRequestBo extends ServletExecutionRequestEntity {
+
+  private EntryPointSnapshotEntityBo entryPointSnapshotEntityBo;
 
   public ServletExecutionRequestBo(ServletExecutionRequestEntity servletExecutionRequestEntity) {
     this.setId(servletExecutionRequestEntity.getId());
@@ -33,6 +36,7 @@ public class ServletExecutionRequestBo extends ServletExecutionRequestEntity {
     this.setBody(servletExecutionRequestEntity.getBody());
     this.setBodyText(servletExecutionRequestEntity.getBodyText());
     this.setCurl(servletExecutionRequestEntity.getCurl());
+    this.setEntryPointSnapshotId(servletExecutionRequestEntity.getEntryPointSnapshotId());
     this.setCreator(servletExecutionRequestEntity.getCreator());
     this.setCreatorName(servletExecutionRequestEntity.getCreatorName());
     this.setCreateDt(servletExecutionRequestEntity.getCreateDt());

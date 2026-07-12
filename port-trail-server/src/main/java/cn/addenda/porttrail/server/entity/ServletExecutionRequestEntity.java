@@ -49,6 +49,8 @@ public class ServletExecutionRequestEntity extends SimpleBaseModel implements Se
   private String bodyText;
   private String curl;
 
+  private Long entryPointSnapshotId;
+
   public static ServletExecutionRequestEntity ofParam() {
     return new ServletExecutionRequestEntity();
   }

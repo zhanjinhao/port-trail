@@ -9,6 +9,7 @@ import cn.addenda.porttrail.agent.transform.interceptor.Interceptor;
 import cn.addenda.porttrail.agent.writer.servlet.AgentServletWriter;
 import cn.addenda.porttrail.common.constant.MediaType;
 import cn.addenda.porttrail.common.entrypoint.EntryPoint;
+import cn.addenda.porttrail.common.entrypoint.EntryPointSnapshot;
 import cn.addenda.porttrail.common.entrypoint.EntryPointType;
 import cn.addenda.porttrail.common.exception.PortTrailException;
 import cn.addenda.porttrail.common.pojo.LocaleData;
@@ -16,6 +17,7 @@ import cn.addenda.porttrail.common.pojo.FormData;
 import cn.addenda.porttrail.common.pojo.FormDataList;
 import cn.addenda.porttrail.common.pojo.servlet.bo.*;
 import cn.addenda.porttrail.common.util.UuidUtils;
+import cn.addenda.porttrail.infrastructure.entrypoint.EntryPointStackContext;
 import cn.addenda.porttrail.infrastructure.log.PortTrailLogger;
 import cn.addenda.porttrail.infrastructure.writer.ServletWriter;
 import net.bytebuddy.implementation.bind.annotation.*;
@@ -115,6 +117,7 @@ public class JavaxServletServiceInterceptor extends AbstractDeduplicationEntryPo
       }
 
       JavaxContentCachingResponseWrapper responseWrapper = new JavaxContentCachingResponseWrapper(response);
+      EntryPointSnapshot requestEntryPointSnapshot = EntryPointStackContext.snapshot();
       targetMethodArgs[1] = responseWrapper;
 
       Object call = zuper.call(targetMethodArgs);
@@ -122,7 +125,7 @@ public class JavaxServletServiceInterceptor extends AbstractDeduplicationEntryPo
       // ------------------
       // 处理ServletRequest
       // ------------------
-      ServletRequestBo servletRequestBo = assembleServletRequestBo(request, executionId);
+      ServletRequestBo servletRequestBo = assembleServletRequestBo(request, requestEntryPointSnapshot, executionId);
       if (requestWrapper != null) {
         servletRequestBo.setContentLength(requestWrapper.getCachedContent().size());
         if (servletRequestBo.getContentType() == null) {
@@ -205,7 +208,7 @@ public class JavaxServletServiceInterceptor extends AbstractDeduplicationEntryPo
     return requestWrapper.getParts();
   }
 
-  private ServletRequestBo assembleServletRequestBo(HttpServletRequest request, String executionId) {
+  private ServletRequestBo assembleServletRequestBo(HttpServletRequest request, EntryPointSnapshot entryPointSnapshot, String executionId) {
     ServletRequestBo servletRequestBo = new ServletRequestBo(executionId);
     servletRequestBo.setVersion(request.getProtocol());
     servletRequestBo.setScheme(request.getScheme());
@@ -232,6 +235,7 @@ public class JavaxServletServiceInterceptor extends AbstractDeduplicationEntryPo
     if (locale != null) {
       servletRequestBo.setLocale(new LocaleData(locale.getLanguage(), locale.getCountry(), locale.getVariant()));
     }
+    servletRequestBo.setEntryPointSnapshot(entryPointSnapshot);
     return servletRequestBo;
   }
 
@@ -472,7 +476,7 @@ public class JavaxServletServiceInterceptor extends AbstractDeduplicationEntryPo
       headerMap.put(headerName, new ArrayList<>(response.getHeaders(headerName)));
     }
     servletResponseBo.setHeaderMap(headerMap);
-
+    servletResponseBo.setEntryPointSnapshot(EntryPointStackContext.snapshot());
     return servletResponseBo;
   }
 

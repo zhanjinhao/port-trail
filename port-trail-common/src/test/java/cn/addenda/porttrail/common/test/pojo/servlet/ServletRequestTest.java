@@ -1,5 +1,8 @@
 package cn.addenda.porttrail.common.test.pojo.servlet;
 
+import cn.addenda.porttrail.common.entrypoint.EntryPoint;
+import cn.addenda.porttrail.common.entrypoint.EntryPointSnapshot;
+import cn.addenda.porttrail.common.entrypoint.EntryPointType;
 import cn.addenda.porttrail.common.pojo.LocaleData;
 import cn.addenda.porttrail.common.pojo.servlet.bo.AbstractServletExecution;
 import cn.addenda.porttrail.common.pojo.servlet.bo.ServletExecution;
@@ -18,6 +21,9 @@ class ServletRequestTest {
     Map<String, List<String>> headers = new HashMap<>();
     headers.put("Content-Type", Collections.singletonList("application/json"));
     LocaleData locale = new LocaleData("zh", "CN", "");
+    EntryPointSnapshot snapshot = EntryPointSnapshot.of(
+            Arrays.asList(EntryPoint.of(EntryPointType.SERVLET_JAVAX, "testDtoFromBo")),
+            "main", "trace-s1", 1L);
 
     ServletRequestBo bo = new ServletRequestBo("exec-001");
     bo.setVersion("HTTP/1.1");
@@ -33,6 +39,7 @@ class ServletRequestTest {
     bo.setContentLength(30);
     bo.setLocale(locale);
     bo.setBody("{\"user\":\"admin\",\"pass\":\"123\"}");
+    bo.setEntryPointSnapshot(snapshot);
 
     ServletRequestDto dto = new ServletRequestDto(bo);
 
@@ -49,10 +56,14 @@ class ServletRequestTest {
     Assertions.assertEquals(30, dto.getAllContentLength());
     Assertions.assertEquals(30, dto.getContentLength());
     Assertions.assertEquals("zh", dto.getLocale().getLanguage());
+    Assertions.assertEquals(snapshot, dto.getEntryPointSnapshot());
   }
 
   @Test
   void testBoFromDto() {
+    EntryPointSnapshot snapshot = EntryPointSnapshot.of(
+            Arrays.asList(EntryPoint.of(EntryPointType.SERVLET_JAVAX, "testBoFromDto")),
+            "worker", "trace-s2", 2L);
     ServletRequestDto dto = new ServletRequestDto("exec-002");
     dto.setVersion("HTTP/1.1");
     dto.setScheme("http");
@@ -67,6 +78,7 @@ class ServletRequestTest {
     dto.setContentLength(0);
     dto.setLocale(new cn.addenda.porttrail.common.pojo.LocaleDataDto(new LocaleData("en", "US", "")));
     dto.setBody(null);
+    dto.setEntryPointSnapshot(snapshot);
 
     ServletRequestBo bo = new ServletRequestBo(dto);
 
@@ -83,65 +95,90 @@ class ServletRequestTest {
     Assertions.assertEquals(0, bo.getContentLength());
     Assertions.assertEquals("en", bo.getLocale().getLanguage());
     Assertions.assertEquals(ServletExecution.SERVLET_EXECUTION_TYPE_REQUEST, bo.getServletExecutionType());
+    Assertions.assertEquals(snapshot, bo.getEntryPointSnapshot());
   }
 
   @Test
   void testBodySentinelBoToDto() {
+    EntryPointSnapshot snapshot = EntryPointSnapshot.of(
+            Arrays.asList(EntryPoint.of(EntryPointType.SERVLET_JAVAX, "sentinelBoToDto")),
+            "sentinel", "trace-ss1", 10L);
     ServletRequestBo bo = new ServletRequestBo("exec-s1");
+    bo.setEntryPointSnapshot(snapshot);
     bo.setBody(AbstractServletExecution.UNSUPPORTED_CONTENT_TYPE);
     ServletRequestDto dto = new ServletRequestDto(bo);
     Assertions.assertArrayEquals(AbstractServletDto.getUNSUPPORTED_CONTENT_TYPE(), dto.getBody());
+    Assertions.assertEquals(snapshot, dto.getEntryPointSnapshot());
 
     bo.setBody(AbstractServletExecution.UNSUPPORTED_CHARSET_ENCODING);
     dto = new ServletRequestDto(bo);
     Assertions.assertArrayEquals(AbstractServletDto.getUNSUPPORTED_CHARSET_ENCODING(), dto.getBody());
+    Assertions.assertEquals(snapshot, dto.getEntryPointSnapshot());
 
     bo.setBody(AbstractServletExecution.BODY_EMPTY);
     dto = new ServletRequestDto(bo);
     Assertions.assertArrayEquals(AbstractServletDto.getBODY_EMPTY(), dto.getBody());
+    Assertions.assertEquals(snapshot, dto.getEntryPointSnapshot());
 
     bo.setBody(AbstractServletExecution.BODY_EXCEED_LENGTH);
     dto = new ServletRequestDto(bo);
     Assertions.assertArrayEquals(AbstractServletDto.getBODY_EXCEED_LENGTH(), dto.getBody());
+    Assertions.assertEquals(snapshot, dto.getEntryPointSnapshot());
 
     bo.setBody(ServletRequestBo.BODY_BYTE_ARRAY);
     dto = new ServletRequestDto(bo);
     Assertions.assertArrayEquals(ServletRequestDto.getBODY_BYTE_ARRAY(), dto.getBody());
+    Assertions.assertEquals(snapshot, dto.getEntryPointSnapshot());
   }
 
   @Test
   void testBodySentinelDtoToBo() {
+    EntryPointSnapshot snapshot = EntryPointSnapshot.of(
+            Arrays.asList(EntryPoint.of(EntryPointType.SERVLET_JAVAX, "sentinelDtoToBo")),
+            "sentinel", "trace-ss2", 20L);
     ServletRequestDto dto = new ServletRequestDto("exec-s2");
+    dto.setEntryPointSnapshot(snapshot);
     dto.setBody(AbstractServletDto.getUNSUPPORTED_CONTENT_TYPE());
     ServletRequestBo bo = new ServletRequestBo(dto);
     Assertions.assertEquals(AbstractServletExecution.UNSUPPORTED_CONTENT_TYPE, bo.getBody());
+    Assertions.assertEquals(snapshot, bo.getEntryPointSnapshot());
 
     dto.setBody(AbstractServletDto.getUNSUPPORTED_CHARSET_ENCODING());
     bo = new ServletRequestBo(dto);
     Assertions.assertEquals(AbstractServletExecution.UNSUPPORTED_CHARSET_ENCODING, bo.getBody());
+    Assertions.assertEquals(snapshot, bo.getEntryPointSnapshot());
 
     dto.setBody(AbstractServletDto.getBODY_EMPTY());
     bo = new ServletRequestBo(dto);
     Assertions.assertEquals(AbstractServletExecution.BODY_EMPTY, bo.getBody());
+    Assertions.assertEquals(snapshot, bo.getEntryPointSnapshot());
 
     dto.setBody(AbstractServletDto.getBODY_EXCEED_LENGTH());
     bo = new ServletRequestBo(dto);
     Assertions.assertEquals(AbstractServletExecution.BODY_EXCEED_LENGTH, bo.getBody());
+    Assertions.assertEquals(snapshot, bo.getEntryPointSnapshot());
 
     dto.setBody(ServletRequestDto.getBODY_BYTE_ARRAY());
     bo = new ServletRequestBo(dto);
     Assertions.assertEquals(ServletRequestBo.BODY_BYTE_ARRAY, bo.getBody());
+    Assertions.assertEquals(snapshot, bo.getEntryPointSnapshot());
   }
 
   @Test
   void testBodySentinelRoundTrip() {
+    EntryPointSnapshot snapshot = EntryPointSnapshot.of(
+            Arrays.asList(EntryPoint.of(EntryPointType.SERVLET_JAVAX, "sentinelRoundTrip")),
+            "sentinel", "trace-ss3", 30L);
     ServletRequestBo bo1 = new ServletRequestBo("exec-s3");
+    bo1.setEntryPointSnapshot(snapshot);
     bo1.setBody(AbstractServletExecution.UNSUPPORTED_CONTENT_TYPE);
     ServletRequestDto dto1 = new ServletRequestDto(bo1);
     ServletRequestBo bo2 = new ServletRequestBo(dto1);
     ServletRequestDto dto2 = new ServletRequestDto(bo2);
     Assertions.assertEquals(bo1.getBody(), bo2.getBody());
     Assertions.assertArrayEquals(dto1.getBody(), dto2.getBody());
+    Assertions.assertEquals(bo1.getEntryPointSnapshot(), bo2.getEntryPointSnapshot());
+    Assertions.assertEquals(dto1.getEntryPointSnapshot(), dto2.getEntryPointSnapshot());
 
     bo1.setBody(AbstractServletExecution.UNSUPPORTED_CHARSET_ENCODING);
     dto1 = new ServletRequestDto(bo1);
@@ -149,6 +186,8 @@ class ServletRequestTest {
     dto2 = new ServletRequestDto(bo2);
     Assertions.assertEquals(bo1.getBody(), bo2.getBody());
     Assertions.assertArrayEquals(dto1.getBody(), dto2.getBody());
+    Assertions.assertEquals(bo1.getEntryPointSnapshot(), bo2.getEntryPointSnapshot());
+    Assertions.assertEquals(dto1.getEntryPointSnapshot(), dto2.getEntryPointSnapshot());
 
     bo1.setBody(AbstractServletExecution.BODY_EMPTY);
     dto1 = new ServletRequestDto(bo1);
@@ -156,6 +195,8 @@ class ServletRequestTest {
     dto2 = new ServletRequestDto(bo2);
     Assertions.assertEquals(bo1.getBody(), bo2.getBody());
     Assertions.assertArrayEquals(dto1.getBody(), dto2.getBody());
+    Assertions.assertEquals(bo1.getEntryPointSnapshot(), bo2.getEntryPointSnapshot());
+    Assertions.assertEquals(dto1.getEntryPointSnapshot(), dto2.getEntryPointSnapshot());
 
     bo1.setBody(AbstractServletExecution.BODY_EXCEED_LENGTH);
     dto1 = new ServletRequestDto(bo1);
@@ -163,6 +204,8 @@ class ServletRequestTest {
     dto2 = new ServletRequestDto(bo2);
     Assertions.assertEquals(bo1.getBody(), bo2.getBody());
     Assertions.assertArrayEquals(dto1.getBody(), dto2.getBody());
+    Assertions.assertEquals(bo1.getEntryPointSnapshot(), bo2.getEntryPointSnapshot());
+    Assertions.assertEquals(dto1.getEntryPointSnapshot(), dto2.getEntryPointSnapshot());
 
     bo1.setBody(ServletRequestBo.BODY_BYTE_ARRAY);
     dto1 = new ServletRequestDto(bo1);
@@ -170,6 +213,8 @@ class ServletRequestTest {
     dto2 = new ServletRequestDto(bo2);
     Assertions.assertEquals(bo1.getBody(), bo2.getBody());
     Assertions.assertArrayEquals(dto1.getBody(), dto2.getBody());
+    Assertions.assertEquals(bo1.getEntryPointSnapshot(), bo2.getEntryPointSnapshot());
+    Assertions.assertEquals(dto1.getEntryPointSnapshot(), dto2.getEntryPointSnapshot());
   }
 
   @Test
@@ -192,6 +237,9 @@ class ServletRequestTest {
     bo1.setContentLength(100);
     bo1.setLocale(locale);
     bo1.setBody("<html><body>OK</body></html>");
+    bo1.setEntryPointSnapshot(EntryPointSnapshot.of(
+            Arrays.asList(EntryPoint.of(EntryPointType.SERVLET_JAVAX, "roundTrip")),
+            "rt-thread", "rt-trace", 99L));
 
     ServletRequestDto dto1 = new ServletRequestDto(bo1);
     ServletRequestBo bo2 = new ServletRequestBo(dto1);
@@ -209,7 +257,10 @@ class ServletRequestTest {
     Assertions.assertEquals(bo1.getAllContentLength(), bo2.getAllContentLength());
     Assertions.assertEquals(bo1.getContentLength(), bo2.getContentLength());
     Assertions.assertEquals(bo1.getLocale().getLanguage(), bo2.getLocale().getLanguage());
+    Assertions.assertEquals(bo1.getLocale().getCountry(), bo2.getLocale().getCountry());
+    Assertions.assertEquals(bo1.getLocale().getVariant(), bo2.getLocale().getVariant());
     Assertions.assertEquals(bo1.getBody(), bo2.getBody());
+    Assertions.assertEquals(bo1.getEntryPointSnapshot(), bo2.getEntryPointSnapshot());
 
     Assertions.assertEquals(dto1.getExecutionId(), dto2.getExecutionId());
     Assertions.assertEquals(dto1.getVersion(), dto2.getVersion());
@@ -222,6 +273,11 @@ class ServletRequestTest {
     Assertions.assertEquals(dto1.getDatetime(), dto2.getDatetime());
     Assertions.assertEquals(dto1.getAllContentLength(), dto2.getAllContentLength());
     Assertions.assertEquals(dto1.getContentLength(), dto2.getContentLength());
+    Assertions.assertEquals(dto1.getLocale().getLanguage(), dto2.getLocale().getLanguage());
+    Assertions.assertEquals(dto1.getLocale().getCountry(), dto2.getLocale().getCountry());
+    Assertions.assertEquals(dto1.getLocale().getVariant(), dto2.getLocale().getVariant());
+    Assertions.assertArrayEquals(dto1.getBody(), dto2.getBody());
+    Assertions.assertEquals(dto1.getEntryPointSnapshot(), dto2.getEntryPointSnapshot());
   }
 
 }

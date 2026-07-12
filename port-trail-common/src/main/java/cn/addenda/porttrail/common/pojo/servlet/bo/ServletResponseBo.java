@@ -67,6 +67,7 @@ public class ServletResponseBo extends AbstractServletExecution {
 
   public ServletResponseBo(ServletResponseDto servletResponseDto) {
     super(servletResponseDto.getExecutionId());
+    this.setEntryPointSnapshot(servletResponseDto.getEntryPointSnapshot());
     this.setContentType(servletResponseDto.getContentType());
     this.setCharsetEncoding(servletResponseDto.getCharsetEncoding());
     this.setContentLength(servletResponseDto.getContentLength());

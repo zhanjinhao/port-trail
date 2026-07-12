@@ -83,6 +83,7 @@ public class ServletRequestBo extends AbstractServletExecution {
 
   public ServletRequestBo(ServletRequestDto servletRequestDto) {
     super(servletRequestDto.getExecutionId());
+    this.setEntryPointSnapshot(servletRequestDto.getEntryPointSnapshot());
     this.setVersion(servletRequestDto.getVersion());
     this.setScheme(servletRequestDto.getScheme());
     this.setMethod(servletRequestDto.getMethod());
