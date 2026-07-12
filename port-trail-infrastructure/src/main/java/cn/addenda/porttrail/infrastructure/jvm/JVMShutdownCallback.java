@@ -4,6 +4,6 @@ public interface JVMShutdownCallback {
 
   void shutdown() throws Throwable;
 
-  Integer getOrder();
+  int getOrder();
 
 }

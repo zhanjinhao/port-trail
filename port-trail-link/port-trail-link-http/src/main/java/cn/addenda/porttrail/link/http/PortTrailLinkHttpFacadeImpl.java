@@ -135,7 +135,7 @@ public class PortTrailLinkHttpFacadeImpl implements HttpFacade, JVMShutdownCallb
   }
 
   @Override
-  public Integer getOrder() {
+  public int getOrder() {
     return 100;
   }
 

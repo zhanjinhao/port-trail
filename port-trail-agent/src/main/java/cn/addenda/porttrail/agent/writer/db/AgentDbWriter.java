@@ -216,7 +216,7 @@ public class AgentDbWriter extends AbstractAgentWriter implements DbWriter {
     }
 
     @Override
-    public Integer getOrder() {
+    public int getOrder() {
       return 0;
     }
 

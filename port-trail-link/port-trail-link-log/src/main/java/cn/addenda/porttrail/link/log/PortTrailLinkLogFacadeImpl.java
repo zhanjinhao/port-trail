@@ -40,7 +40,7 @@ public class PortTrailLinkLogFacadeImpl implements LogFacade {
             }
 
             @Override
-            public Integer getOrder() {
+            public int getOrder() {
               return 100;
             }
           });

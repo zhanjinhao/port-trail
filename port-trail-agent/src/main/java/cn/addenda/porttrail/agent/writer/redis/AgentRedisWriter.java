@@ -183,7 +183,7 @@ public class AgentRedisWriter extends AbstractAgentWriter implements RedisWriter
     }
 
     @Override
-    public Integer getOrder() {
+    public int getOrder() {
       return 0;
     }
 

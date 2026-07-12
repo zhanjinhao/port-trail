@@ -188,7 +188,7 @@ public class AgentHttpClientWriter extends AbstractAgentWriter implements HttpCl
     }
 
     @Override
-    public Integer getOrder() {
+    public int getOrder() {
       return 0;
     }
 

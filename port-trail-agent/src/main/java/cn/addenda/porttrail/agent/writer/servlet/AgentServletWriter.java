@@ -185,7 +185,7 @@ public class AgentServletWriter extends AbstractAgentWriter implements ServletWr
     }
 
     @Override
-    public Integer getOrder() {
+    public int getOrder() {
       return 0;
     }
 
