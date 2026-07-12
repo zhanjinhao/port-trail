@@ -120,7 +120,7 @@ public class PortTrailDataSource extends WrapperAdapter implements DataSource, P
   // ----------------------------------
 
   @Override
-  public synchronized void closePortTrail() throws SQLException {
+  public void closePortTrail() throws SQLException {
     // 按照先申请资源后释放的步骤，在DataSource关闭的时候，其创造的Connection一定都关闭完成了。
     // 但是，为了在遇到异常步骤时尽可能减少内存泄漏，在close这里还是释放一下
     closeAllPortTrailConnection();
@@ -136,13 +136,22 @@ public class PortTrailDataSource extends WrapperAdapter implements DataSource, P
     portTrailConnectionMap.remove(portTrailConnection.getPortTrailId());
   }
 
-  private synchronized void closeAllPortTrailConnection() throws SQLException {
-    // 使用 entrySet 的副本进行遍历，避免并发修改异常
-    Set<Map.Entry<String, PortTrailConnection>> entries = new HashSet<>(portTrailConnectionMap.entrySet());
+  private void closeAllPortTrailConnection() throws SQLException {
+    // thread1: PortTrailDataSource#close
+    //              -> PortTrailDataSource#closePortTrail
+    //              -> PortTrailDataSource#closeAllPortTrailConnection
+    //              -> PortTrailConnection#closePortTrail : 依次拿DataSource、Connection和AbstractStatementExecutionBoQueue的锁
+    // thread2: PortTrailConnection#close
+    //              -> PortTrailDataSourceConnection#closePortTrail : 拿Connection和AbstractStatementExecutionBoQueue的锁
+    //              -> PortTrailDataSource#removePortTrailConnection : 拿DataSource的锁
+    // 如上并发会出现死锁。下面解决问题的方案是：thread1拿DataSource锁只做快照。
+    Set<PortTrailConnection> snapshot;
+    synchronized (this) {
+      snapshot = new HashSet<>(portTrailConnectionMap.values());
+    }
 
     SQLException firstException = null;
-    for (Map.Entry<String, PortTrailConnection> entry : entries) {
-      PortTrailConnection portTrailConnection = entry.getValue();
+    for (PortTrailConnection portTrailConnection : snapshot) {
       try {
         // close()方法执行的时候，会执行closePortTrail()方法
         portTrailConnection.closePortTrail();
