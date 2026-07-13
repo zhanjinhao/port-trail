@@ -2,6 +2,7 @@ package cn.addenda.porttrail.common.pojo.db.bo;
 
 import cn.addenda.porttrail.common.pojo.db.dto.PreparedStatementExecutionDto;
 import cn.addenda.porttrail.common.util.ArrayUtils;
+import cn.addenda.porttrail.common.util.StringUtils;
 import lombok.*;
 
 import java.sql.PreparedStatement;
@@ -63,9 +64,8 @@ public class PreparedStatementExecutionBo extends AbstractStatementExecutionBo {
 
   @Override
   public boolean ifKeepAlive() {
-    String parameterizedSqlWithoutBlank = parameterizedSql.replaceAll("\\s+", "");
-    return "select1".equalsIgnoreCase(parameterizedSqlWithoutBlank) ||
-            "select1fromdual".equalsIgnoreCase(parameterizedSqlWithoutBlank);
+    return StringUtils.endsWithIgnoreBlankAndCase(parameterizedSql, "select1")
+            || StringUtils.startsWithIgnoreBlankAndCase(parameterizedSql, "select1fromdual");
   }
 
 }

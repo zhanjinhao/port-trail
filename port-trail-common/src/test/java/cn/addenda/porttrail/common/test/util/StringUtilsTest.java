@@ -109,4 +109,101 @@ class StringUtilsTest {
     Assertions.assertTrue(StringUtils.startsWithIgnoreCase("hElLo", "HeLlO"));
   }
 
+  @Test
+  void testStartsWithIgnoreBlankAndCase_basicMatch() {
+    Assertions.assertTrue(StringUtils.startsWithIgnoreBlankAndCase("select1", "select1"));
+    Assertions.assertTrue(StringUtils.startsWithIgnoreBlankAndCase("select1 from dual", "select1"));
+    Assertions.assertTrue(StringUtils.startsWithIgnoreBlankAndCase("SELECT1", "select1"));
+    Assertions.assertTrue(StringUtils.startsWithIgnoreBlankAndCase("  select1", "select1"));
+    Assertions.assertTrue(StringUtils.startsWithIgnoreBlankAndCase("\t\n select1", "select1"));
+  }
+
+  @Test
+  void testStartsWithIgnoreBlankAndCase_notMatch() {
+    Assertions.assertFalse(StringUtils.startsWithIgnoreBlankAndCase("select2", "select1"));
+    Assertions.assertFalse(StringUtils.startsWithIgnoreBlankAndCase("select1", "select12"));
+    Assertions.assertFalse(StringUtils.startsWithIgnoreBlankAndCase("sel", "select1"));
+    Assertions.assertFalse(StringUtils.startsWithIgnoreBlankAndCase("  selection", "select1"));
+  }
+
+  @Test
+  void testStartsWithIgnoreBlankAndCase_nullHandling() {
+    Assertions.assertFalse(StringUtils.startsWithIgnoreBlankAndCase(null, "select1"));
+    Assertions.assertFalse(StringUtils.startsWithIgnoreBlankAndCase("select1", null));
+    Assertions.assertFalse(StringUtils.startsWithIgnoreBlankAndCase(null, null));
+  }
+
+  @Test
+  void testStartsWithIgnoreBlankAndCase_interleavedWhitespace() {
+    Assertions.assertTrue(StringUtils.startsWithIgnoreBlankAndCase(" s e l e c t 1", "select1"));
+    Assertions.assertTrue(StringUtils.startsWithIgnoreBlankAndCase("s e l e c t 1 from dual", "select1"));
+  }
+
+  @Test
+  void testStartsWithIgnoreBlankAndCase_emptyString() {
+    Assertions.assertFalse(StringUtils.startsWithIgnoreBlankAndCase("", "select1"));
+    Assertions.assertTrue(StringUtils.startsWithIgnoreBlankAndCase("select1", ""));
+    Assertions.assertTrue(StringUtils.startsWithIgnoreBlankAndCase("", ""));
+  }
+
+  @Test
+  void testStartsWithIgnoreBlankAndCase_onlyWhitespace() {
+    Assertions.assertFalse(StringUtils.startsWithIgnoreBlankAndCase("   ", "select1"));
+  }
+
+  @Test
+  void testEndsWithIgnoreBlankAndCase_basicMatch() {
+    Assertions.assertTrue(StringUtils.endsWithIgnoreBlankAndCase("select1", "select1"));
+    Assertions.assertTrue(StringUtils.endsWithIgnoreBlankAndCase("select 1", "select1"));
+    Assertions.assertTrue(StringUtils.endsWithIgnoreBlankAndCase("SELECT1", "select1"));
+    Assertions.assertTrue(StringUtils.endsWithIgnoreBlankAndCase("select1  ", "select1"));
+    Assertions.assertTrue(StringUtils.endsWithIgnoreBlankAndCase("select1\n\t", "select1"));
+  }
+
+  @Test
+  void testEndsWithIgnoreBlankAndCase_notMatch() {
+    Assertions.assertFalse(StringUtils.endsWithIgnoreBlankAndCase("select2", "select1"));
+    Assertions.assertFalse(StringUtils.endsWithIgnoreBlankAndCase("select1", "select12"));
+    Assertions.assertFalse(StringUtils.endsWithIgnoreBlankAndCase("sel", "select1"));
+    Assertions.assertFalse(StringUtils.endsWithIgnoreBlankAndCase("1select2", "select1"));
+  }
+
+  @Test
+  void testEndsWithIgnoreBlankAndCase_nullHandling() {
+    Assertions.assertFalse(StringUtils.endsWithIgnoreBlankAndCase(null, "select1"));
+    Assertions.assertFalse(StringUtils.endsWithIgnoreBlankAndCase("select1", null));
+    Assertions.assertFalse(StringUtils.endsWithIgnoreBlankAndCase(null, null));
+  }
+
+  @Test
+  void testEndsWithIgnoreBlankAndCase_interleavedWhitespace() {
+    Assertions.assertTrue(StringUtils.endsWithIgnoreBlankAndCase("s e l e c t 1", "select1"));
+    Assertions.assertTrue(StringUtils.endsWithIgnoreBlankAndCase("from dual s e l e c t 1", "select1"));
+    Assertions.assertTrue(StringUtils.endsWithIgnoreBlankAndCase("/* ping */ select 1", "select1"));
+  }
+
+  @Test
+  void testEndsWithIgnoreBlankAndCase_emptyString() {
+    Assertions.assertFalse(StringUtils.endsWithIgnoreBlankAndCase("", "select1"));
+    Assertions.assertTrue(StringUtils.endsWithIgnoreBlankAndCase("select1", ""));
+    Assertions.assertTrue(StringUtils.endsWithIgnoreBlankAndCase("", ""));
+  }
+
+  @Test
+  void testStartsWithIgnoreBlankAndCase_keepAliveScenario() {
+    Assertions.assertTrue(StringUtils.startsWithIgnoreBlankAndCase("SELECT 1", "select1"));
+    Assertions.assertTrue(StringUtils.startsWithIgnoreBlankAndCase("select  1 from dual", "select1"));
+    Assertions.assertTrue(StringUtils.startsWithIgnoreBlankAndCase("  \t  SELECT   1", "select1"));
+    Assertions.assertTrue(StringUtils.startsWithIgnoreBlankAndCase("Select\t1 from dual", "select1"));
+    Assertions.assertFalse(StringUtils.startsWithIgnoreBlankAndCase("select username from dual", "select1"));
+  }
+
+  @Test
+  void testEndsWithIgnoreBlankAndCase_keepAliveScenario() {
+    Assertions.assertTrue(StringUtils.endsWithIgnoreBlankAndCase("SELECT 1", "select1"));
+    Assertions.assertTrue(StringUtils.endsWithIgnoreBlankAndCase("/* check alive */ select  1", "select1"));
+    Assertions.assertTrue(StringUtils.endsWithIgnoreBlankAndCase("SELECT   1 \t  ", "select1"));
+    Assertions.assertFalse(StringUtils.endsWithIgnoreBlankAndCase("select 1 from dual", "select1"));
+  }
+
 }

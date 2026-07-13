@@ -2,6 +2,7 @@ package cn.addenda.porttrail.common.pojo.db.bo;
 
 import cn.addenda.porttrail.common.pojo.db.dto.StatementExecutionDto;
 import cn.addenda.porttrail.common.util.ArrayUtils;
+import cn.addenda.porttrail.common.util.StringUtils;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -60,9 +61,8 @@ public class StatementExecutionBo extends AbstractStatementExecutionBo {
   @Override
   public boolean ifKeepAlive() {
     for (StatementSql statementSql : statementSqlList) {
-      String sqlWithoutBlank = statementSql.getSql().replaceAll("\\s+", "");
-      if (!"select1".equalsIgnoreCase(sqlWithoutBlank)
-              && !"select1fromdual".equalsIgnoreCase(sqlWithoutBlank)) {
+      if (!StringUtils.endsWithIgnoreBlankAndCase(statementSql.getSql(), "select1")
+              && !StringUtils.startsWithIgnoreBlankAndCase(statementSql.getSql(), "select1fromdual")) {
         return false;
       }
     }

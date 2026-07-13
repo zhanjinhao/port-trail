@@ -131,4 +131,66 @@ public class StringUtils {
             str.regionMatches(true, 0, prefix, 0, prefix.length()));
   }
 
+  /**
+   * 忽略空白字符和大小写，判断字符串的前缀是否匹配。
+   * 跳过开头的空白字符，取前 N 个非空白字符（N = prefix.length()）与 prefix 做不区分大小写的比较。
+   */
+  public static boolean startsWithIgnoreBlankAndCase(String str, String prefix) {
+    if (str == null || prefix == null) {
+      return false;
+    }
+    int strLen = str.length();
+    int prefixLen = prefix.length();
+    int matched = 0;
+    for (int i = 0; i < strLen; i++) {
+      char c = str.charAt(i);
+      if (Character.isWhitespace(c)) {
+        continue;
+      }
+      if (matched >= prefixLen) {
+        return true;
+      }
+      if (!regionMatchesIgnoreCase(c, prefix.charAt(matched))) {
+        return false;
+      }
+      matched++;
+    }
+    return matched == prefixLen;
+  }
+
+  /**
+   * 忽略空白字符和大小写，判断字符串的后缀是否匹配。
+   * 跳过结尾的空白字符，取最后 N 个非空白字符（N = suffix.length()）与 suffix 做不区分大小写的比较。
+   */
+  public static boolean endsWithIgnoreBlankAndCase(String str, String suffix) {
+    if (str == null || suffix == null) {
+      return false;
+    }
+    int strLen = str.length();
+    int suffixLen = suffix.length();
+    int matched = 0;
+    for (int i = strLen - 1; i >= 0; i--) {
+      char c = str.charAt(i);
+      if (Character.isWhitespace(c)) {
+        continue;
+      }
+      if (matched >= suffixLen) {
+        return true;
+      }
+      if (!regionMatchesIgnoreCase(c, suffix.charAt(suffixLen - 1 - matched))) {
+        return false;
+      }
+      matched++;
+    }
+    return matched == suffixLen;
+  }
+
+  private static boolean regionMatchesIgnoreCase(char c1, char c2) {
+    if (c1 == c2) {
+      return true;
+    }
+    return Character.toUpperCase(c1) == Character.toUpperCase(c2)
+            || Character.toLowerCase(c1) == Character.toLowerCase(c2);
+  }
+
 }
