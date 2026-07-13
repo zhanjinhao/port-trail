@@ -90,7 +90,6 @@ public class LettuceRedisCommandUtils {
     }
     // UTF-8 解码
     CharsetDecoder decoder = UTF8_DECODER.get();
-    decoder.reset();
     try {
       return decoder.decode(ByteBuffer.wrap(bytes)).toString();
     } catch (CharacterCodingException s) {
