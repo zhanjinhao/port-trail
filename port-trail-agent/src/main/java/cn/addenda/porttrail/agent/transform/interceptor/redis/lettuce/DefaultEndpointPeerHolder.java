@@ -1,5 +1,6 @@
 package cn.addenda.porttrail.agent.transform.interceptor.redis.lettuce;
 
+import cn.addenda.porttrail.agent.link.LinkFacade;
 import cn.addenda.porttrail.agent.log.AgentPortTrailLoggerFactory;
 import cn.addenda.porttrail.common.util.DateUtils;
 import cn.addenda.porttrail.infrastructure.log.PortTrailLogger;
@@ -34,8 +35,8 @@ public class DefaultEndpointPeerHolder {
   private static final AtomicLong SEQ = new AtomicLong(0);
 
   private static final long LEAK_THRESHOLD_MS = TimeUnit.MINUTES.toMillis(10);
-  private static final long LEAK_DETECTION_INITIAL_DELAY = 5 * 60;
-  private static final long LEAK_DETECTION_PERIOD = 5 * 60;
+  private static final long LEAK_DETECTION_INITIAL_DELAY = 5 * 60L;
+  private static final long LEAK_DETECTION_PERIOD = 5 * 60L;
 
   static {
     ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor(r -> {
@@ -118,8 +119,15 @@ public class DefaultEndpointPeerHolder {
       }
     }
     if (!staleList.isEmpty()) {
-      log.error("DefaultEndpointPeerHolder 泄露检测发现[{}]条存活超过10分钟的记录, 总数[{}]。详情: {}",
-              staleList.size(), total, staleList);
+      String msg = String.format("DefaultEndpointPeerHolder 泄露检测发现[%s]条存活超过[%s ms]的记录, 总数[%s]。详情: %s",
+              staleList.size(), LEAK_THRESHOLD_MS, total, LinkFacade.toStr(staleList));
+      if (staleList.size() > 100) {
+        log.error(msg);
+      } else if (staleList.size() > 10) {
+        log.info(msg);
+      } else {
+        log.debug(msg);
+      }
     }
   }
 
