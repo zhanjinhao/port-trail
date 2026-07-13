@@ -12,6 +12,9 @@ import java.util.zip.*;
 public class CompressUtils {
 
   public static byte[] compress(byte[] bytes) {
+    if (bytes == null) {
+      return null;
+    }
     ByteArrayOutputStream out = new ByteArrayOutputStream();
     // todo 可配置
     Deflater deflater = new Deflater(1);
@@ -31,6 +34,9 @@ public class CompressUtils {
   }
 
   public static byte[] decompress(byte[] bytes) {
+    if (bytes == null) {
+      return null;
+    }
     ByteArrayOutputStream out = new ByteArrayOutputStream();
     Inflater inflater = new Inflater();
 
@@ -56,6 +62,9 @@ public class CompressUtils {
   }
 
   public static byte[] gzipCompress(byte[] bytes) {
+    if (bytes == null) {
+      return null;
+    }
     ByteArrayOutputStream out = new ByteArrayOutputStream();
     try (GZIPOutputStream gos = new GZIPOutputStream(out)) {
       gos.write(bytes);
@@ -66,6 +75,9 @@ public class CompressUtils {
   }
 
   public static byte[] gzipDecompress(byte[] bytes) {
+    if (bytes == null) {
+      return null;
+    }
     ByteArrayOutputStream out = new ByteArrayOutputStream();
     try (GZIPInputStream gis = new GZIPInputStream(new ByteArrayInputStream(bytes))) {
       byte[] buffer = new byte[2048];
