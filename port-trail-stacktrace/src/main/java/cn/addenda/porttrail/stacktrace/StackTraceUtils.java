@@ -126,7 +126,7 @@ public class StackTraceUtils {
       excludeSet.addAll(Arrays.stream(excludes).filter(Objects::nonNull)
               .map(IdentifierMatcherFactory::getIdentifierMatcher).collect(Collectors.toList()));
     }
-    return determineStackTraceElement(Thread.currentThread().getStackTrace(), excludeSet, ifExcludeLambda, ifExcludeAnonymousInnerClass);
+    return determineStackTraceElement(new Throwable().getStackTrace(), excludeSet, ifExcludeLambda, ifExcludeAnonymousInnerClass);
   }
 
   private static StackTraceElement determineStackTraceElement(
