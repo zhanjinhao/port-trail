@@ -70,6 +70,8 @@ public class PortTrailAgent {
 
               private List<File> linkJarList;
 
+              private ClassFileLocator.Compound cachedJarLocator;
+
               private List<File> getBootJarList() {
                 if (bootJarList == null) {
                   File bootDir = new File(AgentPackage.getPath(), "boot");
@@ -86,31 +88,36 @@ public class PortTrailAgent {
                 return linkJarList;
               }
 
+              private ClassFileLocator.Compound getJarLocator() {
+                if (cachedJarLocator == null) {
+                  // 创建复合ClassFileLocator
+                  List<ClassFileLocator> locators = new ArrayList<>();
+
+                  for (File jar : getBootJarList()) {
+                    try {
+                      locators.add(ClassFileLocator.ForJarFile.of(jar));
+                    } catch (IOException e) {
+                      log.error("Cannot create ClassFileLocator for jar: {}", jar.getAbsolutePath(), e);
+                    }
+                  }
+
+                  for (File jar : getLinkJarList()) {
+                    try {
+                      locators.add(ClassFileLocator.ForJarFile.of(jar));
+                    } catch (IOException e) {
+                      log.error("Cannot create ClassFileLocator for jar: {}", jar.getAbsolutePath(), e);
+                    }
+                  }
+
+                  cachedJarLocator = new ClassFileLocator.Compound(locators.toArray(new ClassFileLocator[0]));
+                }
+                return cachedJarLocator;
+              }
+
               @Override
               public TypePool typePool(ClassFileLocator classFileLocator, ClassLoader classLoader) {
-                // 创建复合ClassFileLocator
-                List<ClassFileLocator> locators = new java.util.ArrayList<>();
-                locators.add(classFileLocator);
-
-                for (File jar : getBootJarList()) {
-                  try {
-                    locators.add(ClassFileLocator.ForJarFile.of(jar));
-                  } catch (IOException e) {
-                    log.error("Cannot create ClassFileLocator for jar: {}", jar.getAbsolutePath(), e);
-                  }
-                }
-
-                for (File jar : getLinkJarList()) {
-                  try {
-                    locators.add(ClassFileLocator.ForJarFile.of(jar));
-                  } catch (IOException e) {
-                    log.error("Cannot create ClassFileLocator for jar: {}", jar.getAbsolutePath(), e);
-                  }
-                }
-
-                return TypePool.Default.WithLazyResolution.of(
-                        new ClassFileLocator.Compound(locators.toArray(new ClassFileLocator[0]))
-                );
+                return TypePool.Default.WithLazyResolution
+                        .of(new ClassFileLocator.Compound(classFileLocator, getJarLocator()));
               }
 
               @Override
