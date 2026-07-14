@@ -45,12 +45,31 @@ public class CompressUtils {
       byte[] buffer = new byte[512];
       while (!inflater.finished()) {
         int count = inflater.inflate(buffer);
-        if (count <= 0) {
+        if (count > 0) {
+          out.write(buffer, 0, count);
+          continue;
+        }
+        // count == 0：inflate 本次未产出数据，需区分具体原因，
+        // 既要正确处理合法的空内容流（原始数据为空），也要避免死循环。
+        if (inflater.finished()) {
+          // 流已正常结束（例如原始数据为空）
+          break;
+        }
+        if (inflater.needsDictionary()) {
           throw new PortTrailException(
-                  String.format("Deflate解压异常: 数据不完整, inflater.finished=%s, inflater.needsInput=%s, inflater.needsDictionary=%s",
+                  String.format("Deflate解压异常(需要预置字典):inflater#finished()=%s, inflater#needsInput()=%s, inflater#needsDictionary()=%s.",
                           inflater.finished(), inflater.needsInput(), inflater.needsDictionary()));
         }
-        out.write(buffer, 0, count);
+        if (inflater.needsInput()) {
+          // 已一次性setInput全部数据仍需要更多输入，说明数据不完整
+          throw new PortTrailException(
+                  String.format("Deflate解压异常(数据不完整):inflater#finished()=%s, inflater#needsInput()=%s, inflater#needsDictionary()=%s.",
+                          inflater.finished(), inflater.needsInput(), inflater.needsDictionary()));
+        }
+        // 兜底：既未结束、又不需要输入/字典却产出0字节，跳出避免死循环
+        throw new PortTrailException(
+                String.format("Deflate解压异常(未知异常):inflater#finished()=%s, inflater#needsInput()=%s, inflater#needsDictionary()=%s.",
+                        inflater.finished(), inflater.needsInput(), inflater.needsDictionary()));
       }
     } catch (DataFormatException e) {
       throw new PortTrailException("Deflate解压失败", e);
