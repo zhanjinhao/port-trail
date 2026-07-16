@@ -112,11 +112,11 @@ public class JavaxServletServiceInterceptor extends AbstractDeduplicationEntryPo
       // requestContentType为null时，虽然规范上不会有body，但也有可能有body
       if (requestContentType == null
               || MediaType.ifRequestContentType(requestContentType)) {
-        requestWrapper = new JavaxContentCachingRequestWrapper(request);
+        requestWrapper = new JavaxContentCachingRequestWrapper(request, requestMaxBodyLength);
         targetMethodArgs[0] = requestWrapper;
       }
 
-      JavaxContentCachingResponseWrapper responseWrapper = new JavaxContentCachingResponseWrapper(response);
+      JavaxContentCachingResponseWrapper responseWrapper = new JavaxContentCachingResponseWrapper(response, responseMaxBodyLength);
       EntryPointSnapshot requestEntryPointSnapshot = EntryPointStackContext.snapshot();
       targetMethodArgs[1] = responseWrapper;
 
@@ -127,7 +127,7 @@ public class JavaxServletServiceInterceptor extends AbstractDeduplicationEntryPo
       // ------------------
       ServletRequestBo servletRequestBo = assembleServletRequestBo(request, requestEntryPointSnapshot, executionId);
       if (requestWrapper != null) {
-        servletRequestBo.setContentLength(requestWrapper.getCachedContent().size());
+        servletRequestBo.setContentLength(requestWrapper.getContentSize());
         if (servletRequestBo.getContentType() == null) {
           // 如果没有content-type，按text处理，如果报错就设置为UNSUPPORTED_CONTENT_TYPE
           try {
@@ -242,34 +242,33 @@ public class JavaxServletServiceInterceptor extends AbstractDeduplicationEntryPo
   private String extractTextRequestBody(JavaxContentCachingRequestWrapper request, String executionId,
                                         String contentType, String queryString, boolean ifThrow) {
     // 如果请求体里有body，但是Controller未使用，body为blank
+    if (request.isContentExceedLimit()) {
+      return AbstractServletExecution.BODY_EXCEED_LENGTH;
+    }
     byte[] contentAsByteArray = request.getContentAsByteArray();
     if (contentAsByteArray.length > 0) {
-      if (request.getRequest().getContentLength() > requestMaxBodyLength) {
-        return AbstractServletExecution.BODY_EXCEED_LENGTH;
-      } else {
-        // 如果请求体配置了压缩，server(tomcat,jetty...)收到的原始字节是压缩后的字节
-        // springboot的执行链路是：filter -> servlet -> interceptor。
-        // 对于springboot来说，一般是在filter里进行解压。
-        // 所以这里获取到的是解压后的字节。
-        String body = convertBytesToString(contentAsByteArray, request.getCharacterEncoding(), executionId, ifThrow);
-        if (MediaType.ifRequestFormUrlencodedContentType(contentType)) {
-          /**
-           * 当contentType是{@link MediaType#APPLICATION_FORM_URLENCODED_VALUE}时。Body里的数据格式是：f1=123
-           * queryString的数据格式是：nodeType=3。
-           * 此时extract出来的body是nodeType=3&f1=123。
-           *
-           * 更极端的案例，body里的数据是nodeType=4&f1=123，queryString的数据是nodeType=3。
-           * 此时extract出来的body是nodeType=3&nodeType=4&f1=123。
-           *
-           * 在StringMVC中，使用'@RequestParam('nodeType') String nodeType'得到的数据是3,4；
-           * 在StringMVC中，使用'@RequestParam('nodeType') Integer nodeType'得到的数据是3（优先取queryString）
-           *
-           * 我们这里需要从body中移除queryString。
-           */
-          body = removeQueryStringFromBody(body, queryString, executionId);
-        }
-        return body;
+      // 如果请求体配置了压缩，server(tomcat,jetty...)收到的原始字节是压缩后的字节
+      // springboot的执行链路是：filter -> servlet -> interceptor。
+      // 对于springboot来说，一般是在filter里进行解压。
+      // 所以这里获取到的是解压后的字节。
+      String body = convertBytesToString(contentAsByteArray, request.getCharacterEncoding(), executionId, ifThrow);
+      if (MediaType.ifRequestFormUrlencodedContentType(contentType)) {
+        /**
+         * 当contentType是{@link MediaType#APPLICATION_FORM_URLENCODED_VALUE}时。Body里的数据格式是：f1=123
+         * queryString的数据格式是：nodeType=3。
+         * 此时extract出来的body是nodeType=3&f1=123。
+         *
+         * 更极端的案例，body里的数据是nodeType=4&f1=123，queryString的数据是nodeType=3。
+         * 此时extract出来的body是nodeType=3&nodeType=4&f1=123。
+         *
+         * 在StringMVC中，使用'@RequestParam('nodeType') String nodeType'得到的数据是3,4；
+         * 在StringMVC中，使用'@RequestParam('nodeType') Integer nodeType'得到的数据是3（优先取queryString）
+         *
+         * 我们这里需要从body中移除queryString。
+         */
+        body = removeQueryStringFromBody(body, queryString, executionId);
       }
+      return body;
     }
     return AbstractServletExecution.BODY_EMPTY;
   }
@@ -481,13 +480,12 @@ public class JavaxServletServiceInterceptor extends AbstractDeduplicationEntryPo
   }
 
   private String extractTextResponseBody(JavaxContentCachingResponseWrapper response, String executionId, boolean ifThrow) {
+    if (response.isContentExceedLimit()) {
+      return AbstractServletExecution.BODY_EXCEED_LENGTH;
+    }
     byte[] contentAsByteArray = response.getContentAsByteArray();
     if (contentAsByteArray.length > 0) {
-      if (contentAsByteArray.length > responseMaxBodyLength) {
-        return AbstractServletExecution.BODY_EXCEED_LENGTH;
-      } else {
-        return convertBytesToString(contentAsByteArray, response.getCharacterEncoding(), executionId, ifThrow);
-      }
+      return convertBytesToString(contentAsByteArray, response.getCharacterEncoding(), executionId, ifThrow);
     }
     return AbstractServletExecution.BODY_EMPTY;
   }

@@ -1,44 +1,24 @@
-/*
- * Copyright 2002-2019 the original author or authors.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      https://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package cn.addenda.porttrail.agent.transform.interceptor.servlet.javax;
 
-import cn.addenda.porttrail.common.helper.FastByteArrayOutputStream;
 import cn.addenda.porttrail.common.util.Assert;
 
 import javax.servlet.ServletOutputStream;
-import javax.servlet.WriteListener;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServletResponseWrapper;
 import java.io.*;
 
 /**
- * {@link javax.servlet.http.HttpServletResponse} wrapper that caches all content written to
- * the {@linkplain #getOutputStream() output stream} and {@linkplain #getWriter() writer},
- * and allows this content to be retrieved via a {@link #getContentAsByteArray() byte array}.
- * <p>
- * Note: As of Spring Framework 5.0, this wrapper is built on the Servlet 3.1 API.
+ * 采用tee模式：数据在读取的同时被缓存，应用层正常消费数据流不受影响。
+ * 通过contentCacheLimit控制缓存上限，超过上限后不再缓存，通过{@link #isContentExceedLimit()}
+ * 判断是否超限。{@link #getContentSize()}始终返回实际写出的总字节数。
  *
  * @author Juergen Hoeller
- * @see ContentCachingRequestWrapper
+ * @see JavaxContentCachingRequestWrapper
  * @since 4.1.3
  */
 public class JavaxContentCachingResponseWrapper extends HttpServletResponseWrapper {
 
-  private final FastByteArrayOutputStream content = new FastByteArrayOutputStream(1024);
+  private final LimitCacheOutputStream content;
 
   private ServletOutputStream outputStream;
 
@@ -50,16 +30,17 @@ public class JavaxContentCachingResponseWrapper extends HttpServletResponseWrapp
   /**
    * Create a new ContentCachingResponseWrapper for the given servlet response.
    *
-   * @param response the original servlet response
+   * @param response     the original servlet response
+   * @param limitContent 缓存上限（字节），超过此值后不再缓存。-1表示不限制。
    */
-  public JavaxContentCachingResponseWrapper(HttpServletResponse response) {
+  public JavaxContentCachingResponseWrapper(HttpServletResponse response, int limitContent) {
     super(response);
+    this.content = new LimitCacheOutputStream(1024, limitContent);
   }
 
 
   @Override
   public void sendError(int sc) throws IOException {
-    copyBodyToResponse(false);
     try {
       super.sendError(sc);
     } catch (IllegalStateException ex) {
@@ -71,7 +52,6 @@ public class JavaxContentCachingResponseWrapper extends HttpServletResponseWrapp
   @Override
   @SuppressWarnings("deprecation")
   public void sendError(int sc, String msg) throws IOException {
-    copyBodyToResponse(false);
     try {
       super.sendError(sc, msg);
     } catch (IllegalStateException ex) {
@@ -82,14 +62,13 @@ public class JavaxContentCachingResponseWrapper extends HttpServletResponseWrapp
 
   @Override
   public void sendRedirect(String location) throws IOException {
-    copyBodyToResponse(false);
     super.sendRedirect(location);
   }
 
   @Override
   public ServletOutputStream getOutputStream() throws IOException {
     if (this.outputStream == null) {
-      this.outputStream = new ResponseServletOutputStream(getResponse().getOutputStream());
+      this.outputStream = new TeeOutputStream(getResponse().getOutputStream(), content);
     }
     return this.outputStream;
   }
@@ -100,17 +79,15 @@ public class JavaxContentCachingResponseWrapper extends HttpServletResponseWrapp
   public PrintWriter getWriter() throws IOException {
     if (this.writer == null) {
       String characterEncoding = getCharacterEncoding();
-      this.writer = (characterEncoding != null ? new ResponsePrintWriter(characterEncoding) :
-              new ResponsePrintWriter(DEFAULT_CHARACTER_ENCODING));
+      this.writer = new PrintWriter(new OutputStreamWriter(getOutputStream(),
+              characterEncoding != null ? characterEncoding : DEFAULT_CHARACTER_ENCODING), true);
     }
     return this.writer;
   }
 
   @Override
   public void flushBuffer() throws IOException {
-    // Spring中此方法仅有如下的注释。但是我的实现中，数据已经写出去了，所以这里可以调用super.flushBuffer()
-    // do not flush the underlying response as the content has not been copied to it yet
-
+    // 数据已通过tee模式直接写到客户端，这里只需flush底层响应
     super.flushBuffer();
   }
 
@@ -188,104 +165,20 @@ public class JavaxContentCachingResponseWrapper extends HttpServletResponseWrapp
    * @since 4.2
    */
   public int getContentSize() {
-    return this.content.size();
+    return this.content.getContentWritten();
   }
 
   /**
-   * Copy the complete cached body content to the response.
-   *
-   * @since 4.2
+   * 写入的数据是否超过了limitContent限制。
    */
-  public void copyBodyToResponse() throws IOException {
-    copyBodyToResponse(true);
-  }
-
-  private static final String TRANSFER_ENCODING = "Transfer-Encoding";
-
-  /**
-   * Copy the cached body content to the response.
-   *
-   * @param complete whether to set a corresponding content length
-   *                 for the complete cached body content
-   * @since 4.2
-   */
-  protected void copyBodyToResponse(boolean complete) throws IOException {
-    if (this.content.size() > 0) {
-      HttpServletResponse rawResponse = (HttpServletResponse) getResponse();
-      if ((complete || this.contentLength != null) && !rawResponse.isCommitted()) {
-        if (rawResponse.getHeader(TRANSFER_ENCODING) == null) {
-          rawResponse.setContentLength(complete ? this.content.size() : this.contentLength);
-        }
-        this.contentLength = null;
-      }
-      this.content.writeTo(rawResponse.getOutputStream());
-      this.content.reset();
-      if (complete) {
-        super.flushBuffer();
-      }
-    }
+  public boolean isContentExceedLimit() {
+    return this.content.isExceedLimit();
   }
 
   public void clearContent() {
     this.content.reset();
   }
 
-  private class ResponseServletOutputStream extends ServletOutputStream {
-
-    private final ServletOutputStream os;
-
-    public ResponseServletOutputStream(ServletOutputStream os) {
-      this.os = os;
-    }
-
-    @Override
-    public void write(int b) throws IOException {
-      content.write(b);
-      // Spring的实现里是没有这行代码的
-      os.write(b);
-    }
-
-    @Override
-    public void write(byte[] b, int off, int len) throws IOException {
-      content.write(b, off, len);
-      // Spring的实现里是没有这行代码的
-      os.write(b, off, len);
-    }
-
-    @Override
-    public boolean isReady() {
-      return this.os.isReady();
-    }
-
-    @Override
-    public void setWriteListener(WriteListener writeListener) {
-      this.os.setWriteListener(writeListener);
-    }
-  }
-
-  private class ResponsePrintWriter extends PrintWriter {
-
-    public ResponsePrintWriter(String characterEncoding) throws UnsupportedEncodingException {
-      super(new OutputStreamWriter(content, characterEncoding));
-    }
-
-    @Override
-    public void write(char[] buf, int off, int len) {
-      super.write(buf, off, len);
-      super.flush();
-    }
-
-    @Override
-    public void write(String s, int off, int len) {
-      super.write(s, off, len);
-      super.flush();
-    }
-
-    @Override
-    public void write(int c) {
-      super.write(c);
-      super.flush();
-    }
-  }
+  private static final String TRANSFER_ENCODING = "Transfer-Encoding";
 
 }
