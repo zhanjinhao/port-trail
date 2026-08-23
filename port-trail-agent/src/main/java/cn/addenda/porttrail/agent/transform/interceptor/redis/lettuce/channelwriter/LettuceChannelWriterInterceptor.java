@@ -18,6 +18,7 @@ import net.bytebuddy.implementation.bind.annotation.*;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.nio.ByteBuffer;
 import java.util.Deque;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -128,44 +129,97 @@ public class LettuceChannelWriterInterceptor
           sb.append(' ');
         }
         Object singularArgument = singularArguments.get(i);
-        byte[] byteVal = SingularArgumentsHolder.getBytesArgumentByteValue(singularArgument);
-        if (byteVal != null) {
-          try {
-            sb.append(LettuceRedisCommandUtils.bytesToString(byteVal));
-          } catch (Exception e) {
-            sb.append(singularArgument);
-          }
-        } else {
-          byteVal = SingularArgumentsHolder.getValueArgumentByteValue(singularArgument);
-          if (byteVal != null) {
-            try {
-              sb.append(String.format("value<%s>", LettuceRedisCommandUtils.bytesToString(byteVal)));
-            } catch (Exception e) {
-              sb.append(singularArgument);
-            }
-          } else {
-            sb.append(singularArgument);
-          }
-        }
+        appendSingularArgument(sb, singularArgument);
       }
       return sb.toString();
     } catch (Exception ignored) {
+      return safeToCommandString(args);
+    }
+  }
+
+  /**
+   * 将单个 SingularArgument 追加到 StringBuilder 中。
+   * 按类型优先级依次尝试提取可读的字节值：
+   * 1. BytesArgument（排除 ProtocolKeywordArgument）
+   * 2. ValueArgument（val 为 byte[] 直接取；否则通过 codec 编码）
+   * 3. KeyArgument（通过 codec.encodeKey 编码为字节）
+   * 4. 其他类型（StringArgument、IntegerArgument、DoubleArgument、CharArrayArgument 等）使用 toString()
+   */
+  private static void appendSingularArgument(StringBuilder sb, Object singularArgument) {
+    // 1. BytesArgument（排除 ProtocolKeywordArgument）
+    if (SingularArgumentsHolder.appendBytesArgument(singularArgument, sb)) {
+      return;
+    }
+
+    // 2. ValueArgument
+    if (SingularArgumentsHolder.appendValueArgument(singularArgument, sb)) {
+      return;
+    }
+
+    // 3. KeyArgument
+    if (SingularArgumentsHolder.appendKeyArgument(singularArgument, sb)) {
+      return;
+    }
+
+    // 4. 其他类型：StringArgument、IntegerArgument、DoubleArgument、CharArrayArgument 等
+    //    这些类型的 toString() 都是可读的
+    try {
+      sb.append(singularArgument);
+    } catch (Exception e) {
+      sb.append(singularArgument.getClass().getSimpleName());
+    }
+  }
+
+  /**
+   * 安全的 toCommandString 兜底，避免因 SingularArgument.toString() 异常导致整体失败。
+   */
+  private static String safeToCommandString(CommandArgs<?, ?> args) {
+    try {
       return args.toCommandString();
+    } catch (Exception e) {
+      return "";
     }
   }
 
   /**
    * 通过反射访问 CommandArgs 的包私有内部类和私有字段。
-   * SingularArgument 是包私有的，BytesArgument 也是包私有的，无法直接从外部访问。
+   * SingularArgument 是包私有的，BytesArgument、ValueArgument、KeyArgument也是包私有的，无法直接从外部访问。
+   * <p>
+   * Lettuce 6.4.2 中 SingularArgument 的子类：
+   * - BytesArgument (byte[] val)
+   * - ProtocolKeywordArgument (extends BytesArgument)
+   * - KeyArgument (K key, RedisCodec codec)
+   * - ValueArgument (V val, RedisCodec codec)
+   * - StringArgument (String val)
+   * - CharArrayArgument (char[] val)
+   * - IntegerArgument (long val)
+   * - DoubleArgument (double val)
    */
   private static class SingularArgumentsHolder {
     public static final String SIMPLE_NAME_BytesArgument = "BytesArgument";
     public static final String SIMPLE_NAME_ValueArgument = "ValueArgument";
+    public static final String SIMPLE_NAME_KeyArgument = "KeyArgument";
+
     private static volatile Field singularArgumentsField;
+
+    // BytesArgument
     private static volatile Class<?> bytesArgumentClass;
     private static volatile Field bytesArgumentValField;
+
+    // ValueArgument
     private static volatile Class<?> valueArgumentClass;
     private static volatile Field valueArgumentValField;
+    private static volatile Field valueArgumentCodecField;
+
+    // KeyArgument
+    private static volatile Class<?> keyArgumentClass;
+    private static volatile Field keyArgumentKeyField;
+    private static volatile Field keyArgumentCodecField;
+
+    // RedisCodec.encodeKey / encodeValue 方法
+    private static volatile Method encodeKeyMethod;
+    private static volatile Method encodeValueMethod;
+
     private static volatile boolean initialized = false;
 
     private static void ensureInitialized() {
@@ -181,16 +235,34 @@ public class LettuceChannelWriterInterceptor
           singularArgumentsField.setAccessible(true);
 
           for (Class<?> inner : CommandArgs.class.getDeclaredClasses()) {
-            if (SIMPLE_NAME_BytesArgument.equals(inner.getSimpleName())) {
+            String simpleName = inner.getSimpleName();
+            if (SIMPLE_NAME_BytesArgument.equals(simpleName)) {
               bytesArgumentClass = inner;
               bytesArgumentValField = inner.getDeclaredField("val");
               bytesArgumentValField.setAccessible(true);
-            } else if (SIMPLE_NAME_ValueArgument.equals(inner.getSimpleName())) {
+            } else if (SIMPLE_NAME_ValueArgument.equals(simpleName)) {
               valueArgumentClass = inner;
               valueArgumentValField = inner.getDeclaredField("val");
               valueArgumentValField.setAccessible(true);
+              valueArgumentCodecField = inner.getDeclaredField("codec");
+              valueArgumentCodecField.setAccessible(true);
+            } else if (SIMPLE_NAME_KeyArgument.equals(simpleName)) {
+              keyArgumentClass = inner;
+              keyArgumentKeyField = inner.getDeclaredField("key");
+              keyArgumentKeyField.setAccessible(true);
+              keyArgumentCodecField = inner.getDeclaredField("codec");
+              keyArgumentCodecField.setAccessible(true);
             }
           }
+
+          // 加载 RedisCodec 的 encodeKey/encodeValue 方法
+          try {
+            Class<?> codecClass = Class.forName("io.lettuce.core.codec.RedisCodec");
+            encodeKeyMethod = codecClass.getMethod("encodeKey", Object.class);
+            encodeValueMethod = codecClass.getMethod("encodeValue", Object.class);
+          } catch (Exception ignored) {
+          }
+
         } catch (NoSuchFieldException e) {
           throw new RuntimeException("Failed to access CommandArgs internal fields", e);
         }
@@ -213,40 +285,150 @@ public class LettuceChannelWriterInterceptor
      * 排除 ProtocolKeywordArgument（继承自 BytesArgument，但有更好的 toString()）。
      * 非 BytesArgument 类型返回 null。
      */
-    static byte[] getBytesArgumentByteValue(Object arg) {
+    static boolean appendBytesArgument(Object singularArgument, StringBuilder sb) {
       ensureInitialized();
-      String simpleName = arg.getClass().getSimpleName();
+      String simpleName = singularArgument.getClass().getSimpleName();
       // BytesArgument 及其子类（排除 ProtocolKeywordArgument）
-      if (bytesArgumentClass != null && bytesArgumentClass.isInstance(arg)
+      if (bytesArgumentClass != null && bytesArgumentClass.isInstance(singularArgument)
               && !"ProtocolKeywordArgument".equals(simpleName)) {
         try {
-          return (byte[]) bytesArgumentValField.get(arg);
+          byte[] bytes = (byte[]) bytesArgumentValField.get(singularArgument);
+          tryAppendBytes(sb, singularArgument, bytes);
+          return true;
         } catch (IllegalAccessException e) {
-          return null;
+          return false;
         }
       }
-      return null;
+      return false;
+    }
+
+    private static final String VALUE_FORMAT = "value<%s>";
+
+    /**
+     * 提取 ValueArgument 中的字节值。
+     * 1. val 为 byte[] 时直接返回
+     * 2. val 为非 byte[] 时，通过 codec.encodeValue(val) 编码为 ByteBuffer 再转为 byte[]
+     * 非 ValueArgument 类型返回 null。
+     */
+    static boolean appendValueArgument(Object singularArgument, StringBuilder sb) {
+      ensureInitialized();
+      if (valueArgumentClass != null && valueArgumentClass.isInstance(singularArgument)) {
+        try {
+          Object val = valueArgumentValField.get(singularArgument);
+          if (val == null || val instanceof CharSequence) {
+            sb.append(String.format(VALUE_FORMAT, val));
+            return true;
+          }
+          if (val instanceof byte[]) {
+            byte[] bytes = (byte[]) val;
+            tryAppendBytes(sb, singularArgument, bytes, VALUE_FORMAT);
+            return true;
+          }
+          // val 为非 byte[]，通过 codec 编码
+          Object codec = valueArgumentCodecField.get(singularArgument);
+          if (codec != null) {
+            byte[] bytes = encodeViaCodec(codec, val, true);
+            if (bytes != null) {
+              tryAppendBytes(sb, singularArgument, bytes, VALUE_FORMAT);
+              return true;
+            }
+          }
+        } catch (Exception e) {
+          return false;
+        }
+      }
+      return false;
+    }
+
+    private static final String KEY_FORMAT = "key<%s>";
+
+    /**
+     * 提取 KeyArgument 中的字节值。
+     * 通过 codec.encodeKey(key) 编码为 ByteBuffer，再转为 byte[]。
+     * 非 KeyArgument 类型返回 null。
+     */
+    static boolean appendKeyArgument(Object singularArgument, StringBuilder sb) {
+      ensureInitialized();
+      if (keyArgumentClass != null && keyArgumentClass.isInstance(singularArgument)) {
+        try {
+          Object key = keyArgumentKeyField.get(singularArgument);
+          if (key == null || key instanceof CharSequence) {
+            sb.append(String.format(KEY_FORMAT, key));
+            return true;
+          }
+          if (key instanceof byte[]) {
+            byte[] bytes = (byte[]) key;
+            tryAppendBytes(sb, singularArgument, bytes, KEY_FORMAT);
+            return true;
+          }
+          // key 为非 byte[]，通过 codec 编码
+          Object codec = keyArgumentCodecField.get(singularArgument);
+          if (codec != null) {
+            byte[] bytes = encodeViaCodec(codec, key, false);
+            if (bytes != null) {
+              tryAppendBytes(sb, singularArgument, bytes, KEY_FORMAT);
+              return true;
+            }
+          }
+        } catch (Exception e) {
+          return false;
+        }
+      }
+      return false;
     }
 
     /**
-     * 提取 ValueArgument 中的 byte[] 值（仅当 val 为 byte[] 类型时）。
-     * val 为非 byte[] 类型或非 ValueArgument 时返回 null。
+     * 通过 RedisCodec 将对象编码为字节数组。
+     *
+     * @param codec   RedisCodec 实例
+     * @param value   待编码的对象
+     * @param isValue true 调用 encodeValue，false 调用 encodeKey
      */
-    static byte[] getValueArgumentByteValue(Object arg) {
-      ensureInitialized();
-      // ValueArgument，仅当 val 为 byte[] 时
-      if (valueArgumentClass != null && valueArgumentClass.isInstance(arg)) {
-        try {
-          Object val = valueArgumentValField.get(arg);
-          if (val instanceof byte[]) {
-            return (byte[]) val;
-          }
-        } catch (IllegalAccessException e) {
+    private static byte[] encodeViaCodec(Object codec, Object value, boolean isValue) {
+      if (codec == null || value == null) {
+        return null;
+      }
+      try {
+        Method method = isValue ? encodeValueMethod : encodeKeyMethod;
+        if (method == null) {
           return null;
         }
+        ByteBuffer buffer = (ByteBuffer) method.invoke(codec, value);
+        if (buffer == null) {
+          return null;
+        }
+        byte[] bytes = new byte[buffer.remaining()];
+        buffer.get(bytes);
+        return bytes;
+      } catch (Exception e) {
+        return null;
       }
-      return null;
     }
+
+    private static void tryAppendBytes(StringBuilder sb, Object singularArgument, byte[] bytes) {
+      try {
+        sb.append(LettuceRedisCommandUtils.bytesToString(bytes));
+      } catch (Exception e1) {
+        try {
+          sb.append(new String(bytes, java.nio.charset.StandardCharsets.UTF_8));
+        } catch (Exception e2) {
+          sb.append(singularArgument);
+        }
+      }
+    }
+
+    private static void tryAppendBytes(StringBuilder sb, Object singularArgument, byte[] bytes, String format) {
+      try {
+        sb.append(String.format(format, LettuceRedisCommandUtils.bytesToString(bytes)));
+      } catch (Exception e1) {
+        try {
+          sb.append(String.format(format, new String(bytes, java.nio.charset.StandardCharsets.UTF_8)));
+        } catch (Exception e2) {
+          sb.append(singularArgument);
+        }
+      }
+    }
+
   }
 
   @Override

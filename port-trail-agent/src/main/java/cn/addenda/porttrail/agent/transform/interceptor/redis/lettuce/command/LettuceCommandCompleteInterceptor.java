@@ -10,8 +10,7 @@ import cn.addenda.porttrail.agent.writer.redis.AgentRedisWriter;
 import cn.addenda.porttrail.common.pojo.redis.bo.RedisBo;
 import cn.addenda.porttrail.common.pojo.redis.bo.RedisExecution;
 import cn.addenda.porttrail.infrastructure.log.PortTrailLogger;
-import io.lettuce.core.StreamMessage;
-import io.lettuce.core.ValueScanCursor;
+import io.lettuce.core.*;
 import io.lettuce.core.models.stream.ClaimedMessages;
 import io.lettuce.core.output.CommandOutput;
 import io.lettuce.core.protocol.RedisCommand;
@@ -108,16 +107,9 @@ public class LettuceCommandCompleteInterceptor implements Interceptor {
    */
   @SuppressWarnings("unchecked")
   private static String deepConvertToString(Object obj) {
-    if (obj == null) {
-      return "null";
-    }
-    if (obj instanceof byte[]) {
-      byte[] bytes = (byte[]) obj;
-      try {
-        return LettuceRedisCommandUtils.bytesToString(bytes);
-      } catch (Exception e) {
-        return obj.toString();
-      }
+    String tmp = safeToString(obj);
+    if (tmp != null) {
+      return tmp;
     }
     if (obj instanceof Collection) {
       return ((Collection<?>) obj).stream()
@@ -129,7 +121,56 @@ public class LettuceCommandCompleteInterceptor implements Interceptor {
               .map(entry -> deepConvertToString(entry.getKey()) + ":" + deepConvertToString(entry.getValue()))
               .collect(Collectors.joining(",", "{", "}"));
     }
+    if (obj instanceof KeyValue) {
+      return extractKeyValueResult((KeyValue<?, ?>) obj);
+    }
+    if (obj instanceof ScoredValue) {
+      return extractKeyValueResult((ScoredValue<?>) obj);
+    }
+    if (obj instanceof GeoValue) {
+      return extractGeoValueResult((GeoValue<?>) obj);
+    }
     return obj.toString();
+  }
+
+  private static String extractGeoCoordinatesResult(GeoCoordinates obj) {
+    return String.format("(%s, %s)", obj.getX(), obj.getY());
+  }
+
+  private static String extractGeoValueResult(GeoValue<?> get) {
+    return get.hasValue() ?
+            String.format("GeoValue[%s, %s]", extractGeoCoordinatesResult(get.getCoordinates()), safeToString(get.getValue()))
+            : String.format("GeoValue[%s].empty", extractGeoCoordinatesResult(get.getCoordinates()));
+  }
+
+  private static String extractKeyValueResult(ScoredValue<?> get) {
+    return get.hasValue() ?
+            String.format("ScoredValue[%f, %s]", get.getScore(), safeToString(get.getValue()))
+            : String.format("ScoredValue[%f].empty", get.getScore());
+  }
+
+  private static String extractKeyValueResult(KeyValue<?, ?> get) {
+    return get.hasValue() ?
+            String.format("KeyValue[%s, %s]", safeToString(get.getKey()), safeToString(get.getValue()))
+            : String.format("KeyValue[%s].empty", get.getKey());
+  }
+
+  private static String safeToString(Object obj) {
+    if (obj == null) {
+      return "null";
+    }
+    if (obj instanceof CharSequence) {
+      return obj.toString();
+    }
+    if (obj instanceof byte[]) {
+      byte[] bytes = (byte[]) obj;
+      try {
+        return LettuceRedisCommandUtils.bytesToString(bytes);
+      } catch (Exception e) {
+        return obj.toString();
+      }
+    }
+    return null;
   }
 
   @Setter
