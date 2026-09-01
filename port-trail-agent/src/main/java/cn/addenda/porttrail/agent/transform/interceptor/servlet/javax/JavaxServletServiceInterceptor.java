@@ -122,6 +122,10 @@ public class JavaxServletServiceInterceptor extends AbstractDeduplicationEntryPo
 
       Object call = zuper.call(targetMethodArgs);
 
+      // 把 response wrapper 中通过 getWriter() 写出的缓冲内容刷入 TeeOutputStream（缓存+底层响应）。
+      // 否则 OutputStreamWriter 的编码缓冲会拦截数据，导致客户端拿不到 body，trace 也采集不到 response body。
+      responseWrapper.flushBuffer();
+
       // ------------------
       // 处理ServletRequest
       // ------------------
@@ -182,8 +186,8 @@ public class JavaxServletServiceInterceptor extends AbstractDeduplicationEntryPo
       }
       servletWriter.writeServletResponse(servletResponseBo);
 
+      // 清空缓存，释放 response body 占用的内存。响应已在 zuper.call() 之后通过 flushBuffer() 提交给客户端。
       responseWrapper.clearContent();
-      responseWrapper.flushBuffer();
 
       return call;
     });

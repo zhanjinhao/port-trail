@@ -87,7 +87,15 @@ public class JavaxContentCachingResponseWrapper extends HttpServletResponseWrapp
 
   @Override
   public void flushBuffer() throws IOException {
-    // 数据已通过tee模式直接写到客户端，这里只需flush底层响应
+    // 先把 writer/stream 缓冲的数据刷入 TeeOutputStream（同时进缓存和底层响应），再flush底层响应。
+    // 否则通过 getWriter() 写出的内容会一直滞留在 OutputStreamWriter 的编码缓冲里，
+    // 既到不了客户端，也进不了缓存（trace 的 response body 会丢失）。
+    if (this.writer != null) {
+      this.writer.flush();
+    }
+    if (this.outputStream != null) {
+      this.outputStream.flush();
+    }
     super.flushBuffer();
   }
 
