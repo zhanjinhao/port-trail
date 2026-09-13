@@ -27,6 +27,16 @@ public class AgentPortTrailLogger implements PortTrailLogger {
   }
 
   @Override
+  public void trace(String format, Object arg) {
+    logFacade.trace(format, arg);
+  }
+
+  @Override
+  public void trace(String format, Object arg1, Object arg2) {
+    logFacade.trace(format, arg1, arg2);
+  }
+
+  @Override
   public void trace(String format, Object... arguments) {
     logFacade.trace(format, arguments);
   }
@@ -39,6 +49,16 @@ public class AgentPortTrailLogger implements PortTrailLogger {
   @Override
   public void debug(String msg) {
     logFacade.debug(msg);
+  }
+
+  @Override
+  public void debug(String format, Object arg) {
+    logFacade.debug(format, arg);
+  }
+
+  @Override
+  public void debug(String format, Object arg1, Object arg2) {
+    logFacade.debug(format, arg1, arg2);
   }
 
   @Override
@@ -57,6 +77,16 @@ public class AgentPortTrailLogger implements PortTrailLogger {
   }
 
   @Override
+  public void info(String format, Object arg) {
+    logFacade.info(format, arg);
+  }
+
+  @Override
+  public void info(String format, Object arg1, Object arg2) {
+    logFacade.info(format, arg1, arg2);
+  }
+
+  @Override
   public void info(String format, Object... arguments) {
     logFacade.info(format, arguments);
   }
@@ -72,6 +102,16 @@ public class AgentPortTrailLogger implements PortTrailLogger {
   }
 
   @Override
+  public void warn(String format, Object arg) {
+    logFacade.warn(format, arg);
+  }
+
+  @Override
+  public void warn(String format, Object arg1, Object arg2) {
+    logFacade.warn(format, arg1, arg2);
+  }
+
+  @Override
   public void warn(String format, Object... arguments) {
     logFacade.warn(format, arguments);
   }
@@ -84,6 +124,16 @@ public class AgentPortTrailLogger implements PortTrailLogger {
   @Override
   public void error(String msg) {
     logFacade.error(msg);
+  }
+
+  @Override
+  public void error(String format, Object arg) {
+    logFacade.error(format, arg);
+  }
+
+  @Override
+  public void error(String format, Object arg1, Object arg2) {
+    logFacade.error(format, arg1, arg2);
   }
 
   @Override

@@ -23,6 +23,16 @@ public class JdbcPortTrailLogger implements PortTrailLogger {
   }
 
   @Override
+  public void trace(String format, Object arg) {
+    log.trace(format, arg);
+  }
+
+  @Override
+  public void trace(String format, Object arg1, Object arg2) {
+    log.trace(format, arg1, arg2);
+  }
+
+  @Override
   public void trace(String format, Object... arguments) {
     log.trace(format, arguments);
   }
@@ -35,6 +45,16 @@ public class JdbcPortTrailLogger implements PortTrailLogger {
   @Override
   public void debug(String msg) {
     log.debug(msg);
+  }
+
+  @Override
+  public void debug(String format, Object arg) {
+    log.debug(format, arg);
+  }
+
+  @Override
+  public void debug(String format, Object arg1, Object arg2) {
+    log.debug(format, arg1, arg2);
   }
 
   @Override
@@ -53,6 +73,16 @@ public class JdbcPortTrailLogger implements PortTrailLogger {
   }
 
   @Override
+  public void info(String format, Object arg) {
+    log.info(format, arg);
+  }
+
+  @Override
+  public void info(String format, Object arg1, Object arg2) {
+    log.info(format, arg1, arg2);
+  }
+
+  @Override
   public void info(String format, Object... arguments) {
     log.info(format, arguments);
   }
@@ -68,6 +98,16 @@ public class JdbcPortTrailLogger implements PortTrailLogger {
   }
 
   @Override
+  public void warn(String format, Object arg) {
+    log.warn(format, arg);
+  }
+
+  @Override
+  public void warn(String format, Object arg1, Object arg2) {
+    log.warn(format, arg1, arg2);
+  }
+
+  @Override
   public void warn(String format, Object... arguments) {
     log.warn(format, arguments);
   }
@@ -80,6 +120,16 @@ public class JdbcPortTrailLogger implements PortTrailLogger {
   @Override
   public void error(String msg) {
     log.error(msg);
+  }
+
+  @Override
+  public void error(String format, Object arg) {
+    log.error(format, arg);
+  }
+
+  @Override
+  public void error(String format, Object arg1, Object arg2) {
+    log.error(format, arg1, arg2);
   }
 
   @Override
