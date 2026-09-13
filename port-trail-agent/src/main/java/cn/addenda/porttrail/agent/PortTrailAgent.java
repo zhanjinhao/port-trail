@@ -3,6 +3,7 @@ package cn.addenda.porttrail.agent;
 import cn.addenda.porttrail.agent.log.AgentPortTrailLoggerFactory;
 import cn.addenda.porttrail.agent.transform.AgentTransformer;
 import cn.addenda.porttrail.agent.transform.InterceptorPointDefineGather;
+import cn.addenda.porttrail.agent.transform.interceptor.InterceptorPointDefine;
 import cn.addenda.porttrail.agent.transform.interceptor.datasource.druid.DruidDruidDataSourceInterceptorPointDefine;
 import cn.addenda.porttrail.agent.transform.interceptor.datasource.hikari.HikariConcurrentBagInterceptorPointDefine;
 import cn.addenda.porttrail.agent.transform.interceptor.driver.mysql.MySQLDriverInterceptorPointDefine;
@@ -39,6 +40,8 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.instrument.Instrumentation;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.jar.JarFile;
 
@@ -47,6 +50,49 @@ import static net.bytebuddy.matcher.ElementMatchers.nameContains;
 import static net.bytebuddy.matcher.ElementMatchers.nameStartsWith;
 
 public class PortTrailAgent {
+
+  private static final String INTERCEPTOR_POINT_DEFINE_IMPL_KEY = "interceptorPointDefine.impl";
+
+  /**
+   * 内置的拦截点定义白名单。interceptorPointDefine.impl缺失时使用这份清单，与历史行为保持一致。
+   * <p>
+   * 顺序即注册顺序：InterceptorPointDefineGather按插入顺序保存同一个类名下的多个define，
+   * matcher相同时后注册的会覆盖先注册的。
+   */
+  private static final List<Class<? extends InterceptorPointDefine>> DEFAULT_INTERCEPTOR_POINT_DEFINE_CLASS_LIST =
+          Collections.unmodifiableList(Arrays.asList(
+                  // Server层拦截
+                  TomcatAbstractProtocolInterceptorPointDefine.class,
+                  JettyServerInterceptorPointDefine.class,
+                  // 入口层拦截（Servlet/Task/XxlJob）
+                  JavaxServletInterceptorPointDefine.class,
+                  // JakartaServletInterceptorPointDefine整个类被注释掉，写进配置会导致agent启动失败
+                  TaskInterceptorPointDefine.class,
+                  XxlJobHandlerInterceptorPointDefine.class,
+                  XxlMethodInterceptorPointDefine.class,
+                  XxlGlueInterceptorPointDefine.class,
+                  XxlScriptInterceptorPointDefine.class,
+                  // Tx层拦截
+                  SpringTransactionalInterceptorPointDefine.class,
+                  SpringTransactionHelperInterceptorPointDefine.class,
+                  SpringTransactionTemplateInterceptorPointDefine.class,
+                  // ORM层拦截
+                  MybatisExecutorInterceptorPointDefine.class,
+                  // DataSource层拦截
+                  HikariConcurrentBagInterceptorPointDefine.class,
+                  DruidDruidDataSourceInterceptorPointDefine.class,
+                  // JDBC层拦截
+                  PortTrailStatementInterceptorPointDefine.class,
+                  // DB层拦截
+                  MySQLDriverInterceptorPointDefine.class,
+                  OracleDriverInterceptorPointDefine.class,
+                  // HTTP层拦截
+                  HttpClient4HttpClientBuilderInterceptorPointDefine.class,
+                  // Redis层拦截
+                  LettuceDefaultEndpointInterceptorPointDefine.class,
+                  LettuceCommandInterceptorPointDefine.class,
+                  LettuceChannelWriterInterceptorPointDefine.class
+          ));
 
   public static void premain(String args, Instrumentation instrumentation) {
 
@@ -187,40 +233,96 @@ public class PortTrailAgent {
     AgentContext.postInit();
   }
 
+  /**
+   * 注意：本类里不能引用继承自boot（bootstrap classloader）中类型的异常，只能用PortTrailAgentBootstrapException。
+   * JVM在premain真正执行之前会反射PortTrailAgent，为了校验athrow会加载被抛出的异常类。
+   * 此时boot下的jar还没被appendToBootstrapClassLoaderSearch，而PortTrailAgentStartException继承自
+   * port-trail-common里的PortTrailException，一旦引用就会以NoClassDefFoundError导致agent启动失败。
+   * 同理logger只在方法体内以局部变量的形式使用，不进入方法签名。
+   */
   private static InterceptorPointDefineGather getInterceptorGather() {
+    PortTrailLogger log = AgentPortTrailLoggerFactory.getInstance().getPortTrailLogger(PortTrailAgent.class);
     InterceptorPointDefineGather interceptorPointDefineGather = new InterceptorPointDefineGather();
-    // Server层拦截
-    interceptorPointDefineGather.addInterceptorPointDefine(new TomcatAbstractProtocolInterceptorPointDefine());
-    interceptorPointDefineGather.addInterceptorPointDefine(new JettyServerInterceptorPointDefine());
-    // 入口层拦截（Servlet/Task/XxlJob）
-    interceptorPointDefineGather.addInterceptorPointDefine(new JavaxServletInterceptorPointDefine());
-//    interceptorPointDefineGather.addInterceptorPointDefine(new JakartaServletInterceptorPointDefine());
-    interceptorPointDefineGather.addInterceptorPointDefine(new TaskInterceptorPointDefine());
-    interceptorPointDefineGather.addInterceptorPointDefine(new XxlJobHandlerInterceptorPointDefine());
-    interceptorPointDefineGather.addInterceptorPointDefine(new XxlMethodInterceptorPointDefine());
-    interceptorPointDefineGather.addInterceptorPointDefine(new XxlGlueInterceptorPointDefine());
-    interceptorPointDefineGather.addInterceptorPointDefine(new XxlScriptInterceptorPointDefine());
-    // Tx层拦截
-    interceptorPointDefineGather.addInterceptorPointDefine(new SpringTransactionalInterceptorPointDefine());
-    interceptorPointDefineGather.addInterceptorPointDefine(new SpringTransactionHelperInterceptorPointDefine());
-    interceptorPointDefineGather.addInterceptorPointDefine(new SpringTransactionTemplateInterceptorPointDefine());
-    // ORM层拦截
-    interceptorPointDefineGather.addInterceptorPointDefine(new MybatisExecutorInterceptorPointDefine());
-    // DataSource层拦截
-    interceptorPointDefineGather.addInterceptorPointDefine(new HikariConcurrentBagInterceptorPointDefine());
-    interceptorPointDefineGather.addInterceptorPointDefine(new DruidDruidDataSourceInterceptorPointDefine());
-    // JDBC层拦截
-    interceptorPointDefineGather.addInterceptorPointDefine(new PortTrailStatementInterceptorPointDefine());
-    // DB层拦截
-    interceptorPointDefineGather.addInterceptorPointDefine(new MySQLDriverInterceptorPointDefine());
-    interceptorPointDefineGather.addInterceptorPointDefine(new OracleDriverInterceptorPointDefine());
-    // HTTP层拦截
-    interceptorPointDefineGather.addInterceptorPointDefine(new HttpClient4HttpClientBuilderInterceptorPointDefine());
-    // Redis层拦截
-    interceptorPointDefineGather.addInterceptorPointDefine(new LettuceDefaultEndpointInterceptorPointDefine());
-    interceptorPointDefineGather.addInterceptorPointDefine(new LettuceCommandInterceptorPointDefine());
-    interceptorPointDefineGather.addInterceptorPointDefine(new LettuceChannelWriterInterceptorPointDefine());
+    for (InterceptorPointDefine interceptorPointDefine : resolveInterceptorPointDefineList()) {
+      interceptorPointDefineGather.addInterceptorPointDefine(interceptorPointDefine);
+      log.info("interceptorPointDefine.impl[{}] enabled.", interceptorPointDefine.getClass().getName());
+    }
     return interceptorPointDefineGather;
+  }
+
+  private static List<InterceptorPointDefine> resolveInterceptorPointDefineList() {
+    PortTrailLogger log = AgentPortTrailLoggerFactory.getInstance().getPortTrailLogger(PortTrailAgent.class);
+    String property = AgentPackage.getAgentProperties().getProperty(INTERCEPTOR_POINT_DEFINE_IMPL_KEY);
+    if (StringUtils.hasText(property)) {
+      log.debug("interceptorPointDefine.impl is configured: {}", property);
+    } else {
+      property = defaultInterceptorPointDefineImpl();
+      log.info("interceptorPointDefine.impl is absent, fallback to the built-in default list.");
+    }
+    return resolveInterceptorPointDefineList(property);
+  }
+
+  /**
+   * 包级可见，便于单元测试校验内置默认清单与随包发布的agent.properties保持一致。
+   */
+  static String defaultInterceptorPointDefineImpl() {
+    List<String> defaultClassNameList = new ArrayList<>();
+    for (Class<? extends InterceptorPointDefine> clazz : DEFAULT_INTERCEPTOR_POINT_DEFINE_CLASS_LIST) {
+      defaultClassNameList.add(clazz.getName());
+    }
+    return StringUtils.join(",", defaultClassNameList.toArray(new String[0]));
+  }
+
+  /**
+   * 包级可见，便于单元测试直接验证解析逻辑。
+   */
+  static List<InterceptorPointDefine> resolveInterceptorPointDefineList(String property) {
+    List<InterceptorPointDefine> interceptorPointDefineList = new ArrayList<>();
+    for (String className : property.split(",")) {
+      String trimmedClassName = className.trim();
+      if (trimmedClassName.isEmpty()) {
+        continue;
+      }
+      if (containsClassName(interceptorPointDefineList, trimmedClassName)) {
+        throw new PortTrailAgentBootstrapException(String.format(
+                "加载interceptorPointDefine.impl异常，类名[%s]重复，配置值为：%s", trimmedClassName, property));
+      }
+      interceptorPointDefineList.add(newInterceptorPointDefine(trimmedClassName));
+    }
+    if (interceptorPointDefineList.isEmpty()) {
+      throw new PortTrailAgentBootstrapException(String.format(
+              "加载interceptorPointDefine.impl异常，没有有效的类名，配置值为：%s", property));
+    }
+    return interceptorPointDefineList;
+  }
+
+  private static boolean containsClassName(List<InterceptorPointDefine> interceptorPointDefineList, String className) {
+    for (InterceptorPointDefine interceptorPointDefine : interceptorPointDefineList) {
+      if (interceptorPointDefine.getClass().getName().equals(className)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  private static InterceptorPointDefine newInterceptorPointDefine(String className) {
+    Class<?> clazz;
+    try {
+      clazz = Class.forName(className);
+    } catch (Throwable t) {
+      throw new PortTrailAgentBootstrapException(String.format(
+              "加载interceptorPointDefine.impl[%s]异常，无法加载该类。", className), t);
+    }
+    if (!InterceptorPointDefine.class.isAssignableFrom(clazz)) {
+      throw new PortTrailAgentBootstrapException(String.format(
+              "加载interceptorPointDefine.impl[%s]异常，该类未实现InterceptorPointDefine接口。", className));
+    }
+    try {
+      return (InterceptorPointDefine) clazz.newInstance();
+    } catch (Throwable t) {
+      throw new PortTrailAgentBootstrapException(String.format(
+              "加载interceptorPointDefine.impl[%s]异常，无法通过public无参构造函数实例化。", className), t);
+    }
   }
 
   private static void addBootLibToBootstrapClassLoaderSearch(Instrumentation instrumentation) {
