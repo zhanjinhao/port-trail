@@ -34,7 +34,7 @@ public class SpringTransactionalInterceptor extends AbstractTxEntryPointIntercep
           // 用于调用父类的方法。
           @SuperCall Callable<?> zuper
   ) throws Exception {
-    log.info("TargetObj is [{}] and it's classloader is [{}].", targetObj, targetObj.getClass().getClassLoader());
+    log.debug("Intercepted [{}].", Interceptor.assembleDetail(targetObj, targetMethod));
 
     return callWithEntryPoint(assembleDetail(targetObj, targetMethod), zuper);
   }

@@ -28,7 +28,7 @@ public abstract class AbstractEntryPointInterceptor {
   protected abstract EntryPoint entryPoint(String detail);
 
   protected String assembleDetail(Object targetObj, Method targetMethod) {
-    return targetObj.getClass().getName() + "#" + targetMethod.getName();
+    return Interceptor.assembleDetail(targetObj, targetMethod);
   }
 
   /**

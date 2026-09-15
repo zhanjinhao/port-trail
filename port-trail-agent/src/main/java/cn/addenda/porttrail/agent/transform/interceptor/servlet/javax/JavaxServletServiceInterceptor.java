@@ -97,15 +97,18 @@ public class JavaxServletServiceInterceptor extends AbstractDeduplicationEntryPo
     HttpServletRequest request = (HttpServletRequest) targetMethodArgs[0];
     HttpServletResponse response = (HttpServletResponse) targetMethodArgs[1];
 
-    if (!ifPushEntryPoint(request.getRequestURI())) {
+    String requestURI = request.getRequestURI();
+    if (log.isDebugEnabled()) {
+      log.debug("Intercepted [{}], uri [{}].", Interceptor.assembleDetail(targetObj, targetMethod), requestURI);
+    }
+
+    if (!ifPushEntryPoint(requestURI)) {
       return zuper.call(targetMethodArgs);
     }
 
-    log.info("TargetObj is [{}] and it's classloader is [{}].", targetObj, targetObj.getClass().getClassLoader());
-
     String executionId = UuidUtils.generateUuid();
 
-    return callWithEntryPoint(request.getRequestURI(), () -> {
+    return callWithEntryPoint(requestURI, () -> {
 
       String requestContentType = request.getContentType();
       JavaxContentCachingRequestWrapper requestWrapper = null;

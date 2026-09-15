@@ -121,16 +121,27 @@ public class LettuceRedisCommandContextHolder {
       }
     }
     if (!staleList.isEmpty()) {
-      String msg = String.format("LettuceRedisCommandContextHolder 泄露检测发现[%s]条存活超过[%s ms]的记录, 总数[%s]。详情: %s",
-              staleList.size(), LEAK_THRESHOLD_MS, total, LinkFacade.toStr(staleList));
-      if (staleList.size() > 100) {
-        log.error(msg);
-      } else if (staleList.size() > 10) {
-        log.info(msg);
-      } else {
-        log.debug(msg);
+      int size = staleList.size();
+      if (size > 100) {
+        if (log.isErrorEnabled()) {
+          log.error(buildLeakMessage(size, total, staleList));
+        }
+      } else if (size > 10) {
+        if (log.isInfoEnabled()) {
+          log.info(buildLeakMessage(size, total, staleList));
+        }
+      } else if (log.isDebugEnabled()) {
+        log.debug(buildLeakMessage(size, total, staleList));
       }
     }
+  }
+
+  /**
+   * 仅在实际输出日志时构建：LinkFacade.toStr 会做 JSON 序列化。
+   */
+  private static String buildLeakMessage(int size, int total, List<String> staleList) {
+    return String.format("LettuceRedisCommandContextHolder 泄露检测发现[%s]条存活超过[%s ms]的记录, 总数[%s]。详情: %s",
+            size, LEAK_THRESHOLD_MS, total, LinkFacade.toStr(staleList));
   }
 
 }

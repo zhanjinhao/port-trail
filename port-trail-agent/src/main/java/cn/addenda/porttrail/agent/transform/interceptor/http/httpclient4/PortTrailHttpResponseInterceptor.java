@@ -198,6 +198,7 @@ public class PortTrailHttpResponseInterceptor extends AbstractPortTrailHttpInter
     String executionId = (String) context.getAttribute(EXECUTION_ID_KEY);
 
     try {
+      log.debug("Intercepted [{}], uri [{}].", RESPONSE_INTERCEPTOR_POINT, context.getAttribute(EXECUTION_ID_URI));
       HttpClientResponseBo httpClientResponseBo = assembleHttpClientResponseBo(response, executionId);
       httpClientWriter.writeHttpResponse(httpClientResponseBo);
     } catch (Throwable throwable) {

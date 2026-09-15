@@ -2,7 +2,7 @@ package cn.addenda.porttrail.agent.transform.interceptor.datasource.druid;
 
 import cn.addenda.porttrail.agent.log.AgentPortTrailLoggerFactory;
 import cn.addenda.porttrail.agent.transform.interceptor.Interceptor;
-import cn.addenda.porttrail.agent.util.ReflectionUtils;
+import cn.addenda.porttrail.agent.util.CachedField;
 import cn.addenda.porttrail.infrastructure.log.PortTrailLogger;
 import cn.addenda.porttrail.jdbc.core.PortTrailConnection;
 import net.bytebuddy.implementation.bind.annotation.*;
@@ -14,7 +14,7 @@ import java.util.concurrent.Callable;
 
 public class DruidDruidDataSourceGetConnectionDirectInterceptor implements Interceptor {
 
-  private static Field _connField;
+  private static final CachedField CONNECTION_FIELD = new CachedField("conn");
 
   private static final PortTrailLogger log =
           AgentPortTrailLoggerFactory.getInstance().getPortTrailLogger(DruidDruidDataSourceGetConnectionDirectInterceptor.class);
@@ -38,7 +38,7 @@ public class DruidDruidDataSourceGetConnectionDirectInterceptor implements Inter
           @SuperCall Callable<?> zuper
   ) throws Exception {
 
-    log.info("TargetObj's class is [{}] and it's classloader is [{}].", targetObj.getClass(), targetObj.getClass().getClassLoader());
+    log.debug("Intercepted [{}].", Interceptor.assembleDetail(targetObj, targetMethod));
 
     Object call = zuper.call();
 
@@ -51,7 +51,7 @@ public class DruidDruidDataSourceGetConnectionDirectInterceptor implements Inter
       return call;
     }
 
-    Field connectionField = getConnectionField(call);
+    Field connectionField = CONNECTION_FIELD.get(call);
     Connection connection = (Connection) getFieldValueFromObject(call, connectionField);
     if (connection == null) {
       return call;
@@ -63,13 +63,6 @@ public class DruidDruidDataSourceGetConnectionDirectInterceptor implements Inter
     }
 
     return call;
-  }
-
-  private static synchronized Field getConnectionField(Object o) {
-    if (_connField == null) {
-      _connField = ReflectionUtils.getField(o, "conn");
-    }
-    return _connField;
   }
 
   @Override

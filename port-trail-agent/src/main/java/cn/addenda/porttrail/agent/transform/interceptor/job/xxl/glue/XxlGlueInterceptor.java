@@ -1,10 +1,12 @@
 package cn.addenda.porttrail.agent.transform.interceptor.job.xxl.glue;
 
+import cn.addenda.porttrail.agent.log.AgentPortTrailLoggerFactory;
 import cn.addenda.porttrail.agent.transform.interceptor.AbstractDeduplicationEntryPointInterceptor;
 import cn.addenda.porttrail.agent.transform.interceptor.Interceptor;
-import cn.addenda.porttrail.agent.util.ReflectionUtils;
+import cn.addenda.porttrail.agent.util.CachedField;
 import cn.addenda.porttrail.common.entrypoint.EntryPoint;
 import cn.addenda.porttrail.common.entrypoint.EntryPointType;
+import cn.addenda.porttrail.infrastructure.log.PortTrailLogger;
 import net.bytebuddy.implementation.bind.annotation.*;
 
 import java.lang.reflect.Field;
@@ -14,7 +16,10 @@ import java.util.concurrent.Callable;
 
 public class XxlGlueInterceptor extends AbstractDeduplicationEntryPointInterceptor implements Interceptor {
 
-  private static Field _jobHandlerField;
+  private static final PortTrailLogger log =
+          AgentPortTrailLoggerFactory.getInstance().getPortTrailLogger(XxlGlueInterceptor.class);
+
+  private static final CachedField JOB_HANDLER_FIELD = new CachedField("jobHandler");
 
   /**
    * 被@RuntimeType标注的方法就是被委托的方法
@@ -34,15 +39,10 @@ public class XxlGlueInterceptor extends AbstractDeduplicationEntryPointIntercept
           // 用于调用父类的方法。
           @SuperCall Callable<?> zuper
   ) throws Exception {
-    Field jobHandlerField = getJobHandlerField(targetObj);
-    return callWithEntryPoint((String) getFieldValueFromObject(targetObj, jobHandlerField, "UNKNOWN_JOB_HANDLER"), zuper);
-  }
+    log.debug("Intercepted [{}].", Interceptor.assembleDetail(targetObj, targetMethod));
 
-  private static synchronized Field getJobHandlerField(Object o) {
-    if (_jobHandlerField == null) {
-      _jobHandlerField = ReflectionUtils.getField(o, "jobHandler");
-    }
-    return _jobHandlerField;
+    Field jobHandlerField = JOB_HANDLER_FIELD.get(targetObj);
+    return callWithEntryPoint((String) getFieldValueFromObject(targetObj, jobHandlerField, "UNKNOWN_JOB_HANDLER"), zuper);
   }
 
   @Override

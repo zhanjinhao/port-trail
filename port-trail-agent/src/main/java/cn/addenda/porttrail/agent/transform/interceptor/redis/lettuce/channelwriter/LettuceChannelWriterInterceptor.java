@@ -12,7 +12,6 @@ import cn.addenda.porttrail.common.entrypoint.EntryPointType;
 import cn.addenda.porttrail.infrastructure.entrypoint.EntryPointStackContext;
 import cn.addenda.porttrail.infrastructure.log.PortTrailLogger;
 import io.lettuce.core.protocol.CommandArgs;
-import io.lettuce.core.protocol.ProtocolKeyword;
 import io.lettuce.core.protocol.RedisCommand;
 import net.bytebuddy.implementation.bind.annotation.*;
 
@@ -42,7 +41,12 @@ public class LettuceChannelWriterInterceptor
           @Super Object originalObj,
           @SuperCall Callable<?> zuper
   ) throws Exception {
-    log.info("TargetObj is [{}] and it's classloader is [{}].", targetObj, targetObj.getClass().getClassLoader());
+    // write(List) 时 assembleWriteCommandString 会遍历整批命令，成本随规模增长，故先判断级别
+    if (log.isDebugEnabled()) {
+      log.debug("Intercepted [{}], command [{}].",
+              Interceptor.assembleDetail(targetObj, targetMethod),
+              assembleWriteCommandString(targetMethodArgs[0]));
+    }
     String peer = DefaultEndpointPeerHolder.get(targetObj);
 
     // 从ClusterWriter或SentinelWriter中调用write()，是没有peer的。
@@ -80,7 +84,7 @@ public class LettuceChannelWriterInterceptor
 
     LettuceRedisCommandContext context = new LettuceRedisCommandContext();
     context.setPeer(null);
-    context.setCommandName(extractCommandName(command));
+    context.setCommandName(LettuceRedisCommandUtils.extractCommandName(command));
     context.setCommandArgString(extractCommandArgString(command));
     context.setStartTime(startTime);
     context.setEntryPointSnapshot(EntryPointStackContext.snapshot());
@@ -104,13 +108,32 @@ public class LettuceChannelWriterInterceptor
     context.setPeer(peer);
   }
 
-  static String extractCommandName(RedisCommand<?, ?, ?> command) {
-    ProtocolKeyword type = command.getType();
+  /**
+   * write(RedisCommand) 返回命令名；write(List) 返回逗号分隔的命令名列表。
+   * <p>
+   * 本方法必须保证不抛异常：日志语句不得影响业务代码。
+   */
+  private static String assembleWriteCommandString(Object writeArg) {
     try {
-      return type.name();
-    } catch (Exception ignored) {
-      return type.toString();
+      if (writeArg instanceof List) {
+        StringBuilder sb = new StringBuilder();
+        for (Object command : (List<?>) writeArg) {
+          if (sb.length() > 0) {
+            sb.append(',');
+          }
+          sb.append(resolveCommandName(command));
+        }
+        return sb.toString();
+      }
+      return resolveCommandName(writeArg);
+    } catch (Exception e) {
+      return "UNKNOWN";
     }
+  }
+
+  private static String resolveCommandName(Object command) {
+    return LettuceRedisCommandUtils.extractCommandName(
+            LettuceRedisCommandUtils.resolveCommand((RedisCommand<?, ?, ?>) command));
   }
 
   static String extractCommandArgString(RedisCommand<?, ?, ?> command) {

@@ -1,10 +1,12 @@
 package cn.addenda.porttrail.agent.transform.interceptor.job.xxl.script;
 
+import cn.addenda.porttrail.agent.log.AgentPortTrailLoggerFactory;
 import cn.addenda.porttrail.agent.transform.interceptor.AbstractDeduplicationEntryPointInterceptor;
 import cn.addenda.porttrail.agent.transform.interceptor.Interceptor;
-import cn.addenda.porttrail.agent.util.ReflectionUtils;
+import cn.addenda.porttrail.agent.util.CachedField;
 import cn.addenda.porttrail.common.entrypoint.EntryPoint;
 import cn.addenda.porttrail.common.entrypoint.EntryPointType;
+import cn.addenda.porttrail.infrastructure.log.PortTrailLogger;
 import net.bytebuddy.implementation.bind.annotation.*;
 
 import java.lang.reflect.Field;
@@ -14,9 +16,15 @@ import java.util.concurrent.Callable;
 
 public class XxlScriptInterceptor extends AbstractDeduplicationEntryPointInterceptor implements Interceptor {
 
-  private static Field _jobIdField;
-  private static Field _glueSourceField;
-  private static Field _glueTypeField;
+  private static final CachedField JOB_ID_FIELD = new CachedField("jobId");
+
+  // XXL 不同版本该字段名不同，两个候选都试
+  private static final CachedField GLUE_SOURCE_FIELD = new CachedField("gluesource", "glueSource");
+
+  private static final CachedField GLUE_TYPE_FIELD = new CachedField("glueType");
+
+  private static final PortTrailLogger log =
+          AgentPortTrailLoggerFactory.getInstance().getPortTrailLogger(XxlScriptInterceptor.class);
 
   /**
    * 被@RuntimeType标注的方法就是被委托的方法
@@ -36,37 +44,15 @@ public class XxlScriptInterceptor extends AbstractDeduplicationEntryPointInterce
           // 用于调用父类的方法。
           @SuperCall Callable<?> zuper
   ) throws Exception {
-    Field jobIdField = getJobIdField(targetObj);
-    Field glueSourceField = getGlueSourceField(targetObj);
-    Field glueTypeField = getGlueTypeField(targetObj);
+    log.debug("Intercepted [{}].", Interceptor.assembleDetail(targetObj, targetMethod));
+
+    Field jobIdField = JOB_ID_FIELD.get(targetObj);
+    Field glueSourceField = GLUE_SOURCE_FIELD.get(targetObj);
+    Field glueTypeField = GLUE_TYPE_FIELD.get(targetObj);
     return callWithEntryPoint(
             getFieldValueFromObject(targetObj, jobIdField, "UNKNOWN_JOB_ID")
                     + ":" + getFieldValueFromObject(targetObj, glueSourceField, "UNKNOWN_GLUE_SOURCE")
                     + ":" + getFieldValueFromObject(targetObj, glueTypeField, "UNKNOWN_GLUE_TYPE"), zuper);
-  }
-
-  private static synchronized Field getJobIdField(Object o) {
-    if (_jobIdField == null) {
-      _jobIdField = ReflectionUtils.getField(o, "jobId");
-    }
-    return _jobIdField;
-  }
-
-  private static synchronized Field getGlueSourceField(Object o) {
-    if (_glueSourceField == null) {
-      _glueSourceField = ReflectionUtils.getField(o, "gluesource");
-    }
-    if (_glueSourceField == null) {
-      _glueSourceField = ReflectionUtils.getField(o, "glueSource");
-    }
-    return _glueSourceField;
-  }
-
-  private static synchronized Field getGlueTypeField(Object o) {
-    if (_glueTypeField == null) {
-      _glueTypeField = ReflectionUtils.getField(o, "glueType");
-    }
-    return _glueTypeField;
   }
 
   @Override

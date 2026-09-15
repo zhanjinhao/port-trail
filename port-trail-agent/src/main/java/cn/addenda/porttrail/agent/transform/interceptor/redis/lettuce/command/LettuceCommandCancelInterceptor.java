@@ -36,12 +36,17 @@ public class LettuceCommandCancelInterceptor implements Interceptor {
           @SuperCall Callable<?> zuper
   ) throws Exception {
 
-    log.info("TargetObj is [{}] and it's classloader is [{}].", targetObj, targetObj.getClass().getClassLoader());
+    RedisCommand<?, ?, ?> command = LettuceRedisCommandUtils.resolveCommand((RedisCommand<?, ?, ?>) targetObj);
+    if (log.isDebugEnabled()) {
+      log.debug("Intercepted [{}], command [{}].",
+              Interceptor.assembleDetail(targetObj, targetMethod),
+              LettuceRedisCommandUtils.extractCommandName(command));
+    }
 
     Object result = zuper.call();
 
     try {
-      LettuceRedisCommandContext context = LettuceRedisCommandContextHolder.remove(LettuceRedisCommandUtils.resolveCommand((RedisCommand<?, ?, ?>) targetObj));
+      LettuceRedisCommandContext context = LettuceRedisCommandContextHolder.remove(command);
       if (context != null) {
         long startTime = context.getStartTime();
         long endTime = System.currentTimeMillis();

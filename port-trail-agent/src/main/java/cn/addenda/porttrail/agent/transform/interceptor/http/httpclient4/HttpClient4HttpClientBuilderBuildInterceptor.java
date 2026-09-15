@@ -75,7 +75,7 @@ public class HttpClient4HttpClientBuilderBuildInterceptor implements Interceptor
           @SuperCall Callable<?> zuper
   ) throws Exception {
 
-    log.info("TargetObj's class is [{}] and it's classloader is [{}].", targetObj.getClass(), targetObj.getClass().getClassLoader());
+    log.debug("Intercepted [{}].", Interceptor.assembleDetail(targetObj, targetMethod));
 
     HttpClientBuilder httpClientBuilder = (HttpClientBuilder) targetObj;
     httpClientBuilder.addInterceptorLast(new PortTrailHttpRequestInterceptor(requestMaxBodyLength, httpClientWriter));

@@ -48,7 +48,7 @@ public class MySQLDriverConnectInterceptor implements Interceptor {
           @SuperCall Callable<?> zuper
   ) throws Exception {
 
-    log.info("TargetObj is [{}] and it's classloader is [{}].", targetObj, targetObj.getClass().getClassLoader());
+    log.debug("Intercepted [{}].", Interceptor.assembleDetail(targetObj, targetMethod));
 
     Object call = zuper.call();
 

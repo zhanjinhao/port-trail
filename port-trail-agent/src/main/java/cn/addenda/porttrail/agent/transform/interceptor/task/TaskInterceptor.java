@@ -37,7 +37,7 @@ public class TaskInterceptor extends AbstractDeduplicationEntryPointInterceptor 
           // 用于调用父类的方法。
           @SuperCall Callable<?> zuper
   ) throws Exception {
-    log.info("TargetObj is [{}] and it's classloader is [{}].", targetObj, targetObj.getClass().getClassLoader());
+    log.debug("Intercepted [{}].", Interceptor.assembleDetail(targetObj, targetMethod));
     PortTrailTask<?> portTrailTask = (PortTrailTask<?>) targetObj;
     String taskName = Optional.ofNullable(portTrailTask.getDelegate()).map(a -> ":" + a).orElse("");
     return callWithEntryPoint(assembleDetail(targetObj, targetMethod) + taskName, zuper);

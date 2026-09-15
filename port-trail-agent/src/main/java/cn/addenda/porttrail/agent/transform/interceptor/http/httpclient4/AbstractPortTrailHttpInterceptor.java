@@ -20,6 +20,10 @@ public abstract class AbstractPortTrailHttpInterceptor {
 
   protected static final String CLIENT_NAME = "httpClient4";
 
+  protected static final String REQUEST_INTERCEPTOR_POINT = CLIENT_NAME + "#request";
+
+  protected static final String RESPONSE_INTERCEPTOR_POINT = CLIENT_NAME + "#response";
+
   protected String extractCharsetFromContentType(String contentType) {
     if (contentType == null) {
       return null;

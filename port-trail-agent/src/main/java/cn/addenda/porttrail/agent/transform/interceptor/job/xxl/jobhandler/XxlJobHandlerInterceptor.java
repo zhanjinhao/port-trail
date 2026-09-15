@@ -1,10 +1,12 @@
 package cn.addenda.porttrail.agent.transform.interceptor.job.xxl.jobhandler;
 
+import cn.addenda.porttrail.agent.log.AgentPortTrailLoggerFactory;
 import cn.addenda.porttrail.agent.transform.interceptor.AbstractDeduplicationEntryPointInterceptor;
 import cn.addenda.porttrail.agent.transform.interceptor.Interceptor;
 import cn.addenda.porttrail.agent.util.AnnotationUtils;
 import cn.addenda.porttrail.common.entrypoint.EntryPoint;
 import cn.addenda.porttrail.common.entrypoint.EntryPointType;
+import cn.addenda.porttrail.infrastructure.log.PortTrailLogger;
 import net.bytebuddy.implementation.bind.annotation.*;
 
 import java.lang.annotation.Annotation;
@@ -15,6 +17,9 @@ import java.util.concurrent.Callable;
 import static cn.addenda.porttrail.agent.transform.interceptor.job.xxl.jobhandler.XxlJobHandlerInterceptorPointDefine.JOB_HANDLER_NAME;
 
 public class XxlJobHandlerInterceptor extends AbstractDeduplicationEntryPointInterceptor implements Interceptor {
+
+  private static final PortTrailLogger log =
+          AgentPortTrailLoggerFactory.getInstance().getPortTrailLogger(XxlJobHandlerInterceptor.class);
 
   /**
    * 被@RuntimeType标注的方法就是被委托的方法
@@ -34,6 +39,8 @@ public class XxlJobHandlerInterceptor extends AbstractDeduplicationEntryPointInt
           // 用于调用父类的方法。
           @SuperCall Callable<?> zuper
   ) throws Exception {
+    log.debug("Intercepted [{}].", Interceptor.assembleDetail(targetObj, targetMethod));
+
     Class<?> aClass = targetObj.getClass();
     Annotation jobHandler = AnnotationUtils.getAnnotation(aClass, JOB_HANDLER_NAME);
 

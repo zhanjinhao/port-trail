@@ -39,7 +39,7 @@ public class SpringTransactionHelperInterceptor extends AbstractTxEntryPointInte
           // 用于调用父类的方法。
           @SuperCall Callable<?> zuper
   ) throws Exception {
-    log.info("TargetObj is [{}] and it's classloader is [{}].", targetObj, targetObj.getClass().getClassLoader());
+    log.debug("Intercepted [{}].", Interceptor.assembleDetail(targetObj, targetMethod));
 
     String callerInfo = StackTraceUtils.getCallerInfo(false, false, false, TRANSACTION_HELPER_NAME, TRANSACTION_ASPECT_SUPPORT_NAME);
 

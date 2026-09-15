@@ -2,7 +2,7 @@ package cn.addenda.porttrail.agent.transform.interceptor.datasource.hikari;
 
 import cn.addenda.porttrail.agent.log.AgentPortTrailLoggerFactory;
 import cn.addenda.porttrail.agent.transform.interceptor.Interceptor;
-import cn.addenda.porttrail.agent.util.ReflectionUtils;
+import cn.addenda.porttrail.agent.util.CachedField;
 import cn.addenda.porttrail.infrastructure.log.PortTrailLogger;
 import cn.addenda.porttrail.jdbc.core.PortTrailConnection;
 import net.bytebuddy.implementation.bind.annotation.*;
@@ -14,7 +14,7 @@ import java.util.concurrent.Callable;
 
 public class HikariConcurrentBagBorrowInterceptor implements Interceptor {
 
-  private static Field _connectionField;
+  private static final CachedField CONNECTION_FIELD = new CachedField("connection");
 
   private static final PortTrailLogger log =
           AgentPortTrailLoggerFactory.getInstance().getPortTrailLogger(HikariConcurrentBagBorrowInterceptor.class);
@@ -37,7 +37,9 @@ public class HikariConcurrentBagBorrowInterceptor implements Interceptor {
           // 用于调用父类的方法。
           @SuperCall Callable<?> zuper
   ) throws Exception {
-    log.info("TargetObj is [{}] and it's classloader is [{}].", targetObj, targetObj.getClass().getClassLoader());
+    if (log.isDebugEnabled()) {
+      log.debug("Intercepted [{}].", Interceptor.assembleDetail(targetObj, targetMethod));
+    }
 
     Object call = zuper.call();
     if (call == null) {
@@ -49,7 +51,7 @@ public class HikariConcurrentBagBorrowInterceptor implements Interceptor {
       return call;
     }
 
-    Field connectionField = getConnectionField(call);
+    Field connectionField = CONNECTION_FIELD.get(call);
     Connection connection = (Connection) getFieldValueFromObject(call, connectionField);
     if (connection == null) {
       return call;
@@ -61,13 +63,6 @@ public class HikariConcurrentBagBorrowInterceptor implements Interceptor {
     }
 
     return call;
-  }
-
-  private static synchronized Field getConnectionField(Object o) {
-    if (_connectionField == null) {
-      _connectionField = ReflectionUtils.getField(o, "connection");
-    }
-    return _connectionField;
   }
 
   @Override

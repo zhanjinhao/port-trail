@@ -3,7 +3,7 @@ package cn.addenda.porttrail.agent.transform.interceptor.mybatis;
 import cn.addenda.porttrail.agent.log.AgentPortTrailLoggerFactory;
 import cn.addenda.porttrail.agent.transform.interceptor.AbstractDeduplicationEntryPointInterceptor;
 import cn.addenda.porttrail.agent.transform.interceptor.Interceptor;
-import cn.addenda.porttrail.agent.util.ReflectionUtils;
+import cn.addenda.porttrail.agent.util.CachedField;
 import cn.addenda.porttrail.common.entrypoint.EntryPoint;
 import cn.addenda.porttrail.common.entrypoint.EntryPointType;
 import cn.addenda.porttrail.infrastructure.log.PortTrailLogger;
@@ -16,7 +16,7 @@ import java.util.concurrent.Callable;
 
 public class MybatisExecutorInterceptor extends AbstractDeduplicationEntryPointInterceptor implements Interceptor {
 
-  private static Field _idField;
+  private static final CachedField ID_FIELD = new CachedField("id");
 
   private static final PortTrailLogger log =
           AgentPortTrailLoggerFactory.getInstance().getPortTrailLogger(MybatisExecutorInterceptor.class);
@@ -39,21 +39,14 @@ public class MybatisExecutorInterceptor extends AbstractDeduplicationEntryPointI
           // 用于调用父类的方法。
           @SuperCall Callable<?> zuper
   ) throws Exception {
-    log.info("TargetObj is [{}] and it's classloader is [{}].", targetObj, targetObj.getClass().getClassLoader());
+    log.debug("Intercepted [{}].", Interceptor.assembleDetail(targetObj, targetMethod));
 
     Object ms = targetMethodArgs[0];
 
-    Field idField = getIdField(ms);
+    Field idField = ID_FIELD.get(ms);
     String msId = (String) getFieldValueFromObject(ms, idField, "UNKNOWN_MAPPED_STATEMENT_ID");
 
     return callWithEntryPoint(msId, zuper);
-  }
-
-  private static synchronized Field getIdField(Object o) {
-    if (_idField == null) {
-      _idField = ReflectionUtils.getField(o, "id");
-    }
-    return _idField;
   }
 
   @Override

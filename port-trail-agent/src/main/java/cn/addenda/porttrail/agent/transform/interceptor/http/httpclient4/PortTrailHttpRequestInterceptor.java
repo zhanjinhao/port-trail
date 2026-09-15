@@ -201,14 +201,16 @@ public class PortTrailHttpRequestInterceptor extends AbstractPortTrailHttpInterc
   @Override
   public void process(HttpRequest request, HttpContext context) throws HttpException, IOException {
     String executionId = UUID.randomUUID().toString().replace("-", "");
+    String requestLine = request.getRequestLine().toString();
     context.setAttribute(EXECUTION_ID_KEY, executionId);
-    context.setAttribute(EXECUTION_ID_URI, request.getRequestLine().toString());
+    context.setAttribute(EXECUTION_ID_URI, requestLine);
 
     try {
+      log.debug("Intercepted [{}], uri [{}].", REQUEST_INTERCEPTOR_POINT, requestLine);
       HttpClientRequestBo httpClientRequestBo = assembleHttpClientRequestBo(request, executionId);
       httpClientWriter.writeHttpRequest(httpClientRequestBo);
     } catch (Throwable t) {
-      log.error("unexpected error, requestLine: [{}].", request.getRequestLine().toString(), t);
+      log.error("unexpected error, requestLine: [{}].", requestLine, t);
     }
   }
 

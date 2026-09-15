@@ -1,11 +1,13 @@
 package cn.addenda.porttrail.agent.transform.interceptor.job.xxl.method;
 
+import cn.addenda.porttrail.agent.log.AgentPortTrailLoggerFactory;
 import cn.addenda.porttrail.agent.transform.interceptor.AbstractDeduplicationEntryPointInterceptor;
 import cn.addenda.porttrail.agent.transform.interceptor.Interceptor;
 import cn.addenda.porttrail.agent.util.AnnotationUtils;
-import cn.addenda.porttrail.agent.util.ReflectionUtils;
+import cn.addenda.porttrail.agent.util.CachedField;
 import cn.addenda.porttrail.common.entrypoint.EntryPoint;
 import cn.addenda.porttrail.common.entrypoint.EntryPointType;
+import cn.addenda.porttrail.infrastructure.log.PortTrailLogger;
 import net.bytebuddy.implementation.bind.annotation.*;
 
 import java.lang.annotation.Annotation;
@@ -19,7 +21,10 @@ public class XxlMethodInterceptor extends AbstractDeduplicationEntryPointInterce
 
   private static final String XXL_JOB_NAME = "com.xxl.job.core.handler.annotation.XxlJob";
 
-  private static Field _methodField;
+  private static final CachedField METHOD_FIELD = new CachedField("method");
+
+  private static final PortTrailLogger log =
+          AgentPortTrailLoggerFactory.getInstance().getPortTrailLogger(XxlMethodInterceptor.class);
 
   /**
    * 被@RuntimeType标注的方法就是被委托的方法
@@ -40,7 +45,9 @@ public class XxlMethodInterceptor extends AbstractDeduplicationEntryPointInterce
           @SuperCall Callable<?> zuper
   ) throws Exception {
 
-    Field methodField = getMethodField(targetObj);
+    log.debug("Intercepted [{}].", Interceptor.assembleDetail(targetObj, targetMethod));
+
+    Field methodField = METHOD_FIELD.get(targetObj);
 
     Annotation xxlJobAnnotation = null;
     Method method = (Method) getFieldValueFromObject(targetObj, methodField);
@@ -52,13 +59,6 @@ public class XxlMethodInterceptor extends AbstractDeduplicationEntryPointInterce
                     + ":" + Optional.ofNullable(method).map(a -> a.getDeclaringClass().getName()).orElse("UNKNOWN_CLASS")
                     + "#" + Optional.ofNullable(method).map(Method::getName).orElse("UNKNOWN_METHOD")
             , zuper);
-  }
-
-  private static synchronized Field getMethodField(Object o) {
-    if (_methodField == null) {
-      _methodField = ReflectionUtils.getField(o, "method");
-    }
-    return _methodField;
   }
 
   @Override

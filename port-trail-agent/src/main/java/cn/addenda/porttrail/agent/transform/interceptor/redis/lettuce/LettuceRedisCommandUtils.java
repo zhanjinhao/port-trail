@@ -5,6 +5,7 @@ import cn.addenda.porttrail.common.exception.PortTrailException;
 import cn.addenda.porttrail.common.util.CompressUtils;
 import cn.addenda.porttrail.common.util.JdkSerializationUtils;
 import io.lettuce.core.protocol.DecoratedCommand;
+import io.lettuce.core.protocol.ProtocolKeyword;
 import io.lettuce.core.protocol.RedisCommand;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
@@ -33,6 +34,20 @@ public class LettuceRedisCommandUtils {
       return resolveCommand(((DecoratedCommand<?, ?, ?>) command).getDelegate());
     }
     return command;
+  }
+
+  /**
+   * 命令名，如 GET、SET、CLUSTER。
+   * <p>
+   * 本方法必须保证不抛异常：日志语句不得影响业务代码。
+   */
+  public static String extractCommandName(RedisCommand<?, ?, ?> command) {
+    ProtocolKeyword type = command.getType();
+    try {
+      return type.name();
+    } catch (Exception ignored) {
+      return type.toString();
+    }
   }
 
   /**
