@@ -29,7 +29,7 @@ public class PortTrailConnection extends AbstractPortTrailConnection implements 
   private final DbWriter dbWriter;
 
   @Getter
-  private AbstractStatementExecutionBoQueue abstractStatementExecutionBoQueue;
+  private final AbstractStatementExecutionBoQueue abstractStatementExecutionBoQueue;
 
   @Getter
   private boolean ifAutoCommit;
