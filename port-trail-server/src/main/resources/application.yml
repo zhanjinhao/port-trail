@@ -1,0 +1,35 @@
+server:
+  port: 29892
+  servlet:
+    context-path: /pts
+
+spring:
+  application:
+    name: port-trail-server
+  servlet:
+    multipart:
+      max-file-size: 1000MB
+      max-request-size: 1000MB
+      enabled: true
+
+  jackson:
+    serialization:
+      write-dates-as-timestamps: true
+    deserialization:
+      fail-on-unknown-properties: false
+
+  # 数据库、redis 的连接信息放在同级目录的 db_config.txt / redis_config.txt 中（均已加入 .gitignore）。
+  # 这两个文件不是 Spring 默认识别的后缀，所以用 [.properties] 扩展名提示，让 Spring 按 properties 格式解析。
+  config:
+    import:
+      - "classpath:db_config.txt[.properties]"
+      - "classpath:redis_config.txt[.properties]"
+
+mybatis:
+  mapper-locations: classpath:/mybatis/mapper/*.xml
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+    map-underscore-to-camel-case: true
+    cache-enabled: false
+    local-cache-scope: statement
+  type-handlers-package: cn.addenda.porttrail.

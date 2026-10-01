@@ -1,0 +1,4 @@
+# redis 连接信息模板。复制为同目录的 redis_config.txt 后填入真实值（redis_config.txt 已被 .gitignore 忽略）。
+# 由 application.yml 的 spring.config.import 以 properties 格式引入
+redis.cluster.nodes=xx.xxx.xx.xxx:xxxx,xx.xxx.xx.xxx:xxxx,xx.xxx.xx.xxx:xxxx
+redis.cluster.max-redirects=3

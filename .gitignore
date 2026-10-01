@@ -43,8 +43,8 @@ src/test/resources/db.properties
 src/logs/*
 src/logs*
 
-**/application.yml
+# 本地连接信息（模板见同目录下的 *.bak）
+**/redis_config.txt
+**/db_config.txt
 
-
-src/main/resources/application.yml
 dist/*

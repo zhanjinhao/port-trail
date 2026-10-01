@@ -231,6 +231,11 @@
       </dependency>
       <dependency>
         <groupId>cn.addenda</groupId>
+        <artifactId>cache-component</artifactId>
+        <version>${component.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>cn.addenda</groupId>
         <artifactId>mybatis-component</artifactId>
         <version>${component.version}</version>
       </dependency>

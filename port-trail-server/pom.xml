@@ -83,6 +83,14 @@
     </dependency>
     <dependency>
       <groupId>cn.addenda</groupId>
+      <artifactId>cache-component</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.lettuce</groupId>
+      <artifactId>lettuce-core</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>cn.addenda</groupId>
       <artifactId>mybatis-component</artifactId>
     </dependency>
     <dependency>
