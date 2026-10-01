@@ -52,6 +52,16 @@ public class MySelectAllChecker implements SelectVisitor, FromItemVisitor, Expre
   @Getter
   boolean hasSelectAll = false;
 
+  /**
+   * IN 子句里元素个数的最大值。
+   *
+   * <p>注意：本类虽然叫 SelectAllChecker，但遍历骨架与 TablesNamesFinder 同源，能覆盖整条语句，
+   * 因此顺带统计 IN 元素个数，避免为同一个 AST 再跑一个 visitor。
+   * 对 {@code in (select ...)} 这类子查询，右表达式不是 ExpressionList，不参与计数。
+   */
+  @Getter
+  private int maxInElementCount = 0;
+
   @Override
   public void visit(Select select) {
     List<WithItem> withItemsList = select.getWithItemsList();
@@ -222,8 +232,12 @@ public class MySelectAllChecker implements SelectVisitor, FromItemVisitor, Expre
 
   @Override
   public void visit(InExpression inExpression) {
+    Expression rightExpression = inExpression.getRightExpression();
+    if (rightExpression instanceof ExpressionList) {
+      maxInElementCount = Math.max(maxInElementCount, ((ExpressionList<?>) rightExpression).size());
+    }
     inExpression.getLeftExpression().accept(this);
-    inExpression.getRightExpression().accept(this);
+    rightExpression.accept(this);
   }
 
   @Override
