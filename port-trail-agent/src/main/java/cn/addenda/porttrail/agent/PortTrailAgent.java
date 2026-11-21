@@ -54,6 +54,15 @@ public class PortTrailAgent {
   private static final String INTERCEPTOR_POINT_DEFINE_IMPL_KEY = "interceptorPointDefine.impl";
 
   /**
+   * systemCode / serviceName / env 的合法字符集：{@code [A-Za-z0-9_.@-]}。
+   * <p>
+   * 这些值会作为 server 端 {@code port-trail.analyze.handler-rules} 的字段值参与匹配，
+   * {@code *}（通配符）、{@code |}（字段分隔符）、{@code ;}（规则分隔符）等字符会破坏规则语义。
+   * 与其枚举所有危险字符，不如用白名单把取值约束成朴素 token。
+   */
+  private static final String ROUTE_VALUE_ALLOWED_CHARS = "[A-Za-z0-9_.@-]";
+
+  /**
    * 内置的拦截点定义白名单。interceptorPointDefine.impl缺失时使用这份清单，与历史行为保持一致。
    * <p>
    * 顺序即注册顺序：InterceptorPointDefineGather按插入顺序保存同一个类名下的多个define，
@@ -230,7 +239,50 @@ public class PortTrailAgent {
     if (!StringUtils.hasText(AgentContext.getEnv())) {
       AgentContext.setEnv("UNKNOWN_ENV");
     }
+
+    // systemCode / serviceName / env 会作为 server 端 handler 路由规则的字段值，
+    // 只允许 [A-Za-z0-9_.@-]；其它字符会破坏规则语义，启动即失败，避免静默路由错误
+    validateRouteValue("systemCode", AgentContext.getSystemCode());
+    validateRouteValue("serviceName", AgentContext.getServiceName());
+    validateRouteValue("env", AgentContext.getEnv());
+
     AgentContext.postInit();
+  }
+
+  /**
+   * 校验路由字段值是朴素的：只允许 {@code [A-Za-z0-9_.@-]}。
+   * <p>
+   * 包级可见，便于单元测试。
+   *
+   * @param name  字段名，只用于异常信息
+   * @param value 字段值；为 null / 空串时视为未配置（后续会被默认值补齐）
+   * @throws PortTrailAgentBootstrapException 包含白名单之外的字符时
+   */
+  static void validateRouteValue(String name, String value) {
+    if (value == null || value.isEmpty()) {
+      return;
+    }
+    for (int i = 0; i < value.length(); i++) {
+      char c = value.charAt(i);
+      if (!isPlainRouteValueChar(c)) {
+        throw new PortTrailAgentBootstrapException(String.format(
+                "%s[%s] 含非法字符[%s]：systemCode/serviceName/env 只允许 %s。",
+                name, value, c, ROUTE_VALUE_ALLOWED_CHARS));
+      }
+    }
+  }
+
+  /**
+   * 字母、数字、下划线、连字符、点、{@code @}。
+   */
+  private static boolean isPlainRouteValueChar(char c) {
+    return (c >= 'A' && c <= 'Z')
+            || (c >= 'a' && c <= 'z')
+            || (c >= '0' && c <= '9')
+            || c == '_'
+            || c == '-'
+            || c == '.'
+            || c == '@';
   }
 
   /**
