@@ -15,7 +15,6 @@ import java.util.Set;
 @Getter
 @ToString
 @NoArgsConstructor
-@AllArgsConstructor
 public class SqlParseResult implements Serializable {
 
   private static final long serialVersionUID = 1L;
@@ -35,4 +34,9 @@ public class SqlParseResult implements Serializable {
    */
   private Set<String> tableNameSet;
 
+  public SqlParseResult(boolean hasSelectAll, int maxInElementCount, Set<String> tableNameSet) {
+    this.hasSelectAll = hasSelectAll;
+    this.maxInElementCount = maxInElementCount;
+    this.tableNameSet = tableNameSet;
+  }
 }
