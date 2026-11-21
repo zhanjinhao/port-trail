@@ -21,16 +21,24 @@ public class EntryPointEntity extends SimpleBaseModel implements Serializable {
    * 主键
    */
   private Long id;
+
+  // ------------------------------------------------------ entryPointType & detail ----------------------------------------
+  //     JOB_XXL_JOB_HANDLER,charterAgreementAutoGenerateOrderJob:com.ade.task.job.CharterAgreementAutoGenerateOrderJob
+  //     ORM_MYBATIS,com.ade.monitor.mapper.MonitorAlarmMapper.selectAlarmByFlightId
+  //     SERVER_JETTY,org.eclipse.jetty.server.Server#handle
+  //     REMOTE_JDBC,cn.addenda.porttrail.jdbc.core.PortTrailPreparedStatement#execute
+  // ------------------------------------------------------------ entryPointType & detail ----------------------------------
+
   /**
-   * 线程名
+   * 进入点名称
    */
   private String entryPointType;
   /**
-   * 线程名
+   * 进入点详情
    */
   private String detail;
   /**
-   * 线程名
+   * 进入点ID
    */
   private Long entryId;
   /**
