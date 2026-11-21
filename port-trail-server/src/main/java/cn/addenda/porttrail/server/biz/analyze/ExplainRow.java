@@ -7,7 +7,7 @@ import lombok.ToString;
 /**
  * explain 单行结果的中间载体。
  *
- * <p>由 {@link com.sf.sfa.est.manager.biz.analyze.AbstractExplainAnalyzeHandler} 解析 ResultSet 产出，
+ * <p>由 {@link AbstractExplainAnalyzeHandler} 解析 ResultSet 产出，
  * 各个 AnalyzeHandler 再把它转换为自己需要的结果结构，避免抽象层耦合具体的 Result 类型。
  */
 @Setter
