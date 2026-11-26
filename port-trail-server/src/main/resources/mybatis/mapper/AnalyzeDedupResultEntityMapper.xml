@@ -1,0 +1,236 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.addenda.porttrail.server.mapper.AnalyzeDedupResultEntityMapper">
+  <resultMap type="cn.addenda.porttrail.server.entity.AnalyzeDedupResultEntity" id="AnalyzeDedupResultEntityMap">
+    <id property="id" column="id" jdbcType="BIGINT"/>
+  </resultMap>
+
+  <sql id="allColumn">
+    `id`, `dedup_key`, `stat_date`, `source`, `system_code`, `service_name`, `env`,
+    `image_name`, `instance_id`, `entry_point_details`, `sql_type`, `parameterized_sql`,
+    `if_select_all`, `select_all_outer_id`, `if_full_scan`, `full_scan_outer_id`, `full_scan_explain_json`,
+    `if_in_too_many`, `in_too_many_outer_id`, `in_too_many_count`,
+    `if_cost_too_high`, `cost_too_high_outer_id`, `cost_too_high_cost`, `hit_rules`
+  </sql>
+
+  <sql id="setCondition">
+    <if test="dedupKey != null">
+      `dedup_key` = #{dedupKey,jdbcType=VARCHAR},
+    </if>
+    <if test="statDate != null">
+      `stat_date` = #{statDate,jdbcType=DATE},
+    </if>
+    <if test="source != null">
+      `source` = #{source,jdbcType=VARCHAR},
+    </if>
+    <if test="systemCode != null">
+      `system_code` = #{systemCode,jdbcType=VARCHAR},
+    </if>
+    <if test="serviceName != null">
+      `service_name` = #{serviceName,jdbcType=VARCHAR},
+    </if>
+    <if test="env != null">
+      `env` = #{env,jdbcType=VARCHAR},
+    </if>
+    <if test="imageName != null">
+      `image_name` = #{imageName,jdbcType=VARCHAR},
+    </if>
+    <if test="instanceId != null">
+      `instance_id` = #{instanceId,jdbcType=VARCHAR},
+    </if>
+    <if test="entryPointDetails != null">
+      `entry_point_details` = #{entryPointDetails,jdbcType=VARCHAR},
+    </if>
+    <if test="sqlType != null">
+      `sql_type` = #{sqlType,jdbcType=VARCHAR},
+    </if>
+    <if test="parameterizedSql != null">
+      `parameterized_sql` = #{parameterizedSql,jdbcType=VARCHAR},
+    </if>
+    <if test="ifSelectAll != null">
+      `if_select_all` = #{ifSelectAll,jdbcType=INTEGER},
+    </if>
+    <if test="selectAllOuterId != null">
+      `select_all_outer_id` = #{selectAllOuterId,jdbcType=BIGINT},
+    </if>
+    <if test="ifFullScan != null">
+      `if_full_scan` = #{ifFullScan,jdbcType=INTEGER},
+    </if>
+    <if test="fullScanOuterId != null">
+      `full_scan_outer_id` = #{fullScanOuterId,jdbcType=BIGINT},
+    </if>
+    <if test="fullScanExplainJson != null">
+      `full_scan_explain_json` = #{fullScanExplainJson,jdbcType=VARCHAR},
+    </if>
+    <if test="ifInTooMany != null">
+      `if_in_too_many` = #{ifInTooMany,jdbcType=INTEGER},
+    </if>
+    <if test="inTooManyOuterId != null">
+      `in_too_many_outer_id` = #{inTooManyOuterId,jdbcType=BIGINT},
+    </if>
+    <if test="inTooManyCount != null">
+      `in_too_many_count` = #{inTooManyCount,jdbcType=INTEGER},
+    </if>
+    <if test="ifCostTooHigh != null">
+      `if_cost_too_high` = #{ifCostTooHigh,jdbcType=INTEGER},
+    </if>
+    <if test="costTooHighOuterId != null">
+      `cost_too_high_outer_id` = #{costTooHighOuterId,jdbcType=BIGINT},
+    </if>
+    <if test="costTooHighCost != null">
+      `cost_too_high_cost` = #{costTooHighCost,jdbcType=INTEGER},
+    </if>
+    <if test="hitRules != null">
+      `hit_rules` = #{hitRules,jdbcType=VARCHAR},
+    </if>
+  </sql>
+
+  <sql id="queryCondition">
+    <if test="id != null">
+      and `id` = #{id,jdbcType=BIGINT}
+    </if>
+    <if test="dedupKey != null">
+      and `dedup_key` = #{dedupKey,jdbcType=VARCHAR}
+    </if>
+    <if test="statDate != null">
+      and `stat_date` = #{statDate,jdbcType=DATE}
+    </if>
+    <if test="source != null">
+      and `source` = #{source,jdbcType=VARCHAR}
+    </if>
+    <if test="systemCode != null">
+      and `system_code` = #{systemCode,jdbcType=VARCHAR}
+    </if>
+    <if test="serviceName != null">
+      and `service_name` = #{serviceName,jdbcType=VARCHAR}
+    </if>
+    <if test="env != null">
+      and `env` = #{env,jdbcType=VARCHAR}
+    </if>
+    <if test="imageName != null">
+      and `image_name` = #{imageName,jdbcType=VARCHAR}
+    </if>
+    <if test="instanceId != null">
+      and `instance_id` = #{instanceId,jdbcType=VARCHAR}
+    </if>
+    <if test="sqlType != null">
+      and `sql_type` = #{sqlType,jdbcType=VARCHAR}
+    </if>
+    <if test="ifSelectAll != null">
+      and `if_select_all` = #{ifSelectAll,jdbcType=INTEGER}
+    </if>
+    <if test="ifFullScan != null">
+      and `if_full_scan` = #{ifFullScan,jdbcType=INTEGER}
+    </if>
+    <if test="ifInTooMany != null">
+      and `if_in_too_many` = #{ifInTooMany,jdbcType=INTEGER}
+    </if>
+    <if test="ifCostTooHigh != null">
+      and `if_cost_too_high` = #{ifCostTooHigh,jdbcType=INTEGER}
+    </if>
+    <if test="hitRules != null">
+      and `hit_rules` = #{hitRules,jdbcType=VARCHAR}
+    </if>
+  </sql>
+
+  <insert id="insert" keyProperty="id" useGeneratedKeys="true">
+    insert into t_analyze_dedup_result_entity
+    <trim prefix="set" suffixOverrides=",">
+      id = #{id,jdbcType=BIGINT},
+      <include refid="setCondition"/>
+    </trim>
+  </insert>
+
+  <update id="updateById">
+    update t_analyze_dedup_result_entity
+    <trim prefix="set" suffixOverrides=",">
+      <include refid="setCondition"/>
+    </trim>
+    where id = #{id,jdbcType=BIGINT}
+    and delete_flag = 'N'
+  </update>
+
+  <!--
+    幂等合并：flag 只增不减；证据列保留第一次的值；hit_rules 由合并后的 flag 重算。
+    MySQL 的 SET 赋值从左到右执行，所以 hit_rules 必须放在 flag 之后。
+  -->
+  <update id="mergeByDedupKey">
+    update t_analyze_dedup_result_entity
+    set
+      `if_select_all` = GREATEST(`if_select_all`, COALESCE(#{ifSelectAll,jdbcType=INTEGER}, 0)),
+      `select_all_outer_id` = COALESCE(`select_all_outer_id`, #{selectAllOuterId,jdbcType=BIGINT}),
+      `if_full_scan` = GREATEST(`if_full_scan`, COALESCE(#{ifFullScan,jdbcType=INTEGER}, 0)),
+      `full_scan_outer_id` = COALESCE(`full_scan_outer_id`, #{fullScanOuterId,jdbcType=BIGINT}),
+      `full_scan_explain_json` = COALESCE(`full_scan_explain_json`, #{fullScanExplainJson,jdbcType=VARCHAR}),
+      `if_in_too_many` = GREATEST(`if_in_too_many`, COALESCE(#{ifInTooMany,jdbcType=INTEGER}, 0)),
+      `in_too_many_outer_id` = COALESCE(`in_too_many_outer_id`, #{inTooManyOuterId,jdbcType=BIGINT}),
+      `in_too_many_count` = COALESCE(`in_too_many_count`, #{inTooManyCount,jdbcType=INTEGER}),
+      `if_cost_too_high` = GREATEST(`if_cost_too_high`, COALESCE(#{ifCostTooHigh,jdbcType=INTEGER}, 0)),
+      `cost_too_high_outer_id` = COALESCE(`cost_too_high_outer_id`, #{costTooHighOuterId,jdbcType=BIGINT}),
+      `cost_too_high_cost` = COALESCE(`cost_too_high_cost`, #{costTooHighCost,jdbcType=INTEGER}),
+      `hit_rules` = CONCAT_WS(',',
+        IF(`if_select_all` = 1, 'SELECT_ALL', NULL),
+        IF(`if_full_scan` = 1, 'FULL_SCAN', NULL),
+        IF(`if_in_too_many` = 1, 'IN_TOO_MANY', NULL),
+        IF(`if_cost_too_high` = 1, 'COST_TOO_HIGH', NULL))
+    where `dedup_key` = #{dedupKey,jdbcType=VARCHAR}
+      and `delete_flag` = 'N'
+  </update>
+
+  <delete id="deleteById">
+    update t_analyze_dedup_result_entity
+    set delete_flag = 'Y',
+        delete_dt   = now(3)
+    where id = #{id,jdbcType=BIGINT}
+      and delete_flag = 'N'
+  </delete>
+
+  <delete id="deleteByEntity">
+    update t_analyze_dedup_result_entity set delete_flag = 'Y', delete_dt = now(3)
+    <trim prefix="where" prefixOverrides="and">
+      <include refid="queryCondition"/>
+      and delete_flag = 'N'
+    </trim>
+  </delete>
+
+  <select id="queryByEntity" resultMap="AnalyzeDedupResultEntityMap">
+    select
+    <include refid="allColumn"/>
+    from t_analyze_dedup_result_entity
+    <trim prefix="where" prefixOverrides="and">
+      <include refid="queryCondition"/>
+      and delete_flag = 'N'
+    </trim>
+  </select>
+
+  <select id="queryById" resultMap="AnalyzeDedupResultEntityMap">
+    select
+    <include refid="allColumn"/>
+    from t_analyze_dedup_result_entity
+    <trim prefix="where" prefixOverrides="and">
+      id = #{id,jdbcType=BIGINT}
+      and delete_flag = 'N'
+    </trim>
+  </select>
+
+  <select id="queryByIdList" resultMap="AnalyzeDedupResultEntityMap">
+    select
+    <include refid="allColumn"/>
+    from t_analyze_dedup_result_entity
+    <trim prefix="where" prefixOverrides="and">
+      id in
+      <foreach collection="idList" open="(" close=")" item="id" separator=",">
+        #{id,jdbcType=BIGINT}
+      </foreach>
+      and delete_flag = 'N'
+    </trim>
+  </select>
+
+  <select id="countByEntity" resultType="java.lang.Long">
+    select count(*) from t_analyze_dedup_result_entity
+    <trim prefix="where" prefixOverrides="and">
+      <include refid="queryCondition"/>
+      and delete_flag = 'N'
+    </trim>
+  </select>
+</mapper>
