@@ -5,7 +5,6 @@ import lombok.Setter;
 import lombok.ToString;
 
 import java.io.Serializable;
-import java.time.LocalDate;
 
 /**
  * 分析-问题SQL去重记录(AnalyzeDedupResultEntity)实体类
@@ -33,9 +32,9 @@ public class AnalyzeDedupResultEntity extends SimpleBaseModel implements Seriali
    */
   private String dedupKey;
   /**
-   * 统计日期
+   * 统计周期。格式化后的字符串，当前为 {@code yyyy-MM-dd}，后续可配置为按小时等粒度
    */
-  private LocalDate statDate;
+  private String statPeriod;
   /**
    * 来源，当前恒为 PREPARED_STATEMENT_EXECUTION
    */

@@ -6,13 +6,13 @@ import lombok.NoArgsConstructor;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.time.LocalDate;
 import java.util.Collection;
 
 /**
  * 去重记录的去重键计算。
  *
- * <p>去重键 = SHA-256(日期 + systemCode + serviceName + env + detail集合 + SQL)。
+ * <p>去重键 = SHA-256(统计周期 + systemCode + serviceName + env + detail集合 + SQL)。
+ * 统计周期是格式化后的字符串，当前固定为 {@code yyyy-MM-dd}，后续可配置粒度。
  * detail 集合来自 entry_point snapshot，按调用链顺序排列（外层入口在前），
  * 顺序是确定的，且顺序本身是区分上下文的信息。
  * <p><b>不排序、不去重</b>：
@@ -54,12 +54,12 @@ public class AnalyzeDedupHandlerKeySupport {
   }
 
   /**
-   * 去重键。前像按 {@code 日期|systemCode|serviceName|env|detail集合|SQL} 拼接后做 SHA-256，
+   * 去重键。前像按 {@code 统计周期|systemCode|serviceName|env|detail集合|SQL} 拼接后做 SHA-256，
    * 与参数顺序一致。
    */
-  public static String computeDedupKey(LocalDate statDate, String systemCode, String serviceName,
+  public static String computeDedupKey(String statPeriod, String systemCode, String serviceName,
                                        String env, Collection<String> details, String parameterizedSql) {
-    String raw = (statDate == null ? "" : statDate.toString())
+    String raw = nullToEmpty(statPeriod)
             + SEPARATOR + nullToEmpty(systemCode)
             + SEPARATOR + nullToEmpty(serviceName)
             + SEPARATOR + nullToEmpty(env)

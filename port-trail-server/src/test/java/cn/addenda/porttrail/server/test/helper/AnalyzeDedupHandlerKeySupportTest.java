@@ -4,13 +4,12 @@ import cn.addenda.porttrail.server.helper.AnalyzeDedupHandlerKeySupport;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.Collections;
 
 class AnalyzeDedupHandlerKeySupportTest {
 
-  private static final LocalDate STAT_DATE = LocalDate.of(2026, 11, 21);
+  private static final String STAT_PERIOD = "2026-11-21";
 
   private static final String SQL = "select * from t_order where id = ?";
 
@@ -20,9 +19,9 @@ class AnalyzeDedupHandlerKeySupportTest {
   @Test
   void testDetailOrderAffectsKey() {
     String key1 = AnalyzeDedupHandlerKeySupport.computeDedupKey(
-            STAT_DATE, "SYS", "svc", "prod", Arrays.asList("/a", "/b", "/c"), SQL);
+            STAT_PERIOD, "SYS", "svc", "prod", Arrays.asList("/a", "/b", "/c"), SQL);
     String key2 = AnalyzeDedupHandlerKeySupport.computeDedupKey(
-            STAT_DATE, "SYS", "svc", "prod", Arrays.asList("/c", "/a", "/b"), SQL);
+            STAT_PERIOD, "SYS", "svc", "prod", Arrays.asList("/c", "/a", "/b"), SQL);
     Assertions.assertNotEquals(key1, key2);
   }
 
@@ -32,38 +31,38 @@ class AnalyzeDedupHandlerKeySupportTest {
   @Test
   void testDuplicateDetailAffectsKey() {
     String key1 = AnalyzeDedupHandlerKeySupport.computeDedupKey(
-            STAT_DATE, "SYS", "svc", "prod", Arrays.asList("/a", "/b"), SQL);
+            STAT_PERIOD, "SYS", "svc", "prod", Arrays.asList("/a", "/b"), SQL);
     String key2 = AnalyzeDedupHandlerKeySupport.computeDedupKey(
-            STAT_DATE, "SYS", "svc", "prod", Arrays.asList("/a", "/b", "/a"), SQL);
+            STAT_PERIOD, "SYS", "svc", "prod", Arrays.asList("/a", "/b", "/a"), SQL);
     Assertions.assertNotEquals(key1, key2);
   }
 
   @Test
   void testDuplicateCountProducesDifferentKey() {
     String twice = AnalyzeDedupHandlerKeySupport.computeDedupKey(
-            STAT_DATE, "SYS", "svc", "prod", Arrays.asList("/a", "/a", "/b"), SQL);
+            STAT_PERIOD, "SYS", "svc", "prod", Arrays.asList("/a", "/a", "/b"), SQL);
     String threeTimes = AnalyzeDedupHandlerKeySupport.computeDedupKey(
-            STAT_DATE, "SYS", "svc", "prod", Arrays.asList("/a", "/a", "/a", "/b"), SQL);
+            STAT_PERIOD, "SYS", "svc", "prod", Arrays.asList("/a", "/a", "/a", "/b"), SQL);
     Assertions.assertNotEquals(twice, threeTimes);
   }
 
   @Test
   void testDifferentInputProducesDifferentKey() {
     String base = AnalyzeDedupHandlerKeySupport.computeDedupKey(
-            STAT_DATE, "SYS", "svc", "prod", Collections.singletonList("/a"), SQL);
+            STAT_PERIOD, "SYS", "svc", "prod", Collections.singletonList("/a"), SQL);
 
     Assertions.assertNotEquals(base, AnalyzeDedupHandlerKeySupport.computeDedupKey(
-            STAT_DATE, "SYS", "svc", "prod", Collections.singletonList("/b"), SQL));
+            STAT_PERIOD, "SYS", "svc", "prod", Collections.singletonList("/b"), SQL));
     Assertions.assertNotEquals(base, AnalyzeDedupHandlerKeySupport.computeDedupKey(
-            STAT_DATE, "SYS", "svc", "prod", Collections.singletonList("/a"), SQL + " "));
+            STAT_PERIOD, "SYS", "svc", "prod", Collections.singletonList("/a"), SQL + " "));
     Assertions.assertNotEquals(base, AnalyzeDedupHandlerKeySupport.computeDedupKey(
-            STAT_DATE, "SYS2", "svc", "prod", Collections.singletonList("/a"), SQL));
+            STAT_PERIOD, "SYS2", "svc", "prod", Collections.singletonList("/a"), SQL));
     Assertions.assertNotEquals(base, AnalyzeDedupHandlerKeySupport.computeDedupKey(
-            STAT_DATE, "SYS", "svc2", "prod", Collections.singletonList("/a"), SQL));
+            STAT_PERIOD, "SYS", "svc2", "prod", Collections.singletonList("/a"), SQL));
     Assertions.assertNotEquals(base, AnalyzeDedupHandlerKeySupport.computeDedupKey(
-            STAT_DATE, "SYS", "svc", "sit", Collections.singletonList("/a"), SQL));
+            STAT_PERIOD, "SYS", "svc", "sit", Collections.singletonList("/a"), SQL));
     Assertions.assertNotEquals(base, AnalyzeDedupHandlerKeySupport.computeDedupKey(
-            STAT_DATE.plusDays(1), "SYS", "svc", "prod", Collections.singletonList("/a"), SQL));
+            "2026-11-22", "SYS", "svc", "prod", Collections.singletonList("/a"), SQL));
   }
 
   @Test
@@ -80,7 +79,7 @@ class AnalyzeDedupHandlerKeySupportTest {
   @Test
   void testHashFormat() {
     String dedupKey = AnalyzeDedupHandlerKeySupport.computeDedupKey(
-            STAT_DATE, "SYS", "svc", "prod", Collections.singletonList("/a"), SQL);
+            STAT_PERIOD, "SYS", "svc", "prod", Collections.singletonList("/a"), SQL);
     String sqlHash = AnalyzeDedupHandlerKeySupport.computeSqlHash(SQL);
 
     Assertions.assertTrue(dedupKey.matches("[0-9a-f]{64}"));

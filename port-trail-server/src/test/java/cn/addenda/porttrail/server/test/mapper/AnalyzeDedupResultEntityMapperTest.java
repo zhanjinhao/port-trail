@@ -34,7 +34,7 @@ class AnalyzeDedupResultEntityMapperTest {
     AnalyzeDedupResultEntity queried = analyzeDedupResultEntityMapper.queryById(param.getId());
     Assertions.assertNotNull(queried);
     Assertions.assertEquals(param.getDedupKey(), queried.getDedupKey());
-    Assertions.assertEquals(param.getStatDate(), queried.getStatDate());
+    Assertions.assertEquals(param.getStatPeriod(), queried.getStatPeriod());
     Assertions.assertEquals("SELECT_ALL", queried.getHitRules());
 
     // 唯一索引 uk_dedup_key 兜底幂等
@@ -88,7 +88,7 @@ class AnalyzeDedupResultEntityMapperTest {
   private AnalyzeDedupResultEntity newEntity() {
     AnalyzeDedupResultEntity entity = AnalyzeDedupResultEntity.ofParam();
     entity.setDedupKey((UUID.randomUUID().toString() + UUID.randomUUID()).replace("-", ""));
-    entity.setStatDate(LocalDate.now());
+    entity.setStatPeriod(LocalDate.now().toString());
     entity.setSource("PREPARED_STATEMENT_EXECUTION");
     entity.setSystemCode("SYS");
     entity.setServiceName("svc");

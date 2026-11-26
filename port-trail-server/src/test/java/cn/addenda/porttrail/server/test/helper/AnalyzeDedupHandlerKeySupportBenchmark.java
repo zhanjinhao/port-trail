@@ -5,7 +5,6 @@ import org.junit.jupiter.api.Test;
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -40,7 +39,7 @@ class AnalyzeDedupHandlerKeySupportBenchmark {
 
   private static final List<String> DETAILS_10 = buildDetails(10);
 
-  private static final LocalDate STAT_DATE = LocalDate.of(2026, 11, 21);
+  private static final String STAT_PERIOD = "2026-11-21";
 
   private static final byte[] DIGEST_BYTES = new byte[32];
 
@@ -76,10 +75,10 @@ class AnalyzeDedupHandlerKeySupportBenchmark {
 
     measure("computeDedupKey(details=3, short)", 200_000,
             i -> sink = AnalyzeDedupHandlerKeySupport.computeDedupKey(
-                    STAT_DATE, "SYS", "svc", "prod", DETAILS_3, SHORT_SQL).charAt(0));
+                    STAT_PERIOD, "SYS", "svc", "prod", DETAILS_3, SHORT_SQL).charAt(0));
     measure("computeDedupKey(details=10, medium)", 50_000,
             i -> sink = AnalyzeDedupHandlerKeySupport.computeDedupKey(
-                    STAT_DATE, "SYS", "svc", "prod", DETAILS_10, MEDIUM_SQL).charAt(0));
+                    STAT_PERIOD, "SYS", "svc", "prod", DETAILS_10, MEDIUM_SQL).charAt(0));
 
     // 成本拆解
     measure("MessageDigest.getInstance(SHA-256)", 200_000,

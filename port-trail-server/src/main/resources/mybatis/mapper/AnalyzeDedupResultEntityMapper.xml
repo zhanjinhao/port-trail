@@ -6,7 +6,7 @@
   </resultMap>
 
   <sql id="allColumn">
-    `id`, `dedup_key`, `stat_date`, `source`, `system_code`, `service_name`, `env`,
+    `id`, `dedup_key`, `stat_period`, `source`, `system_code`, `service_name`, `env`,
     `image_name`, `instance_id`, `entry_point_details`, `sql_type`, `parameterized_sql`,
     `if_select_all`, `select_all_outer_id`, `if_full_scan`, `full_scan_outer_id`, `full_scan_explain_json`,
     `if_in_too_many`, `in_too_many_outer_id`, `in_too_many_count`,
@@ -17,8 +17,8 @@
     <if test="dedupKey != null">
       `dedup_key` = #{dedupKey,jdbcType=VARCHAR},
     </if>
-    <if test="statDate != null">
-      `stat_date` = #{statDate,jdbcType=DATE},
+    <if test="statPeriod != null">
+      `stat_period` = #{statPeriod,jdbcType=VARCHAR},
     </if>
     <if test="source != null">
       `source` = #{source,jdbcType=VARCHAR},
@@ -92,8 +92,8 @@
     <if test="dedupKey != null">
       and `dedup_key` = #{dedupKey,jdbcType=VARCHAR}
     </if>
-    <if test="statDate != null">
-      and `stat_date` = #{statDate,jdbcType=DATE}
+    <if test="statPeriod != null">
+      and `stat_period` = #{statPeriod,jdbcType=VARCHAR}
     </if>
     <if test="source != null">
       and `source` = #{source,jdbcType=VARCHAR}
