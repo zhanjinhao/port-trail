@@ -1,7 +1,6 @@
 package cn.addenda.porttrail.server.biz.analyze;
 
 import lombok.Getter;
-import lombok.ToString;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -17,7 +16,6 @@ import java.util.regex.Pattern;
  * @author addenda
  */
 @Getter
-@ToString
 public class AnalyzeHandlerRule {
 
   // ----------------------------------------------------------------------
@@ -108,6 +106,16 @@ public class AnalyzeHandlerRule {
       }
     }
     return false;
+  }
+
+  /**
+   * 按配置格式输出：{@code systemCode|serviceName|env|handler1,handler2}，
+   * 便于日志里直接和 {@code port-trail.analyze.handler-rules} 对照。
+   */
+  @Override
+  public String toString() {
+    return systemCodePattern + "|" + serviceNamePattern + "|" + envPattern + "|"
+            + String.join(",", handlerNames);
   }
 
   /**
