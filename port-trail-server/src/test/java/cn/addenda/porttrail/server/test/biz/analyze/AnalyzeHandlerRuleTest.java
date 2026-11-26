@@ -88,6 +88,15 @@ class AnalyzeHandlerRuleTest {
             () -> AnalyzeHandlerRule.parse("SYS|svc|prod| , "));
   }
 
+  @Test
+  void testToStringUsesConfigFormat() {
+    // 输出格式与配置一致：systemCode|serviceName|env|handler1,handler2（解析后已 trim）
+    AnalyzeHandlerRule rule = parseOne(
+            " SYS | svc | prod | AnalyzeExplainHandler , AnalyzeDedupHandler ");
+    Assertions.assertEquals("SYS|svc|prod|AnalyzeExplainHandler,AnalyzeDedupHandler",
+            rule.toString());
+  }
+
   // ---------------- matches ----------------
 
   @Test

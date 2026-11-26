@@ -5,7 +5,11 @@ import lombok.Getter;
 import lombok.ToString;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * 去重记录的四条规则判定结果。
@@ -28,6 +32,12 @@ public class AnalyzeDedupRule {
   public static final String RULE_COST_TOO_HIGH = "COST_TOO_HIGH";
 
   private static final String HIT_RULES_DELIMITER = ",";
+
+  /**
+   * {@code hit_rules} 的固定输出顺序，与 SQL 里 {@code CONCAT_WS} 的拼接顺序保持一致。
+   */
+  private static final List<String> RULE_ORDER = Collections.unmodifiableList(Arrays.asList(
+          RULE_SELECT_ALL, RULE_FULL_SCAN, RULE_IN_TOO_MANY, RULE_COST_TOO_HIGH));
 
   private final int ifSelectAll;
 
@@ -82,6 +92,52 @@ public class AnalyzeDedupRule {
       hitList.add(RULE_COST_TOO_HIGH);
     }
     return String.join(HIT_RULES_DELIMITER, hitList);
+  }
+
+  /**
+   * 解析 {@code hit_rules}，如 {@code SELECT_ALL,FULL_SCAN}；null / 空串返回空集合。
+   */
+  public static Set<String> parseHitRules(String hitRules) {
+    Set<String> ruleSet = new LinkedHashSet<>();
+    if (hitRules == null || hitRules.isEmpty()) {
+      return ruleSet;
+    }
+    for (String rule : hitRules.split(HIT_RULES_DELIMITER)) {
+      String trimmed = rule.trim();
+      if (!trimmed.isEmpty()) {
+        ruleSet.add(trimmed);
+      }
+    }
+    return ruleSet;
+  }
+
+  /**
+   * 合并两组 {@code hit_rules}，按 {@link #RULE_ORDER} 的固定顺序输出。
+   */
+  public static String mergeHitRules(String existingHitRules, String currentHitRules) {
+    Set<String> merged = parseHitRules(existingHitRules);
+    merged.addAll(parseHitRules(currentHitRules));
+
+    List<String> hitList = new ArrayList<>(merged.size());
+    for (String rule : RULE_ORDER) {
+      if (merged.contains(rule)) {
+        hitList.add(rule);
+      }
+    }
+    return String.join(HIT_RULES_DELIMITER, hitList);
+  }
+
+  /**
+   * 本次命中集合里是否有已记录集合之外的规则。
+   */
+  public static boolean hasNewHitRule(String existingHitRules, String currentHitRules) {
+    Set<String> existing = parseHitRules(existingHitRules);
+    for (String rule : parseHitRules(currentHitRules)) {
+      if (!existing.contains(rule)) {
+        return true;
+      }
+    }
+    return false;
   }
 
 }
