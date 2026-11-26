@@ -27,6 +27,10 @@ spring:
 
 port-trail:
   analyze:
+    # SQL 解析线程池。JSqlParser 是 CPU 密集操作，线程数不必超过容器 CPU limit
+    sql-parse:
+      threads: 8
+      queue-capacity: 8
     # handler 路由规则表：分号分隔多条，每条为 systemCode|serviceName|env|handler1,handler2
     # 按顺序匹配，首条命中即生效；字段支持 * 通配（纯星号 pattern 匹配一切，含 null；其余 pattern 不匹配 null）；
     # 无任何规则命中时不执行任何 handler（不分析）。

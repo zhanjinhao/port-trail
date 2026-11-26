@@ -331,6 +331,23 @@ class SqlHelperTest {
     Assertions.assertNull(sqlHelper.getTableNameSet("SELECT FROM WHERE"));
   }
 
+  @Test
+  void testDestroyShutsDownExecutor() {
+    ExecutorService executor = new ThreadPoolExecutor(
+            1,
+            1,
+            0,
+            TimeUnit.MILLISECONDS,
+            new ArrayBlockingQueue<>(1),
+            new SqlHelperThreadFactory(),
+            new ThreadPoolExecutor.CallerRunsPolicy());
+
+    SqlHelper helper = new SqlHelper(executor);
+    helper.destroy();
+
+    Assertions.assertTrue(executor.isShutdown());
+  }
+
   private static class SqlHelperThreadFactory implements ThreadFactory {
 
     private final AtomicLong nameCounter = new AtomicLong(0L);

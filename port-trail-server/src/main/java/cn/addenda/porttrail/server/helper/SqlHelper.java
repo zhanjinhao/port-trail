@@ -8,13 +8,15 @@ import lombok.extern.slf4j.Slf4j;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 import net.sf.jsqlparser.statement.Statement;
+import org.springframework.beans.factory.DisposableBean;
 
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
-public class SqlHelper {
+public class SqlHelper implements DisposableBean {
 
   private ExecutorService executorService;
 
@@ -42,7 +44,6 @@ public class SqlHelper {
     } catch (JSQLParserException e) {
       log.error("Error parsing SQL: {}.", sql, e);
     }
-    // todo
     return null;
   }
 
@@ -54,9 +55,6 @@ public class SqlHelper {
             });
   }
 
-  /**
-   * todo with语法里的表明能提取出来吗
-   */
   public Set<String> getTableNameSet(String sql) {
     try {
       Statement statement = parse(sql);
@@ -65,7 +63,6 @@ public class SqlHelper {
     } catch (JSQLParserException e) {
       log.error("Error parsing SQL: {}.", sql, e);
     }
-    // todo
     return null;
   }
 
@@ -78,7 +75,6 @@ public class SqlHelper {
     } catch (JSQLParserException e) {
       log.error("Error parsing SQL: {}.", sql, e);
     }
-    // todo
     return false;
   }
 
@@ -91,6 +87,29 @@ public class SqlHelper {
     }
 
     return stringBuilder.toString();
+  }
+
+  /**
+   * 容器关闭时停止解析线程池：先 {@code shutdown()} 拒绝新任务，最多等在途解析 10 秒；
+   * 超时仍未结束则 {@code shutdownNow()} 中断剩余任务。
+   * <p>
+   * 线程池由 {@code SqlHelperConfig} 创建，生命周期归本对象管理；不停止的话，
+   * 池里的非 daemon 线程会阻止 JVM 退出。
+   */
+  @Override
+  public void destroy() {
+    if (executorService == null) {
+      return;
+    }
+    executorService.shutdown();
+    try {
+      if (!executorService.awaitTermination(10, TimeUnit.SECONDS)) {
+        executorService.shutdownNow();
+      }
+    } catch (InterruptedException e) {
+      executorService.shutdownNow();
+      Thread.currentThread().interrupt();
+    }
   }
 
 }
