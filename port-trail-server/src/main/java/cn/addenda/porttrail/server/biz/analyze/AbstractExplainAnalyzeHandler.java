@@ -38,7 +38,7 @@ public abstract class AbstractExplainAnalyzeHandler<T extends AnalyzeResult>
   protected DbConfigEntityCurder dbConfigEntityCurder;
 
   @Autowired
-  protected CacheHelper cacheHelper;
+  protected CacheHelper<String> cacheHelper;
 
   private static final TypeReference<DbConfigEntity> EST_DB_CONFIG_TYPE_REFERENCE = new TypeReference<DbConfigEntity>() {
   };

@@ -17,7 +17,7 @@ import java.util.Optional;
 public class AnalyzeHandlerScheduler {
 
   @Autowired
-  private List<AnalyzeHandler<?>> analyzeHandlerList;
+  private AnalyzeHandlerRuleMatcher analyzeHandlerRuleMatcher;
 
   @Autowired
   private PlatformTransactionHelper platformTransactionHelper;
@@ -30,15 +30,20 @@ public class AnalyzeHandlerScheduler {
 
   public void handle(AnalyzePreparedStatementExecutionParam analyzeParam) {
 
+    List<AnalyzeHandler<?>> effectiveHandlers = analyzeHandlerRuleMatcher.effectiveHandlers(
+            analyzeParam.getPreparedStatementExecutionEntityBo().getSystemCode(),
+            analyzeParam.getPreparedStatementExecutionEntityBo().getServiceName(),
+            analyzeParam.getPreparedStatementExecutionEntityBo().getEnv());
+
     List<AnalyzeResult> analyzeResultList = new ArrayList<>();
-    for (AnalyzeHandler<?> analyzeHandler : analyzeHandlerList) {
+    for (AnalyzeHandler<?> analyzeHandler : effectiveHandlers) {
       Optional.ofNullable(analyzeHandler.handle(analyzeParam))
               .ifPresent(analyzeResultList::add);
     }
 
     platformTransactionHelper.doTransaction(() -> {
       for (AnalyzeResult analyzeResult : analyzeResultList) {
-        for (AnalyzeHandler<?> analyzeHandler : analyzeHandlerList) {
+        for (AnalyzeHandler<?> analyzeHandler : effectiveHandlers) {
           if (analyzeHandler.canConsume(analyzeResult)) {
             analyzeHandler.consume(analyzeResult);
           }
@@ -50,15 +55,20 @@ public class AnalyzeHandlerScheduler {
 
   public void handle(AnalyzeStatementExecutionParam analyzeParam) {
 
+    List<AnalyzeHandler<?>> effectiveHandlers = analyzeHandlerRuleMatcher.effectiveHandlers(
+            analyzeParam.getStatementExecutionEntityBo().getSystemCode(),
+            analyzeParam.getStatementExecutionEntityBo().getServiceName(),
+            analyzeParam.getStatementExecutionEntityBo().getEnv());
+
     List<AnalyzeResult> analyzeResultList = new ArrayList<>();
-    for (AnalyzeHandler<?> analyzeHandler : analyzeHandlerList) {
+    for (AnalyzeHandler<?> analyzeHandler : effectiveHandlers) {
       Optional.ofNullable(analyzeHandler.handle(analyzeParam))
               .ifPresent(analyzeResultList::add);
     }
 
     platformTransactionHelper.doTransaction(() -> {
       for (AnalyzeResult analyzeResult : analyzeResultList) {
-        for (AnalyzeHandler<?> analyzeHandler : analyzeHandlerList) {
+        for (AnalyzeHandler<?> analyzeHandler : effectiveHandlers) {
           if (analyzeHandler.canConsume(analyzeResult)) {
             analyzeHandler.consume(analyzeResult);
           }

@@ -31,6 +31,13 @@ port-trail:
     sql-parse:
       threads: 8
       queue-capacity: 8
+    # 去重记录（AnalyzeDedupHandler）的阈值与缓存时长
+    dedup:
+      cost-threshold-ms: 1000              # cost 超过该值判定为慢 SQL
+      in-threshold: 200                    # IN 元素个数超过该值判定为 IN 过多
+      cache-ttl-ms: 172800000              # 2 天：去重标记 + explain 结论
+      sql-parse-cache-ttl-ms: 604800000    # 7 天：解析结论（只取决于 SQL 文本）
+      explain-none-ttl-ms: 3600000         # 1 小时：explain 未发现全表扫描的负缓存；0 表示不缓存
     # handler 路由规则表：分号分隔多条，每条为 systemCode|serviceName|env|handler1,handler2
     # 按顺序匹配，首条命中即生效；字段支持 * 通配（纯星号 pattern 匹配一切，含 null；其余 pattern 不匹配 null）；
     # 无任何规则命中时不执行任何 handler（不分析）。
