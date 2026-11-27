@@ -1,6 +1,5 @@
 package cn.addenda.porttrail.server.biz.analyze;
 
-import cn.addenda.porttrail.server.helper.SqlParseResult;
 import lombok.Getter;
 import lombok.ToString;
 
@@ -47,27 +46,14 @@ public class AnalyzeDedupRule {
 
   private final int ifCostTooHigh;
 
-  private AnalyzeDedupRule(int ifSelectAll, int ifFullScan, int ifInTooMany, int ifCostTooHigh) {
+  /**
+   * 规则判定结果载体。各参数取 0 / 1，判定逻辑由调用方负责。
+   */
+  public AnalyzeDedupRule(int ifSelectAll, int ifFullScan, int ifInTooMany, int ifCostTooHigh) {
     this.ifSelectAll = ifSelectAll;
     this.ifFullScan = ifFullScan;
     this.ifInTooMany = ifInTooMany;
     this.ifCostTooHigh = ifCostTooHigh;
-  }
-
-  /**
-   * @param parseResult    SQL 解析结论，解析失败（null）时按「无 select* / 无 IN」处理
-   * @param ifFullScan     explain 是否出现 type = ALL；explain 未执行或失败时为 false
-   * @param cost           当前这次 execution 的耗时，必须用当次值而不是缓存值
-   * @param costThresholdMs cost 超过该值判定为慢 SQL
-   * @param inThreshold    IN 元素个数超过该值判定为 IN 过多
-   */
-  public static AnalyzeDedupRule evaluate(SqlParseResult parseResult, boolean ifFullScan, Integer cost,
-                                          int costThresholdMs, int inThreshold) {
-    int selectAll = parseResult != null && parseResult.isHasSelectAll() ? 1 : 0;
-    int fullScan = ifFullScan ? 1 : 0;
-    int inTooMany = parseResult != null && parseResult.getMaxInElementCount() > inThreshold ? 1 : 0;
-    int costTooHigh = cost != null && cost > costThresholdMs ? 1 : 0;
-    return new AnalyzeDedupRule(selectAll, fullScan, inTooMany, costTooHigh);
   }
 
   public boolean anyHit() {
@@ -92,6 +78,13 @@ public class AnalyzeDedupRule {
       hitList.add(RULE_COST_TOO_HIGH);
     }
     return String.join(HIT_RULES_DELIMITER, hitList);
+  }
+
+  /**
+   * 四条规则的固定顺序，标记读写和 {@code hit_rules} 拼装都按这个顺序。
+   */
+  public static List<String> ruleOrder() {
+    return RULE_ORDER;
   }
 
   /**
