@@ -49,6 +49,11 @@ public interface AnalyzeDedupResultEntityMapper {
   AnalyzeDedupResultEntity queryById(@Param("id") Long id);
 
   /**
+   * 按去重键只查询 hit_rules（走唯一索引 uk_dedup_key）；行不存在或字段为空时返回 null
+   */
+  String queryHitRulesByDedupKey(@Param("dedupKey") String dedupKey);
+
+  /**
    * 按ID集合查询数据
    */
   List<AnalyzeDedupResultEntity> queryByIdList(@Param("idList") List<Long> idList);

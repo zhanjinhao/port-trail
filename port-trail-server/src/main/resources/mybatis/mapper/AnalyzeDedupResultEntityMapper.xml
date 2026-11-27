@@ -213,6 +213,13 @@
     </trim>
   </select>
 
+  <select id="queryHitRulesByDedupKey" resultType="java.lang.String">
+    select hit_rules
+    from t_analyze_dedup_result_entity
+    where dedup_key = #{dedupKey,jdbcType=VARCHAR}
+      and delete_flag = 'N'
+  </select>
+
   <select id="queryByIdList" resultMap="AnalyzeDedupResultEntityMap">
     select
     <include refid="allColumn"/>

@@ -54,6 +54,13 @@ public class AnalyzeDedupResultEntityCurder {
     return analyzeDedupResultEntityMapper.queryById(id);
   }
 
+  public String queryHitRulesByDedupKey(String dedupKey) {
+    if (dedupKey == null) {
+      return null;
+    }
+    return analyzeDedupResultEntityMapper.queryHitRulesByDedupKey(dedupKey);
+  }
+
   public List<AnalyzeDedupResultEntity> queryByIdList(List<Long> idList) {
     if (idList == null) {
       return new ArrayList<>();

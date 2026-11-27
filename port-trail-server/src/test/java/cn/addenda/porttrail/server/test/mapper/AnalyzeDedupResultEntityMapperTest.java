@@ -37,6 +37,9 @@ class AnalyzeDedupResultEntityMapperTest {
     Assertions.assertEquals(param.getStatPeriod(), queried.getStatPeriod());
     Assertions.assertEquals("SELECT_ALL", queried.getHitRules());
 
+    Assertions.assertEquals("SELECT_ALL",
+            analyzeDedupResultEntityMapper.queryHitRulesByDedupKey(param.getDedupKey()));
+
     // 唯一索引 uk_dedup_key 兜底幂等
     AnalyzeDedupResultEntity duplicate = newEntity();
     duplicate.setDedupKey(param.getDedupKey());
@@ -77,6 +80,7 @@ class AnalyzeDedupResultEntityMapperTest {
 
     Assertions.assertNotNull(analyzeDedupResultEntityMapper.deleteById(param.getId()));
     Assertions.assertNull(analyzeDedupResultEntityMapper.queryById(param.getId()));
+    Assertions.assertNull(analyzeDedupResultEntityMapper.queryHitRulesByDedupKey(param.getDedupKey()));
   }
 
   private int merge(AnalyzeDedupResultEntity entity) {
