@@ -78,6 +78,8 @@ class AnalyzeDedupHandlerFlowTest {
 
   private static final String ENV = "sit";
 
+  private static final String THREAD_NAME = "it-thread-1";
+
   @Autowired
   private AnalyzeHandlerScheduler scheduler;
 
@@ -159,6 +161,8 @@ class AnalyzeDedupHandlerFlowTest {
     Assertions.assertEquals(0, row.getIfFullScan());
     Assertions.assertEquals("SELECT_ALL", row.getHitRules());
     Assertions.assertNull(row.getFullScanExplainJson());
+    // 线程名取自 entry_point snapshot
+    Assertions.assertEquals(THREAD_NAME, row.getThreadName());
 
     String dedupKey = dedupKeyFor(sql);
     Assertions.assertTrue(cacheHelper.containsKey(DEDUP_PREFIX,
@@ -236,6 +240,32 @@ class AnalyzeDedupHandlerFlowTest {
   // ================== 重复执行 / 更新 ==================
 
   @Test
+  void testMultipleRulesInOneExecutionRecordSingleThread() {
+    String sql = "select * from t_db_config_entity where id = 0";
+
+    // 一次执行同时命中 SELECT_ALL 和 COST_TOO_HIGH
+    scheduler.handle(newParam(sql, 5000));
+
+    AnalyzeDedupResultEntity row = queryDedup(sql);
+    Assertions.assertNotNull(row);
+    Assertions.assertEquals("SELECT_ALL,COST_TOO_HIGH", row.getHitRules());
+    // 只记第一次记录时的线程，不按规则展开
+    Assertions.assertEquals("it-thread-1", row.getThreadName());
+  }
+
+  @Test
+  void testUnknownFirstThreadStaysEmptyAfterMerge() {
+    String sql = "select * from t_db_config_entity where id = 0";
+
+    scheduler.handle(newParam(sql, 10, SYSTEM_CODE, null));
+    Assertions.assertNull(queryDedup(sql).getThreadName());
+
+    // 后续执行虽然有线程，但合并不更新 thread_name
+    scheduler.handle(newParam(sql, 5000, SYSTEM_CODE, "it-thread-2"));
+    Assertions.assertNull(queryDedup(sql).getThreadName());
+  }
+
+  @Test
   void testSecondExecutionDoesNotInsertAgain() {
     String sql = "select * from t_db_config_entity where id = 0";
 
@@ -263,8 +293,10 @@ class AnalyzeDedupHandlerFlowTest {
     Assertions.assertNull(first.getCostTooHighCost());
     Assertions.assertEquals("SELECT_ALL", first.getHitRules());
 
-    // 第二次：cost 阈值 1000ms（见 application.yml），5000 一定判定为慢 SQL
-    AnalyzePreparedStatementExecutionParam secondParam = newParam(sql, 5000);
+    // 第二次：cost 阈值 1000ms（见 application.yml），5000 一定判定为慢 SQL；
+    // 换一个线程，验证 thread_name 保留第一次的值而不是被覆盖
+    AnalyzePreparedStatementExecutionParam secondParam =
+            newParam(sql, 5000, SYSTEM_CODE, "it-thread-2");
     scheduler.handle(secondParam);
 
     // 合并到同一行，而不是新增
@@ -282,6 +314,8 @@ class AnalyzeDedupHandlerFlowTest {
             merged.getCostTooHighOuterId());
     Assertions.assertEquals(5000, merged.getCostTooHighCost());
     Assertions.assertEquals("SELECT_ALL,COST_TOO_HIGH", merged.getHitRules());
+    // thread_name 只记第一次记录时的线程
+    Assertions.assertEquals("it-thread-1", merged.getThreadName());
   }
 
   @Test
@@ -312,6 +346,11 @@ class AnalyzeDedupHandlerFlowTest {
   }
 
   private AnalyzePreparedStatementExecutionParam newParam(String sql, int cost, String systemCode) {
+    return newParam(sql, cost, systemCode, THREAD_NAME);
+  }
+
+  private AnalyzePreparedStatementExecutionParam newParam(
+          String sql, int cost, String systemCode, String threadName) {
     PreparedStatementExecutionEntity execution = PreparedStatementExecutionEntity.ofParam();
     execution.setId(System.nanoTime());
     execution.setSystemCode(systemCode);
@@ -327,6 +366,7 @@ class AnalyzeDedupHandlerFlowTest {
 
     EntryPointSnapshotEntity snapshot = EntryPointSnapshotEntity.ofParam();
     snapshot.setId(0L);
+    snapshot.setThreadName(threadName);
     EntryPointSnapshotEntityBo snapshotBo = new EntryPointSnapshotEntityBo(snapshot);
     EntryPointEntity entryPoint = EntryPointEntity.ofParam();
     entryPoint.setDetail(detail);

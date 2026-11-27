@@ -261,6 +261,7 @@ public class AnalyzeDedupHandler extends AbstractExplainAnalyzeHandler<AnalyzeDe
     singleResult.setEnv(executionBo.getEnv());
     singleResult.setImageName(executionBo.getImageName());
     singleResult.setInstanceId(executionBo.getInstanceId());
+    singleResult.setThreadName(extractThreadName(executionBo));
     singleResult.setEntryPointDetails(AnalyzeDedupHandlerKeySupport.joinDetails(detailList));
     singleResult.setSqlType(SqlUtils.getSqlType(parameterizedSql));
     singleResult.setParameterizedSql(parameterizedSql);
@@ -336,6 +337,15 @@ public class AnalyzeDedupHandler extends AbstractExplainAnalyzeHandler<AnalyzeDe
     return conclusion;
   }
 
+  /**
+   * 执行线程名。execution 本身不记录线程，取 entry_point snapshot 的 threadName：
+   * 同一条请求链路上记录入口点和执行 SQL 的是同一个线程。
+   */
+  private String extractThreadName(PreparedStatementExecutionEntityBo executionBo) {
+    EntryPointSnapshotEntityBo entryPointSnapshotEntityBo = executionBo.getEntryPointSnapshotEntityBo();
+    return entryPointSnapshotEntityBo == null ? null : entryPointSnapshotEntityBo.getThreadName();
+  }
+
   private List<String> extractDetailList(PreparedStatementExecutionEntityBo executionBo) {
     EntryPointSnapshotEntityBo entryPointSnapshotEntityBo = executionBo.getEntryPointSnapshotEntityBo();
     if (entryPointSnapshotEntityBo == null
@@ -360,6 +370,8 @@ public class AnalyzeDedupHandler extends AbstractExplainAnalyzeHandler<AnalyzeDe
     entity.setEnv(singleResult.getEnv());
     entity.setImageName(singleResult.getImageName());
     entity.setInstanceId(singleResult.getInstanceId());
+    // 只记第一次记录时的线程；merge 不更新该列
+    entity.setThreadName(singleResult.getThreadName());
     entity.setEntryPointDetails(singleResult.getEntryPointDetails());
     entity.setSqlType(singleResult.getSqlType());
     entity.setParameterizedSql(singleResult.getParameterizedSql());

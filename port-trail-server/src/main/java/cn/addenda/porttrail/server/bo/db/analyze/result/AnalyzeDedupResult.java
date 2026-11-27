@@ -61,6 +61,11 @@ public class AnalyzeDedupResult implements AnalyzeResult {
 
     private String instanceId;
 
+    /**
+     * 本次执行的线程名，取自 entry_point snapshot 的 threadName。落库时只在首次插入时写入，合并不更新
+     */
+    private String threadName;
+
     private String entryPointDetails;
 
     private String sqlType;

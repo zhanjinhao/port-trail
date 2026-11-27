@@ -7,7 +7,7 @@
 
   <sql id="allColumn">
     `id`, `dedup_key`, `stat_period`, `source`, `system_code`, `service_name`, `env`,
-    `image_name`, `instance_id`, `entry_point_details`, `sql_type`, `parameterized_sql`,
+    `image_name`, `instance_id`, `thread_name`, `entry_point_details`, `sql_type`, `parameterized_sql`,
     `if_select_all`, `select_all_outer_id`, `if_full_scan`, `full_scan_outer_id`, `full_scan_explain_json`,
     `if_in_too_many`, `in_too_many_outer_id`, `in_too_many_count`,
     `if_cost_too_high`, `cost_too_high_outer_id`, `cost_too_high_cost`, `hit_rules`
@@ -37,6 +37,9 @@
     </if>
     <if test="instanceId != null">
       `instance_id` = #{instanceId,jdbcType=VARCHAR},
+    </if>
+    <if test="threadName != null">
+      `thread_name` = #{threadName,jdbcType=VARCHAR},
     </if>
     <if test="entryPointDetails != null">
       `entry_point_details` = #{entryPointDetails,jdbcType=VARCHAR},
@@ -113,6 +116,9 @@
     <if test="instanceId != null">
       and `instance_id` = #{instanceId,jdbcType=VARCHAR}
     </if>
+    <if test="threadName != null">
+      and `thread_name` = #{threadName,jdbcType=VARCHAR}
+    </if>
     <if test="sqlType != null">
       and `sql_type` = #{sqlType,jdbcType=VARCHAR}
     </if>
@@ -152,7 +158,8 @@
 
   <!--
     幂等合并：flag 只增不减；证据列保留第一次的值；hit_rules 由合并后的 flag 重算。
-    MySQL 的 SET 赋值从左到右执行，所以 hit_rules 必须放在 flag 之后。
+    MySQL 的 SET 赋值从左到右执行，所以 hit_rules 必须放在 flag 之后（它读的是合并后的 flag）。
+    thread_name 是「第一次记录时的线程」，和其他描述列一样不参与合并。
   -->
   <update id="mergeByDedupKey">
     update t_analyze_dedup_result_entity

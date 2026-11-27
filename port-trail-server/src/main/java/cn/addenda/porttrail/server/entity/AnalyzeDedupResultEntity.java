@@ -60,6 +60,11 @@ public class AnalyzeDedupResultEntity extends SimpleBaseModel implements Seriali
    */
   private String instanceId;
   /**
+   * 执行线程名，只记第一次记录时执行的线程（取自 entry_point snapshot 的 threadName）。
+   * <p>去重键里的 detail 已经标识了入口/调用链，所以不需要按规则或按次数记录多个线程；合并时不更新。
+   */
+  private String threadName;
+  /**
    * entry_point 的 detail 集合，按调用链顺序逗号拼接（不排序、不去重）
    */
   private String entryPointDetails;

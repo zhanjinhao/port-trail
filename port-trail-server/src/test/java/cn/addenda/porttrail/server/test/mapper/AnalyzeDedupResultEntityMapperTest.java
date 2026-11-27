@@ -35,6 +35,7 @@ class AnalyzeDedupResultEntityMapperTest {
     Assertions.assertNotNull(queried);
     Assertions.assertEquals(param.getDedupKey(), queried.getDedupKey());
     Assertions.assertEquals(param.getStatPeriod(), queried.getStatPeriod());
+    Assertions.assertEquals(param.getThreadName(), queried.getThreadName());
     Assertions.assertEquals("SELECT_ALL", queried.getHitRules());
 
     Assertions.assertEquals("SELECT_ALL",
@@ -51,6 +52,8 @@ class AnalyzeDedupResultEntityMapperTest {
     // 合并：新增 cost 规则；select_all 的首次证据保持不变
     AnalyzeDedupResultEntity merge = newEntity();
     merge.setDedupKey(param.getDedupKey());
+    // thread_name 只记第一次，合并不更新
+    merge.setThreadName("ignored-thread");
     merge.setSelectAllOuterId(999L);
     merge.setIfCostTooHigh(1);
     merge.setCostTooHighOuterId(888L);
@@ -59,15 +62,18 @@ class AnalyzeDedupResultEntityMapperTest {
 
     queried = analyzeDedupResultEntityMapper.queryById(param.getId());
     Assertions.assertEquals(1, queried.getIfSelectAll());
+    // 首次记录的线程保持不变
+    Assertions.assertEquals("http-nio-8080-exec-1", queried.getThreadName());
     Assertions.assertEquals(param.getSelectAllOuterId(), queried.getSelectAllOuterId());
     Assertions.assertEquals(1, queried.getIfCostTooHigh());
     Assertions.assertEquals(888L, queried.getCostTooHighOuterId());
     Assertions.assertEquals(321, queried.getCostTooHighCost());
     Assertions.assertEquals("SELECT_ALL,COST_TOO_HIGH", queried.getHitRules());
 
-    // 再次命中 cost：flag 不变，首次的 cost 证据保留
+    // 再次命中 cost：flag 不变，首次的 cost 证据保留，也不追加线程
     AnalyzeDedupResultEntity mergeAgain = newEntity();
     mergeAgain.setDedupKey(param.getDedupKey());
+    mergeAgain.setThreadName("never-applied-thread");
     mergeAgain.setIfCostTooHigh(1);
     mergeAgain.setCostTooHighOuterId(777L);
     mergeAgain.setCostTooHighCost(555);
@@ -77,6 +83,7 @@ class AnalyzeDedupResultEntityMapperTest {
     Assertions.assertEquals(888L, queried.getCostTooHighOuterId());
     Assertions.assertEquals(321, queried.getCostTooHighCost());
     Assertions.assertEquals("SELECT_ALL,COST_TOO_HIGH", queried.getHitRules());
+    Assertions.assertEquals("http-nio-8080-exec-1", queried.getThreadName());
 
     Assertions.assertNotNull(analyzeDedupResultEntityMapper.deleteById(param.getId()));
     Assertions.assertNull(analyzeDedupResultEntityMapper.queryById(param.getId()));
@@ -99,6 +106,7 @@ class AnalyzeDedupResultEntityMapperTest {
     entity.setEnv("sit");
     entity.setImageName("image");
     entity.setInstanceId("instance");
+    entity.setThreadName("http-nio-8080-exec-1");
     entity.setEntryPointDetails("/a,/b");
     entity.setSqlType("SELECT");
     entity.setParameterizedSql("select * from t_order where id = ?");
